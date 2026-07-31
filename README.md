@@ -2,7 +2,7 @@
 
 **AyuVerse** is a 100% free study platform built for JEE Advanced aspirants. It brings together structured notes, previous year papers, practice tests, and formula sheets for Physics, Chemistry, and Mathematics — all in one place, with no paywalls, no locked chapters, and no premium tier.
 
-🔗 **Live site:** [maurya-ayush02.github.io](https://maurya-ayush02.github.io)
+🔗 **Live site:** [maurya-ayush02.github.io/AyuVerse-jee-preparation-](https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/)
 
 ---
 
