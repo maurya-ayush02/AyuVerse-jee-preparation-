@@ -1,0 +1,15 @@
+{
+  "name": "ayuverse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AyuVerse — free JEE Advanced preparation material for Physics, Chemistry, and Mathematics.",
+  "scripts": {
+    "start": "serve . -l 3000",
+    "dev": "serve . -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "keywords": ["jee", "jee-advanced", "education", "physics", "chemistry", "mathematics"],
+  "license": "MIT"
+}

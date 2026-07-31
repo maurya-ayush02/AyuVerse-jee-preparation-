@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AyuVerse — JEE Advanced Previous Year Papers</title>
+<meta name="description" content="Free archive of JEE Advanced previous year question papers on AyuVerse, organised by year for quick practice and revision." />
+<link rel="canonical" href="https://maurya-ayush02.github.io/jee-advanced-pyq-archive.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060c;
+  --surface:#0d101c;
+  --surface-2:#12162536;
+  --line:#232838;
+  --blue:#2fb2ec;
+  --violet:#8a4fe6;
+  --ink:#eaeef7;
+  --muted:#818aa3;
+  --gold:#f2c14e;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, #1a1440 0%, transparent 60%),
+    radial-gradient(ellipse 900px 600px at 110% 10%, #0d2d4a 0%, transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Manrope',sans-serif;
+  min-height:100vh;
+}
+
+/* ---------- Header ---------- */
+header{
+  position:relative;
+  padding:28px 24px 20px;
+  border-bottom:1px solid var(--line);
+}
+.logo-corner{
+  position:absolute;
+  top:16px;
+  right:20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.logo-corner img{
+  height:56px;
+  width:auto;
+  filter:drop-shadow(0 0 14px rgba(90,140,255,0.35));
+}
+.eyebrow{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;
+  letter-spacing:0.35em;
+  color:var(--blue);
+  text-transform:uppercase;
+  margin:0 0 10px;
+}
+h1{
+  font-family:'Orbitron',sans-serif;
+  font-weight:900;
+  font-size:clamp(28px,5vw,46px);
+  margin:0;
+  line-height:1.1;
+  background:linear-gradient(100deg,#eaf6ff 0%, var(--blue) 45%, var(--violet) 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  max-width:780px;
+}
+.sub{
+  color:var(--muted);
+  font-size:15px;
+  margin:12px 0 0;
+  max-width:640px;
+  line-height:1.55;
+}
+.sweep{
+  height:2px;
+  margin-top:22px;
+  width:100%;
+  background:linear-gradient(90deg, transparent, var(--blue) 20%, var(--violet) 55%, transparent 90%);
+  opacity:0.7;
+}
+
+/* ---------- Notice ---------- */
+.notice{
+  margin:22px 24px 0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--gold);
+  border-radius:10px;
+  padding:16px 18px;
+  font-size:13.5px;
+  color:#cfd4e4;
+  line-height:1.6;
+}
+.notice b{color:var(--gold);}
+.notice a{color:var(--blue);}
+
+/* ---------- Legend ---------- */
+.legend{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  margin:18px 24px 4px;
+  font-size:12px;
+  color:var(--muted);
+}
+.legend span{display:flex;align-items:center;gap:6px;}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.dot.old{background:var(--violet);}
+.dot.new{background:var(--blue);}
+
+/* ---------- Grid ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(175px,1fr));
+  gap:14px;
+  padding:16px 24px 40px;
+}
+.card{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  border-color:var(--blue);
+  box-shadow:0 8px 24px -8px rgba(47,178,236,0.35);
+}
+.year{
+  font-family:'Orbitron',sans-serif;
+  font-weight:700;
+  font-size:22px;
+}
+.tag{
+  align-self:flex-start;
+  font-size:10px;
+  letter-spacing:0.05em;
+  padding:3px 8px;
+  border-radius:999px;
+  text-transform:uppercase;
+  font-weight:700;
+}
+.tag.old{background:rgba(138,79,230,0.15);color:#c4a4f5;border:1px solid rgba(138,79,230,0.4);}
+.tag.new{background:rgba(47,178,236,0.15);color:#8fdcff;border:1px solid rgba(47,178,236,0.4);}
+.note{font-size:11.5px;color:var(--muted);line-height:1.4;min-height:30px;}
+.card .links{
+  margin-top:auto;
+  display:flex;
+  gap:6px;
+}
+.card a.link{
+  flex:1;
+  font-size:11.5px;
+  font-weight:700;
+  color:var(--bg);
+  background:linear-gradient(100deg,var(--blue),var(--violet));
+  text-align:center;
+  padding:8px 0;
+  border-radius:8px;
+  text-decoration:none;
+}
+.card a.link.disabled{
+  background:none;
+  border:1px solid var(--line);
+  color:var(--muted);
+  pointer-events:none;
+}
+.solved-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  color:var(--muted);
+}
+.solved-row input{accent-color:var(--blue);}
+.answer-key{
+  font-size:11px;
+  background:rgba(47,178,236,0.08);
+  border:1px solid rgba(47,178,236,0.3);
+  border-radius:8px;
+  padding:6px 8px;
+}
+.answer-key a{
+  color:var(--blue);
+  text-decoration:none;
+  font-weight:700;
+}
+.answer-key a:hover{text-decoration:underline;}
+
+/* ---------- Footer ---------- */
+footer{
+  border-top:1px solid var(--line);
+  padding:20px 24px 32px;
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+}
+footer b{color:var(--ink);}
+
+@media(max-width:480px){
+  .logo-corner{position:static;justify-content:flex-start;margin-bottom:14px;}
+  header{padding-top:20px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-corner">
+    <img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo">
+  </div>
+  <p class="eyebrow">AyuVerse · Where Future Engineers Are Built</p>
+  <h1>JEE Advanced Previous Year Papers</h1>
+  <p class="sub">A year-by-year index of official JEE Advanced (and IIT-JEE) papers, 2007–2026 — Physics, Chemistry, and Maths together, exactly as released — with syllabus-cutoff flags so you know which questions still apply.</p>
+  <div class="sweep"></div>
+</header>
+
+<div class="notice">
+  <b>Why no questions here:</b> JEE Advanced papers are copyrighted exam material released by the IITs. This page doesn't reproduce them — each button opens the <b>official PDF directly</b> (hosted on jeeadv.ac.in). Every paper contains Physics, Chemistry, and Maths together — the IITs don't release subject-only files, so use the section inside for whichever subject you're revising.
+</div>
+
+<div class="legend">
+  <span><span class="dot old"></span> Pre-2023 syllabus — some questions now off-syllabus</span>
+  <span><span class="dot new"></span> 2023 syllabus onward — fully current</span>
+</div>
+
+<div class="grid" id="yearGrid"></div>
+
+<footer>
+  Track which years you've solved — saved automatically on this device. Official papers &amp; answer keys: <b>jeeadv.ac.in</b>
+</footer>
+
+<script>
+const CUTOFF_NOTE = "Syllabus revised in 2023 — some topics across Physics/Chem/Maths were dropped or added; check the current syllabus before relying on older questions.";
+const BASE = "https://jeeadv.ac.in/past_qps/";
+
+// Years with an "_English" suffix in the official filenames (bilingual papers began 2019)
+function pdfName(year, paper){
+  return year >= 2019 ? `${year}_${paper}_English.pdf` : `${year}_${paper}.pdf`;
+}
+
+const years = [];
+for (let y = 2026; y >= 2007; y--) {
+  let note = "";
+  if (y >= 2023) note = "Current syllabus.";
+  else if (y === 2022) note = CUTOFF_NOTE;
+  else note = "Pre-2023 syllabus — a few topics may now be excluded.";
+
+  // 2026 papers aren't in the official archive listing yet as of this build —
+  // point to the homepage instead of guessing a filename.
+  const hasDirectPdf = y <= 2025;
+  years.push({
+    year: y,
+    current: y >= 2023,
+    note,
+    p1: hasDirectPdf ? BASE + pdfName(y, 1) : "https://jeeadv.ac.in",
+    p2: hasDirectPdf ? BASE + pdfName(y, 2) : "https://jeeadv.ac.in",
+    direct: hasDirectPdf
+  });
+}
+
+const grid = document.getElementById('yearGrid');
+years.forEach(({year, current, note, p1, p2, direct}) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="year">${year}</div>
+    <div class="tag ${current ? 'new' : 'old'}">${current ? 'Current syllabus' : 'Pre-2023'}</div>
+    <div class="note">${note}</div>
+    <label class="solved-row">
+      <input type="checkbox" data-year="${year}"> Solved
+    </label>
+    <div class="answer-key" data-year="${year}" style="display:none;">
+      <a href="https://jeeadv.ac.in" target="_blank" rel="noopener">✓ View official Answer Key ↗</a>
+    </div>
+    <div class="links">
+      <a class="link" href="${p1}" target="_blank" rel="noopener">${direct ? 'Paper 1 PDF' : 'Check site'}</a>
+      ${direct ? `<a class="link" href="${p2}" target="_blank" rel="noopener">Paper 2 PDF</a>` : ''}
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+// Toggle the answer-key link whenever "Solved" is checked/unchecked
+function refreshAnswerKeyVisibility(cb){
+  const row = document.querySelector(`.answer-key[data-year="${cb.dataset.year}"]`);
+  if (row) row.style.display = cb.checked ? 'block' : 'none';
+}
+
+// Persist "solved" checkboxes via window.storage (personal, per-device)
+async function loadProgress(){
+  try{
+    const res = await window.storage.get('jee-pyq-progress');
+    const data = res ? JSON.parse(res.value) : {};
+    document.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      if (data[cb.dataset.year]) cb.checked = true;
+      refreshAnswerKeyVisibility(cb);
+    });
+  }catch(e){
+    document.querySelectorAll('input[type=checkbox]').forEach(cb=>refreshAnswerKeyVisibility(cb));
+  }
+}
+async function saveProgress(){
+  const data = {};
+  document.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    data[cb.dataset.year] = cb.checked;
+  });
+  try{ await window.storage.set('jee-pyq-progress', JSON.stringify(data)); }catch(e){}
+}
+document.addEventListener('change', e=>{
+  if (e.target.matches('input[type=checkbox]')){
+    refreshAnswerKeyVisibility(e.target);
+    saveProgress();
+  }
+});
+loadProgress();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physics Quiz — AyuVerse</title>
+<link rel="canonical" href="https://maurya-ayush02.github.io/physics-quiz.html" />
+<meta name="description" content="Free JEE Advanced Physics quiz on AyuVerse — original questions in JEE Advanced format, with full solutions and a downloadable PDF of your attempt." />
+<meta name="theme-color" content="#060814" />
+
+<!-- Security headers -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
+<meta http-equiv="X-Frame-Options" content="DENY" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#060814;
+    --panel:#0d0f20;
+    --panel-2:#161933;
+    --line:rgba(124,100,255,.16);
+    --line-strong:rgba(124,100,255,.36);
+    --text:#f3f4fb;
+    --muted:#9a9dc2;
+    --accent:#00c3fa;
+    --accent-2:#ffb454;
+    --good:#38d996;
+    --bad:#ff5d72;
+    --radius:16px;
+    --gradient-brand:linear-gradient(90deg,#00c3fa 0%,#0d7cf5 45%,#6b28f0 100%);
+    --font-display:"Space Grotesk", sans-serif;
+    --font-body:"Inter", sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, #0e1636 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, #0a1230 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:780px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+  .brand-mark{
+    width:36px;height:36px;object-fit:contain;
+  }
+  .brand-name{font-weight:700;letter-spacing:.02em;font-size:15px;color:var(--muted);}
+  .brand-name b{color:var(--text);}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 26px;
+    box-shadow:0 20px 60px -30px rgba(0,0,0,.7);
+  }
+  h1{font-family:var(--font-display);font-weight:600;font-size:26px;margin:0 0 6px;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);font-size:14.5px;margin:0 0 22px;line-height:1.5;}
+  .eyebrow{font-family:var(--font-mono,"JetBrains Mono",monospace);font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:8px;}
+
+  .legend{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;
+    background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-bottom:22px;font-size:12.5px;color:var(--muted);
+  }
+  @media(max-width:520px){.legend{grid-template-columns:1fr;}}
+  .legend b{color:var(--text);}
+
+  .chap-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+  @media(max-width:520px){.chap-grid{grid-template-columns:1fr;}}
+  .chap-option{
+    border:1px solid var(--line);border-radius:10px;padding:14px 14px;
+    cursor:pointer;transition:.15s;display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.01);
+  }
+  .chap-option:hover{border-color:var(--accent);}
+  .chap-option.selected{border-color:var(--accent);background:rgba(91,140,255,.08);}
+  .chap-option .box{
+    width:18px;height:18px;border-radius:5px;border:1.5px solid var(--muted);flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .chap-option.selected .box{background:var(--accent);border-color:var(--accent);color:#0a0f22;font-weight:800;}
+  .chap-option .meta{font-size:12px;color:var(--muted);}
+  .chap-option .name{font-size:14px;font-weight:600;}
+
+  .full-syllabus{
+    border:1px dashed var(--accent-2);border-radius:10px;padding:14px;
+    margin-bottom:18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+    background:rgba(255,180,84,.05);
+  }
+  .full-syllabus.selected{background:rgba(255,180,84,.14);border-style:solid;}
+  .full-syllabus span{font-weight:700;font-size:14.5px;}
+
+  .count-box{border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:8px;}
+  .count-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .chip{border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13.5px;font-weight:700;transition:.15s;}
+  .chip:hover{border-color:var(--accent);}
+  .chip.selected{background:var(--accent);border-color:var(--accent);color:#08101f;}
+  .count-input-row{display:flex;align-items:center;gap:12px;}
+  .count-input-row input[type=range]{flex:1;accent-color:var(--accent);}
+  .count-num{
+    width:70px;padding:9px;border-radius:8px;border:1px solid var(--line);
+    background:rgba(255,255,255,.02);color:var(--text);font-size:15px;font-weight:700;text-align:center;
+  }
+  .hint{font-size:12.5px;color:var(--muted);margin-top:10px;}
+
+  .btn{appearance:none;border:1px solid transparent;border-radius:999px;padding:13px 24px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s,filter .2s;background:var(--gradient-brand);color:#050611;box-shadow:0 8px 40px rgba(75,59,220,.25);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+  .btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 44px rgba(75,59,220,.4);}
+  .btn.ghost{background:rgba(255,255,255,.02);border:1px solid var(--line-strong);color:var(--text);box-shadow:none;}
+  .btn.ghost:hover:not(:disabled){background:rgba(255,255,255,.06);border-color:var(--accent);transform:none;box-shadow:none;}
+  .btn.gold{background:var(--accent-2);color:#221200;box-shadow:0 8px 30px rgba(255,180,84,.25);}
+  .btn-row{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;}
+
+  .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .qtag{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;background:rgba(91,140,255,.15);color:var(--accent);}
+  .qtag.integer{background:rgba(255,180,84,.16);color:var(--accent-2);}
+  .qtag.multi{background:rgba(56,217,150,.15);color:var(--good);}
+  .qtag.numerical{background:rgba(190,140,255,.18);color:#c9a9ff;}
+  .progress{font-size:13px;color:var(--muted);}
+  .qtext{font-size:17px;line-height:1.55;margin:6px 0 20px;}
+  .opt{border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:.15s;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.picked{border-color:var(--accent);background:rgba(91,140,255,.08);}
+  .opt .letter{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .opt.picked .letter{background:var(--accent);border-color:var(--accent);color:#08101f;}
+  .int-input{width:100%;padding:14px;font-size:16px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--text);}
+  .int-input:focus{outline:none;border-color:var(--accent);}
+  .nav-row{display:flex;justify-content:space-between;margin-top:26px;}
+
+  .score-hero{text-align:center;padding:18px 0 8px;}
+  .score-num{font-size:52px;font-weight:800;letter-spacing:-0.02em;}
+  .score-label{color:var(--muted);font-size:14px;margin-top:2px;}
+  .review-item{border-top:1px solid var(--line);padding:18px 0;}
+  .review-item:first-child{border-top:none;}
+  .review-q{font-size:15px;margin-bottom:8px;}
+  .review-flag{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;}
+  .review-flag.correct{color:var(--good);}
+  .review-flag.wrong{color:var(--bad);}
+  .review-answer{font-size:13.5px;color:var(--muted);margin-bottom:8px;}
+  .sol-box{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px;line-height:1.6;color:#c7ceec;}
+  .sol-box b{color:var(--text);}
+  .hidden{display:none;}
+  .pdf-note{font-size:12px;color:var(--muted);text-align:center;margin-top:10px;}
+  .brand{justify-content:space-between;}
+  .brand-left{display:flex;align-items:center;gap:10px;}
+  .brand-back{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--line-strong);border-radius:999px;padding:8px 16px;transition:.2s;text-decoration:none;white-space:nowrap;}
+  .brand-back:hover{color:var(--text);border-color:var(--accent);background:rgba(255,255,255,.04);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <a class="brand-left" href="physics.html" aria-label="AyuVerse Physics Hub">
+      <img class="brand-mark" id="brand-mark-img" alt="AyuVerse logo">
+      <span class="brand-name"><b>AyuVerse</b> · Physics Quiz</span>
+    </a>
+    <a class="brand-back" href="physics.html">← Physics Hub</a>
+  </div>
+
+  <div class="card" id="screen-chapters">
+    <div class="eyebrow">Step 1 of 3</div>
+    <h1>What do you want to be tested on?</h1>
+    <p class="sub">Pick one or more chapters, or go for the full syllabus. Every question is original — written in JEE Advanced format, not lifted from any paper or PYQ set.</p>
+
+    <div class="legend">
+      <div><b>MCQ · Single Correct</b> — exactly one right option</div>
+      <div><b>MCQ · One/More Correct</b> — one or more options can be right</div>
+      <div><b>Integer Type</b> — answer is a whole number</div>
+      <div><b>Numerical Value</b> — answer up to 2 decimal places</div>
+    </div>
+
+    <div class="full-syllabus" id="full-syllabus-toggle">
+      <span>Full Syllabus (all chapters)</span>
+      <span class="meta" id="full-syllabus-count"></span>
+    </div>
+
+    <div class="eyebrow">Or pick specific chapters</div>
+    <div class="chap-grid" id="chapter-grid"></div>
+
+    <div class="btn-row">
+      <button class="btn" id="to-step2" disabled>Continue →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-count">
+    <div class="eyebrow">Step 2 of 3</div>
+    <h1>How many questions?</h1>
+    <p class="sub" id="pool-desc"></p>
+    <div class="count-box">
+      <div class="count-chips" id="count-chips"></div>
+      <div class="count-input-row">
+        <input type="range" id="count-slider" min="1" max="1" value="10">
+        <input type="number" id="count-num" min="1" max="1" value="10">
+      </div>
+    </div>
+    <div class="hint">Choose anywhere from 1 to 100 questions (capped by how many exist in your selected pool). Mix of MCQ single-correct, MCQ multi-correct, Integer, and Numerical type — same as JEE Advanced.</div>
+    <div class="btn-row">
+      <button class="btn ghost" id="back-to-1">← Back</button>
+      <button class="btn" id="to-step3">Start Quiz →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-quiz">
+    <div class="quiz-top">
+      <span class="qtag" id="q-tag"></span>
+      <span class="progress" id="q-progress"></span>
+    </div>
+    <div class="qtext" id="q-text"></div>
+    <div id="q-options"></div>
+    <div class="nav-row">
+      <button class="btn ghost" id="q-prev">← Previous</button>
+      <button class="btn" id="q-next">Next →</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="screen-result">
+    <div class="score-hero">
+      <div class="score-num" id="score-num">0/0</div>
+      <div class="score-label">questions correct</div>
+    </div>
+    <div class="btn-row" style="justify-content:center;margin-bottom:4px;flex-wrap:wrap;">
+      <button class="btn gold" id="download-pdf-btn">Download PDF of this attempt</button>
+      <button class="btn ghost" id="retake-btn">Take another quiz</button>
+    </div>
+    <div class="pdf-note">PDF includes your answers, correct answers, full solutions — watermarked with the AyuVerse logo for attribution.</div>
+    <div class="pdf-note hidden" id="pdf-fallback-row" style="margin-top:8px;">
+      Download didn't start automatically —
+      <a id="pdf-fallback-link" href="#" target="_blank" style="color:var(--accent-2);font-weight:700;">tap here to open your PDF</a>,
+      then use your browser's Share / Save option.
+    </div>
+    <div class="eyebrow" style="margin-top:22px;">Full review &amp; solutions</div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="js/physics-quiz.js?v=quiz1"></script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AyuVerse — Free JEE Advanced Preparation | Physics, Chemistry, Maths</title>
+<link rel="canonical" href="https://maurya-ayush02.github.io/" />
+  <meta name="description" content="AyuVerse offers 100% free JEE Advanced preparation material — structured notes, previous year papers, and practice tests for Physics, Chemistry, and Mathematics." />
+  <meta name="theme-color" content="#060814" />
+
+  <!-- Security headers (GitHub Pages doesn't allow server headers; meta is the fallback) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AyuVerse — Where Future Engineers Are Built" />
+  <meta property="og:description" content="100% free JEE Advanced preparation — Physics, Chemistry, and Mathematics, all in one place." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://maurya-ayush02.github.io/" />
+  <meta property="og:image" content="https://maurya-ayush02.github.io/assets/images/logo-full.webp" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css?v=86c49ce" />
+</head>
+<body>
+
+  <!-- Skip link for keyboard/screen-reader users -->
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Announcement ticker -->
+  <div class="ticker">
+    <div class="ticker__track">
+      <div class="ticker__group">
+        <span>🚀 100% Free — No Sign-up Fees, No Hidden Costs</span>
+        <span>🚀 Physics · Chemistry · Mathematics, All in One Place</span>
+        <span>🚀 Built for JEE Advanced Aspirants</span>
+        <span>🚀 Quality Prep Shouldn't Cost a Fortune</span>
+        <span>🚀 Study at Your Own Pace, Anytime</span>
+      </div>
+      <div class="ticker__group" aria-hidden="true">
+        <span>🚀 100% Free — No Sign-up Fees, No Hidden Costs</span>
+        <span>🚀 Physics · Chemistry · Mathematics, All in One Place</span>
+        <span>🚀 Built for JEE Advanced Aspirants</span>
+        <span>🚀 Quality Prep Shouldn't Cost a Fortune</span>
+        <span>🚀 Study at Your Own Pace, Anytime</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header / Nav -->
+  <header class="header" id="top">
+    <nav class="nav container">
+      <a href="#home" class="nav__brand">
+        <img src="assets/images/icon-mark.webp" alt="AyuVerse" class="nav__icon" width="36" height="36" />
+        <span class="nav__wordmark">Ayu<span>Verse</span></span>
+      </a>
+
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="nav__menu" id="navMenu">
+        <ul class="nav__links">
+          <li><a href="#home">Home</a></li>
+          <li class="nav__dropdown">
+            <button class="nav__dropdown-toggle" id="subjectsToggle" aria-expanded="false" aria-controls="subjectsPanel">
+              Subjects
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="nav__dropdown-panel" id="subjectsPanel">
+              <a href="physics.html"><img src="assets/images/physics.webp" alt="" /><span>Physics</span></a>
+              <a href="maths.html"><img src="assets/images/maths.webp" alt="" /><span>Mathematics</span></a>
+              <a href="chemistry.html"><img src="assets/images/chemistry.webp" alt="" /><span>Chemistry</span></a>
+            </div>
+          </li>
+          <li><a href="#resources">Resources</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#subjects" class="btn btn--primary btn--sm nav__cta">Start Learning</a>
+      </div>
+      <div class="nav__scrim" id="navScrim"></div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" id="home">
+      <canvas class="hero__canvas" id="constellation" aria-hidden="true"></canvas>
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <p class="eyebrow">🚀 100% Free · JEE Advanced</p>
+        <h1 class="hero__title">Where future engineers<br /> are <span class="text-gradient">built.</span></h1>
+        <p class="hero__subtitle">Structured notes, previous year papers, and practice tests for Physics, Chemistry, and Mathematics — free for every JEE Advanced aspirant.</p>
+        <div class="hero__actions">
+          <a href="#subjects" class="btn btn--primary">Explore Subjects</a>
+          <a href="#about" class="btn btn--ghost">Why AyuVerse</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subjects -->
+    <section class="subjects" id="subjects">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Core Subjects</p>
+          <h2>Everything organized by subject</h2>
+          <p class="section-head__sub">Pick a subject and start where you need to.</p>
+        </div>
+
+        <div class="subject-grid">
+          <article class="subject-card">
+            <div class="subject-card__art">
+              <img src="assets/images/physics.webp" alt="Physics — glowing atom and field diagrams" loading="lazy" width="1000" height="920" />
+            </div>
+            <div class="subject-card__body">
+              <h3>Physics</h3>
+              <p>Mechanics, electromagnetism, optics, and modern physics — explained the way JEE actually tests them.</p>
+              <a href="physics.html" class="subject-card__link">Explore Physics <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="subject-card">
+            <div class="subject-card__art">
+              <img src="assets/images/maths.webp" alt="Mathematics — geometric and algebraic diagrams" loading="lazy" width="1000" height="837" />
+            </div>
+            <div class="subject-card__body">
+              <h3>Mathematics</h3>
+              <p>Calculus, algebra, coordinate geometry, and trigonometry, with problems that build real speed.</p>
+              <a href="maths.html" class="subject-card__link">Explore Mathematics <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="subject-card">
+            <div class="subject-card__art">
+              <img src="assets/images/chemistry.webp" alt="Chemistry — atomic structure and molecule diagrams" loading="lazy" width="747" height="687" />
+            </div>
+            <div class="subject-card__body">
+              <h3>Chemistry</h3>
+              <p>Physical, organic, and inorganic chemistry — reactions and concepts explained so they actually stick.</p>
+              <a href="chemistry.html" class="subject-card__link">Explore Chemistry <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources -->
+    <section class="resources" id="resources">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">What's Inside</p>
+          <h2>Study material, not just links</h2>
+          <p class="section-head__sub">Every resource is built to be used while you're actually studying.</p>
+        </div>
+
+        <div class="resource-grid">
+          <div class="resource-tile">
+            <div class="resource-tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 4a2 2 0 0 1 2-2h8l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 2v4a1 1 0 0 0 1 1h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 12h8M8 16h8M8 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Structured Notes</h3>
+            <p>Concept-first notes for every chapter, written to build understanding, not just cover the syllabus.</p>
+          </div>
+
+        <a class="hub-card hub-card--live resource-tile" href="jee-advanced-pyq-archive.html">
+            <span class="hub-card__badge hub-card__badge--live">Live</span>
+            <div class="resource-tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 22a2 2 0 0 1-2-2v0a2 2 0 0 1 2-2h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Previous Year Papers</h3>
+            <p>Solved JEE Advanced papers, year by year — 2007 to 2026, official PDFs, one click away.</p>
+            <span class="hub-card__cta">Browse papers <span aria-hidden="true">→</span></span>
+        </a>
+       
+          <div class="resource-tile">
+            <div class="resource-tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Practice Tests</h3>
+            <p>Timed tests that mirror the real exam format, built to train pace as much as accuracy.</p>
+          </div>
+
+          <div class="resource-tile">
+            <div class="resource-tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 7l9 5 9-5M12 12v10" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Formula Sheets</h3>
+            <p>Quick-reference sheets for every subject, built for fast revision before an exam.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="about" id="about">
+      <div class="container about__inner">
+        <div class="about__art" aria-hidden="true">
+          <img src="assets/images/logo-full.webp" alt="" loading="lazy" />
+        </div>
+        <div class="about__content">
+          <p class="eyebrow">Why AyuVerse</p>
+          <h2>Good preparation shouldn't depend on how much you can pay.</h2>
+          <p>AyuVerse exists to put complete JEE Advanced material in front of any student who wants it — no paywalls, no locked chapters, no premium tier. Physics, Chemistry, and Mathematics, organized the way you'll actually use them while studying.</p>
+          <p>If it helps you prepare, it belongs here for free.</p>
+        </div>
+      </div>
+
+      <!-- Creator card -->
+      <div class="container">
+        <div class="creator-card">
+          <div class="creator-card__avatar" aria-hidden="true">AM</div>
+          <div class="creator-card__info">
+            <p class="eyebrow">Creator &amp; Founder</p>
+            <h3>Ayush Maurya</h3>
+            <ul class="creator-card__meta">
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                Mariahu, Jaunpur, Uttar Pradesh
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 2v4M16 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Class 10 · Batch 2026–27
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact / CTA -->
+    <section class="cta" id="contact">
+      <div class="container cta__inner">
+        <h2>Ready to start?</h2>
+        <p>Jump into Physics, Chemistry, or Mathematics — or reach out if you have questions.</p>
+        <div class="hero__actions">
+          <a href="#subjects" class="btn btn--primary">Explore Subjects</a>
+          <!-- TODO: replace with your real contact email -->
+          <span class="btn btn--ghost" style="opacity:.45;cursor:default;pointer-events:none;">Contact Form Coming Soon</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#home" class="nav__brand">
+          <img src="assets/images/icon-mark.webp" alt="AyuVerse" class="nav__icon" width="32" height="32" />
+          <span class="nav__wordmark">Ayu<span>Verse</span></span>
+        </a>
+        <p>Where future engineers are built.</p>
+      </div>
+
+      <div class="footer__links">
+        <h4>Site</h4>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#subjects">Subjects</a></li>
+          <li><a href="#resources">Resources</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links">
+        <h4>Subjects</h4>
+        <ul>
+          <li><a href="physics.html">Physics</a></li>
+          <li><a href="maths.html">Mathematics</a></li>
+          <li><a href="chemistry.html">Chemistry</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links">
+        <h4>Connect</h4>
+        <ul>
+          <!-- TODO: replace with your real links -->
+          <li><span style="color:var(--text-tertiary);font-size:.92rem;">Contact form coming soon</span></li>
+          <li><a href="https://github.com/maurya-ayush02" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <p>© 2026 AyuVerse. Free forever for JEE Advanced aspirants. · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></p>
+    </div>
+  </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite" hidden>
+    <div class="cookie-banner__inner">
+      <div class="cookie-banner__text">
+        <p class="cookie-banner__title">🍪 We use cookies</p>
+        <p>We use cookies to improve your experience. By clicking "Allow All", you also agree to receive browser notifications when new content is added.</p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button class="btn btn--ghost btn--sm" id="cookieDeny">Decline</button>
+        <button class="btn btn--primary btn--sm" id="cookieAllow">Allow All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
+    <span>Notifications Enabled! You will now be notified when new content is added to the website.</span>
+  </div>
+
+  <script src="js/script.js?v=86c49ce"></script>
+</body>
+</html>

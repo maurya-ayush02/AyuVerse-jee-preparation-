@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms &amp; Conditions — AyuVerse</title>
+<meta name="description" content="Terms and conditions for using AyuVerse's free JEE Advanced preparation material." />
+<link rel="canonical" href="https://maurya-ayush02.github.io/terms.html" />
+<!-- Security headers -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
+<meta http-equiv="X-Frame-Options" content="DENY" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
+<style>
+  :root{
+    --bg: #070a14;
+    --bg-panel: #0d1224;
+    --bg-panel-2: #10162c;
+    --border: rgba(255,255,255,0.08);
+    --text: #e7e9f4;
+    --text-dim: #9aa0c0;
+    --text-faint: #6b7094;
+    --accent-a: #4f7dff;
+    --accent-b: #9b5cff;
+    --accent-c: #33c7ff;
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(79,125,255,0.18), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(155,92,255,0.14), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a{ color: var(--accent-c); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+  a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--accent-c);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  /* ---------- Top bar ---------- */
+  header.topbar{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 24px;
+    background: rgba(7,10,20,0.75);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.2px;
+  }
+  .brand .mark{
+    width: 30px; height: 30px;
+    display:grid; place-items:center;
+    font-size: 1.1rem;
+  }
+  .brand .name span{
+    background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header.topbar .back{
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 100px;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  header.topbar .back:hover{
+    color: var(--text);
+    border-color: var(--accent-c);
+    text-decoration: none;
+  }
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 64px 24px 40px;
+    text-align: left;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-c);
+    border: 1px solid rgba(51,199,255,0.35);
+    background: rgba(51,199,255,0.08);
+    padding: 6px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  h1{
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    margin: 0 0 14px;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .hero p.lede{
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    max-width: 60ch;
+    margin: 0 0 6px;
+  }
+  .meta-row{
+    display:flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+  .meta-row strong{ color: var(--text-dim); font-weight: 600; }
+  /* ---------- Layout ---------- */
+  .layout{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  /* ---------- TOC ---------- */
+  nav.toc{
+    position: sticky;
+    top: 88px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+  }
+  nav.toc h2{
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+  nav.toc ol{
+    list-style: none;
+    margin:0; padding:0;
+    counter-reset: toc;
+    display:flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  nav.toc li{ counter-increment: toc; }
+  nav.toc a{
+    display:flex;
+    gap: 10px;
+    align-items:flex-start;
+    color: var(--text-dim);
+    font-size: 0.86rem;
+    padding: 7px 8px;
+    border-radius: 8px;
+    transition: background .15s ease, color .15s ease;
+  }
+  nav.toc a::before{
+    content: counter(toc);
+    flex: none;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    display:grid; place-items:center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-faint);
+  }
+  nav.toc a:hover{
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    text-decoration:none;
+  }
+  /* ---------- Content ---------- */
+  main.content{ min-width: 0; }
+  section.clause{
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 28px 30px;
+    margin-bottom: 18px;
+    scroll-margin-top: 90px;
+  }
+  section.clause .num{
+    display:inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent-c);
+    margin-bottom: 8px;
+  }
+  section.clause h2{
+    font-size: 1.25rem;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+  section.clause p{
+    color: var(--text-dim);
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+  }
+  section.clause p:last-child{ margin-bottom: 0; }
+  section.clause ul{
+    margin: 0 0 12px;
+    padding-left: 20px;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+  section.clause li{ margin-bottom: 6px; }
+  section.clause li::marker{ color: var(--accent-b); }
+  section.clause strong{ color: var(--text); font-weight: 600; }
+  .callout{
+    display:flex;
+    gap: 12px;
+    background: rgba(155,92,255,0.08);
+    border: 1px solid rgba(155,92,255,0.28);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .callout .dot{
+    flex:none;
+    width: 8px; height:8px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+  }
+  /* ---------- Footer ---------- */
+  footer.legal-footer{
+    border-top: 1px solid var(--border);
+    padding: 28px 24px 40px;
+    text-align:center;
+    color: var(--text-faint);
+    font-size: 0.82rem;
+  }
+  footer.legal-footer a{ color: var(--text-dim); }
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px){
+    .layout{ grid-template-columns: 1fr; }
+    nav.toc{
+      position: static;
+      order: -1;
+    }
+    nav.toc ol{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+  }
+  @media (max-width: 480px){
+    .hero{ padding: 48px 18px 28px; }
+    .layout{ padding: 0 16px 70px; }
+    section.clause{ padding: 22px 18px 24px; }
+    nav.toc ol{ grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">🔺</span>
+    <span class="name">Ayu<span>Verse</span></span>
+  </div>
+  <a class="back" href="index.html">← Back to site</a>
+</header>
+
+<section class="hero">
+  <span class="eyebrow">Legal · Effective 15 July 2026</span>
+  <h1>Terms &amp; Conditions</h1>
+  <p class="lede">
+    These terms explain what you can and can't do with AyuVerse — the study
+    material stays free to use, but the site itself isn't free to copy.
+    Please read this before using the platform.
+  </p>
+  <div class="meta-row">
+    <span><strong>Last updated:</strong> 15 July 2026</span>
+    <span><strong>Applies to:</strong> maurya-ayush02.github.io</span>
+    <span><strong>Owner:</strong> Ayush Maurya</span>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="toc" aria-label="Table of contents">
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#acceptance">Acceptance of terms</a></li>
+      <li><a href="#use-of-site">Use of the site</a></li>
+      <li><a href="#ip">Intellectual property</a></li>
+      <li><a href="#no-copying">No copying or redistribution</a></li>
+      <li><a href="#accounts">Content accuracy</a></li>
+      <li><a href="#conduct">User conduct</a></li>
+      <li><a href="#links">Third-party links</a></li>
+      <li><a href="#disclaimer">Disclaimer</a></li>
+      <li><a href="#liability">Limitation of liability</a></li>
+      <li><a href="#changes">Changes to these terms</a></li>
+      <li><a href="#termination">Termination of access</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <section class="clause" id="acceptance">
+      <span class="num">01</span>
+      <h2>Acceptance of terms</h2>
+      <p>
+        By accessing or using AyuVerse ("the Site"), you agree to be bound by
+        these Terms &amp; Conditions. If you do not agree with any part of
+        these terms, please discontinue use of the Site immediately.
+      </p>
+    </section>
+
+    <section class="clause" id="use-of-site">
+      <span class="num">02</span>
+      <h2>Use of the site</h2>
+      <p>
+        AyuVerse provides free study material — notes, previous year papers,
+        practice tests, and formula sheets — for students preparing for JEE
+        Advanced. You may:
+      </p>
+      <ul>
+        <li>View and use the content on the Site for personal, non-commercial study.</li>
+        <li>Share a direct link to the live Site with other students.</li>
+      </ul>
+      <p>
+        Access is provided free of charge and no account or payment is
+        required.
+      </p>
+    </section>
+
+    <section class="clause" id="ip">
+      <span class="num">03</span>
+      <h2>Intellectual property</h2>
+      <p>
+        All content on this Site — including source code, design, layout,
+        graphics, branding (the name "AyuVerse" and its logo), study notes,
+        and any other original material — is the exclusive property of
+        <strong>Ayush Maurya</strong>, unless explicitly credited otherwise.
+      </p>
+      <p>
+        This ownership is protected under applicable copyright law and is
+        further detailed in the Site's
+        <a href="LICENSE">LICENSE</a>.
+      </p>
+    </section>
+
+    <section class="clause" id="no-copying">
+      <span class="num">04</span>
+      <h2>No copying or redistribution</h2>
+      <p>Without prior written consent from the owner, you may <strong>not</strong>:</p>
+      <ul>
+        <li>Copy, clone, reproduce, or redistribute the Site's code, design, or content, in whole or in part.</li>
+        <li>Host, mirror, or deploy the Site (or a substantial portion of it) on another domain, repository, or platform.</li>
+        <li>Modify or create derivative works based on the Site's design or material.</li>
+        <li>Use the Site's name, logo, or branding to represent another project.</li>
+        <li>Use any part of the Site for commercial purposes.</li>
+      </ul>
+      <div class="callout">
+        <span class="dot"></span>
+        <span>
+          Unauthorized copying is treated as a copyright violation and may
+          result in a takedown request or further legal action.
+        </span>
+      </div>
+    </section>
+
+    <section class="clause" id="accounts">
+      <span class="num">05</span>
+      <h2>Content accuracy</h2>
+      <p>
+        Study material on the Site is prepared with care, but AyuVerse makes
+        no guarantee that notes, solutions, or practice papers are free of
+        errors. Always cross-check important concepts against your own
+        textbooks and coaching material before relying on them for exam
+        preparation.
+      </p>
+    </section>
+
+    <section class="clause" id="conduct">
+      <span class="num">06</span>
+      <h2>User conduct</h2>
+      <p>While using the Site, you agree not to:</p>
+      <ul>
+        <li>Attempt to scrape, extract, or bulk-download content for redistribution.</li>
+        <li>Interfere with the Site's normal operation, including through automated bots or excessive requests.</li>
+        <li>Use the Site for any unlawful purpose.</li>
+      </ul>
+    </section>
+
+    <section class="clause" id="links">
+      <span class="num">07</span>
+      <h2>Third-party links</h2>
+      <p>
+        The Site may link to external resources (for example, reference
+        material or contact platforms). AyuVerse is not responsible for the
+        content, accuracy, or practices of any third-party site linked from
+        here.
+      </p>
+    </section>
+
+    <section class="clause" id="disclaimer">
+      <span class="num">08</span>
+      <h2>Disclaimer</h2>
+      <p>
+        The Site and its content are provided <strong>"as is"</strong>,
+        without warranties of any kind, express or implied, including but
+        not limited to accuracy, completeness, or fitness for a particular
+        purpose.
+      </p>
+    </section>
+
+    <section class="clause" id="liability">
+      <span class="num">09</span>
+      <h2>Limitation of liability</h2>
+      <p>
+        To the fullest extent permitted by law, Ayush Maurya and AyuVerse
+        shall not be held liable for any direct, indirect, incidental, or
+        consequential damages arising from your use of, or inability to use,
+        the Site — including exam outcomes based on material found here.
+      </p>
+    </section>
+
+    <section class="clause" id="changes">
+      <span class="num">10</span>
+      <h2>Changes to these terms</h2>
+      <p>
+        These Terms &amp; Conditions may be updated from time to time.
+        Continued use of the Site after changes are posted constitutes
+        acceptance of the revised terms. The "Last updated" date at the top
+        of this page will reflect the latest revision.
+      </p>
+    </section>
+
+    <section class="clause" id="termination">
+      <span class="num">11</span>
+      <h2>Termination of access</h2>
+      <p>
+        AyuVerse reserves the right to restrict or terminate access to the
+        Site, at its own discretion, for any user found to be violating
+        these terms.
+      </p>
+    </section>
+
+    <section class="clause" id="contact">
+      <span class="num">12</span>
+      <h2>Contact</h2>
+      <p>
+        For questions about these terms, licensing, or to report
+        unauthorized use of this Site's content, please reach out via the
+        contact details listed on the AyuVerse homepage.
+      </p>
+    </section>
+  </main>
+</div>
+
+<footer class="legal-footer">
+  © 2026 AyuVerse · Created by Ayush Maurya · All rights reserved. See <a href="LICENSE">LICENSE</a> for full copyright terms.
+</footer>
+
+</body>
+</html>

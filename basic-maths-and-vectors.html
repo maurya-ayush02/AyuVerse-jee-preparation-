@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Maths & Vectors — Physics Short Notes | AyuVerse</title>
+<meta name="description" content="Free JEE Advanced short notes on Basic Maths & Vectors — trigonometry, differentiation, integration, and vector algebra with worked diagrams." />
+<link rel="canonical" href="https://maurya-ayush02.github.io/basic-maths-and-vectors.html" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbf9f3;
+    --line:#dcd6c6;
+    --margin:#e8a6a0;
+    --blue:#1a3fa0;
+    --blue2:#1f4fd6;
+    --pink:#c21e7a;
+    --black:#1c1c1c;
+    --orange:#e07b1a;
+    --green:#1c7a3e;
+    --hl-blue:#bfe3ef;
+    --hl-pink:#f6c9e0;
+    --hl-yellow:#fdf1a8;
+    --bg-outer:#3a352c;
+    --page-bg:#ffffff;
+    --diagram-ink:#1a3fa0;
+    --diagram-axis:#333333;
+    --diagram-grid:#dddddd;
+    --diagram-text:#1c1c1c;
+    --graph-paper-line:rgba(26,63,160,.14);
+    --graph-paper-major:rgba(26,63,160,.24);
+    --graph-paper-bg:rgba(255,255,255,.35);
+    --shadow:rgba(0,0,0,.45);
+    --box-blue-bg:rgba(191,227,239,.25);
+    --box-pink-bg:rgba(246,201,224,.25);
+    --table-pink-bg:rgba(246,201,224,.2);
+  }
+  html[data-theme="dark"]{
+    --paper:#241f18;
+    --line:#4a4436;
+    --margin:#b06a63;
+    --blue:#7aa2ff;
+    --blue2:#8fb3ff;
+    --pink:#ff8fc4;
+    --black:#eae6da;
+    --orange:#ffb74d;
+    --green:#6fd08c;
+    --hl-blue:#274654;
+    --hl-pink:#4a2b3d;
+    --hl-yellow:#4a3f1e;
+    --bg-outer:#0e0d0a;
+    --page-bg:#1a1712;
+    --diagram-ink:#8fb3ff;
+    --diagram-axis:#c9c4b6;
+    --diagram-grid:#4a4436;
+    --diagram-text:#eae6da;
+    --graph-paper-line:rgba(143,179,255,.14);
+    --graph-paper-major:rgba(143,179,255,.26);
+    --graph-paper-bg:rgba(255,255,255,.03);
+    --shadow:rgba(0,0,0,.7);
+    --box-blue-bg:rgba(122,162,255,.15);
+    --box-pink-bg:rgba(255,143,196,.15);
+    --table-pink-bg:rgba(255,143,196,.12);
+  }
+  *{box-sizing:border-box;}
+  html{ background:var(--bg-outer); }
+  body{
+    margin:0;
+    background:var(--bg-outer);
+    font-family:'Kalam', cursive;
+    color:var(--black);
+    transition:background .25s ease, color .25s ease;
+  }
+  .themebtn{
+    position:fixed;
+    top:18px; right:18px;
+    background:var(--black);
+    color:var(--paper);
+    font-family:'Kalam',cursive;
+    padding:9px 14px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+    box-shadow:0 4px 12px var(--shadow);
+    font-size:14px;
+    z-index:100;
+  }
+  @media print{ .themebtn{display:none;} }
+  .toc{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--paper);
+    padding:28px 34px;
+    border-bottom:6px solid #2b2620;
+    transition:background .25s ease;
+  }
+  .toc h1{
+    font-family:'Caveat', cursive;
+    font-size:46px;
+    color:var(--blue);
+    margin:0 0 4px 0;
+  }
+  .toc h2{
+    font-family:'Caveat', cursive;
+    font-weight:600;
+    font-size:26px;
+    color:var(--pink);
+    margin:0 0 18px 0;
+  }
+  .toc ul{
+    padding-left:20px;
+    font-size:16px;
+    line-height:1.85;
+    margin:4px 0 4px 0;
+  }
+  .navgrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 40px;
+  }
+  .navhead{
+    font-family:'Caveat',cursive;
+    font-size:24px;
+    font-weight:700;
+    color:var(--orange);
+    background:linear-gradient(transparent 55%, var(--hl-yellow) 55%);
+    display:inline-block;
+    padding:0 6px;
+    margin:16px 0 6px 0;
+  }
+  .navcol:first-child .navhead:first-child{ margin-top:0; }
+  .toc li a{color:var(--black); text-decoration:none;}
+  .toc li a:hover{color:var(--blue);}
+  .toc .note{
+    font-family:'Kalam',cursive;
+    font-size:14px;
+    color:#555;
+    margin-top:10px;
+    border-top:1px dashed #bbb;
+    padding-top:10px;
+  }
+
+  .page{
+    max-width:900px;
+    margin:26px auto;
+    background:var(--page-bg);
+    padding:0 40px 30px 60px;
+    position:relative;
+    box-shadow:0 10px 30px var(--shadow);
+    border-radius:2px;
+    min-height:400px;
+    color:var(--black);
+    transition:background .25s ease, color .25s ease;
+  }
+  .page::before{
+    content:"";
+    position:absolute;
+    left:42px; top:70px; bottom:0;
+    width:2px;
+    background:var(--margin);
+    opacity:.35;
+  }
+  /* hat / unit-vector letter (i, j, k, A, B, S, n ...) */
+  .uv{
+    position:relative;
+    display:inline-block;
+    font-style:italic;
+    font-weight:700;
+    padding-top:.5em;
+  }
+  .uv::before{
+    content:"^";
+    position:absolute;
+    top:-.05em; left:50%;
+    transform:translateX(-50%) scaleX(1.6);
+    font-style:normal;
+    font-weight:700;
+    font-size:.8em;
+    line-height:1;
+    color:inherit;
+  }
+  /* vector-arrow letter(s), e.g. A⃗, OP⃗, f₁⃗ — drawn via CSS, not a combining mark */
+  .vec{
+    position:relative;
+    display:inline-block;
+    font-style:italic;
+    font-weight:700;
+    padding-top:.62em;
+  }
+  .vec::before{
+    content:"→";
+    position:absolute;
+    top:-.02em; left:50%;
+    transform:translateX(-50%) scaleX(1.15);
+    font-style:normal;
+    font-weight:700;
+    font-size:.7em;
+    line-height:1;
+    color:inherit;
+  }
+  /* logo badge — small black square, top-left corner, on every page */
+  .brandbar{
+    position:absolute;
+    top:14px; left:14px;
+    width:64px; height:64px;
+    background:#0b0b0b;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:5;
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .brandbar img{
+    width:48px;
+    height:48px;
+    object-fit:contain;
+    display:block;
+  }
+  .toc .brandbar{ top:16px; left:16px; }
+  .page{ padding-top:86px; }
+  .toc{ padding-top:80px; }
+  .lec-tag{
+    display:inline-block;
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:30px;
+    color:var(--orange);
+    background:linear-gradient(transparent 60%, var(--hl-yellow) 60%);
+    padding:0 6px;
+    margin-bottom:10px;
+    transform:rotate(-1deg);
+  }
+  h3.topic{
+    font-family:'Caveat',cursive;
+    font-size:28px;
+    font-weight:700;
+    color:var(--black);
+    background:linear-gradient(transparent 55%, var(--hl-blue) 55%);
+    display:inline-block;
+    padding:0 8px;
+    margin:14px 0 10px 0;
+  }
+  h4.sub{
+    font-family:'Caveat',cursive;
+    font-size:22px;
+    color:var(--pink);
+    margin:14px 0 6px 0;
+    text-decoration:underline;
+    text-decoration-style:wavy;
+  }
+  p, li{
+    font-size:17px;
+    line-height:1.65;
+    margin:5px 0;
+  }
+  .blue{color:var(--blue2);}
+  .pink{color:var(--pink);}
+  .black{color:var(--black);}
+  .orange{color:var(--orange);}
+  .green{color:var(--green);}
+  .hlblue{background:linear-gradient(transparent 55%, var(--hl-blue) 55%);}
+  .hlpink{background:linear-gradient(transparent 55%, var(--hl-pink) 55%);}
+  .hlyellow{background:linear-gradient(transparent 55%, var(--hl-yellow) 55%);}
+  .box{
+    border:2px solid var(--blue2);
+    border-radius:10px;
+    padding:8px 14px;
+    display:inline-block;
+    margin:6px 6px 6px 0;
+    background:var(--box-blue-bg);
+  }
+  .box.pinkbox{border-color:var(--pink); background:var(--box-pink-bg);}
+  .formula{
+    font-size:18px;
+    font-family:'Kalam',cursive;
+  }
+  .hindi{
+    font-family:'Noto Sans Devanagari','Kalam',cursive;
+    color:var(--green);
+    font-size:16px;
+  }
+  .diagram{
+    display:block;
+    margin:14px auto;
+    max-width:100%;
+    background-color:var(--graph-paper-bg);
+    background-image:
+      linear-gradient(var(--graph-paper-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--graph-paper-major) 1px, transparent 1px),
+      linear-gradient(var(--graph-paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--graph-paper-line) 1px, transparent 1px);
+    background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-position:-1px -1px;
+    border:1px solid var(--graph-paper-major);
+    border-radius:4px;
+  }
+  .diagram-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
+    margin:14px 0;
+  }
+  /* re-theme hand-drawn diagram colors for light/dark mode */
+  .page svg.diagram [stroke="#1a3fa0"]{stroke:var(--diagram-ink);}
+  .page svg.diagram [stroke="#333"]{stroke:var(--diagram-axis);}
+  .page svg.diagram [stroke="#999"]{stroke:var(--diagram-axis);}
+  .page svg.diagram [stroke="#ddd"]{stroke:var(--diagram-grid);}
+  .page svg.diagram [stroke="#eee"]{stroke:var(--diagram-grid);}
+  .page svg.diagram [stroke="#c21e7a"]{stroke:var(--pink);}
+  .page svg.diagram [stroke="#e07b1a"]{stroke:var(--orange);}
+  .page svg.diagram [stroke="#1c7a3e"]{stroke:var(--green);}
+  .page svg.diagram [fill="#c21e7a"]{fill:var(--pink);}
+  .page svg.diagram [fill="#1a3fa0"]{fill:var(--diagram-ink);}
+  .page svg.diagram [fill="#1c1c1c"]{fill:var(--diagram-text);}
+  .page svg.diagram text{fill:var(--diagram-text);}
+  .page svg.diagram .axis-label{
+    font-family:'Kalam',cursive;
+    font-style:italic;
+    font-weight:700;
+    fill:var(--diagram-text);
+  }
+  table.trigtab{
+    border-collapse:collapse;
+    margin:10px auto;
+    font-size:16px;
+  }
+  table.trigtab th, table.trigtab td{
+    border:1.5px solid var(--blue2);
+    padding:6px 14px;
+    text-align:center;
+  }
+  table.trigtab th{color:var(--pink); background:var(--table-pink-bg);}
+  .pagenum{
+    position:absolute;
+    bottom:10px; right:20px;
+    font-family:'Caveat',cursive;
+    color:#999;
+    font-size:16px;
+  }
+  .divider{
+    border:none;
+    border-top:1.5px dashed var(--pink);
+    margin:18px 0;
+  }
+  .note-callout{
+    border-left:4px solid var(--orange);
+    padding-left:12px;
+    margin:10px 0;
+    font-size:16px;
+    color:var(--black);
+  }
+  .backtotop{
+    position:fixed;
+    bottom:22px; right:22px;
+    background:var(--blue2);
+    color:#fff;
+    font-family:'Kalam',cursive;
+    padding:10px 16px;
+    border-radius:20px;
+    text-decoration:none;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+    font-size:14px;
+    z-index:99;
+  }
+  .pdfbtn{
+    position:fixed;
+    bottom:22px; right:150px;
+    background:var(--pink);
+    color:#fff;
+    font-family:'Kalam',cursive;
+    padding:10px 16px;
+    border-radius:20px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+    font-size:14px;
+    z-index:99;
+  }
+  .rawpdfbtn{
+    position:fixed;
+    bottom:22px; right:290px;
+    background:var(--green);
+    color:#fff;
+    font-family:'Kalam',cursive;
+    padding:10px 16px;
+    border-radius:20px;
+    text-decoration:none;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+    font-size:14px;
+    z-index:99;
+  }
+  .watermark{
+    display:none;
+  }
+  .copyright-footer{
+    display:none;
+  }
+  @media print{
+    body{background:#fff;}
+    .page{box-shadow:none; page-break-after:always; margin:0; border-radius:0;}
+    .toc{box-shadow:none;}
+    .backtotop, .pdfbtn, .rawpdfbtn{display:none;}
+    .watermark{
+      display:block;
+      position:fixed;
+      top:0; left:0; right:0; bottom:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      z-index:1000;
+    }
+    .watermark span{
+      font-family:'Caveat',cursive;
+      font-weight:700;
+      font-size:120px;
+      color:rgba(20,20,20,0.07);
+      transform:rotate(-35deg);
+      white-space:nowrap;
+    }
+    .copyright-footer{
+      display:block;
+      position:fixed;
+      bottom:6px; left:0; right:0;
+      text-align:center;
+      font-family:'Kalam',cursive;
+      font-size:9px;
+      color:rgba(0,0,0,.55);
+      z-index:1001;
+    }
+  }
+</style>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('ayuverse-theme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
+</head>
+<body>
+<button class="themebtn" id="themeToggleBtn" onclick="toggleAyuTheme()">🌓 Theme</button>
+
+<div class="watermark"><span>AyuVerse</span></div>
+<div class="copyright-footer">© AyuVerse — digitised study notes for personal educational use only. Not for resale or commercial redistribution.</div>
+
+<div class="toc" id="top">
+  <a href="physics-notes.html" style="display:inline-block;margin-bottom:14px;font-family:'Kalam',cursive;color:#1a3fa0;text-decoration:none;font-size:15px;">← Back to Physics Short Notes</a>
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="eager" alt="AyuVerse logo"></div>
+  <h1>Mathematical Tools</h1>
+  <h2>Trigonometry → Functions → Differentiation → Integration → Vectors</h2>
+
+  <div class="navgrid">
+    <div class="navcol">
+      <h3 class="navhead">📐 Trigonometry</h3>
+      <ul>
+        <li><a href="#lec1">Lec 1 — Angles, Radians &amp; Degrees, T-ratios</a></li>
+        <li><a href="#lec2">Lec 2 — Sine: graph &amp; properties</a></li>
+        <li><a href="#lec3cos">Cosine: graph &amp; properties</a></li>
+        <li><a href="#lec3">Lec 3 — Tan: graph &amp; properties</a></li>
+        <li><a href="#biggerangle">Bigger angle T-ratios, ASTC, Identities</a></li>
+        <li><a href="#lec4">Lec 4 — Cute triangles, Small angle approx</a></li>
+      </ul>
+
+      <h3 class="navhead">📈 Functions &amp; Graphs</h3>
+      <ul>
+        <li><a href="#lec5">Lec 5 — Linear relationship y = mx + c</a></li>
+        <li><a href="#quad">Quadratic relationship y = kx²</a></li>
+        <li><a href="#lec6">Lec 6 — Shifting curves: f(x)+c, f(x±a)</a></li>
+        <li><a href="#cubic">Cubic &amp; Inverse relationship</a></li>
+        <li><a href="#lec7">Lec 7 — Inverse square &amp; Exponential</a></li>
+        <li><a href="#slope">Slope theory</a></li>
+      </ul>
+    </div>
+
+    <div class="navcol">
+      <h3 class="navhead">∂ Differentiation</h3>
+      <ul>
+        <li><a href="#lec8">Lec 8 — First principles</a></li>
+        <li><a href="#lec9">Lec 9 — Differentiation rules</a></li>
+        <li><a href="#lec10">Lec 10 — Worked problems, physical meaning</a></li>
+        <li><a href="#doublediff">Double differentiation &amp; Chain rule</a></li>
+        <li><a href="#lec11">Lec 11 — Rate of change problems</a></li>
+        <li><a href="#maxima">Maxima &amp; Minima</a></li>
+        <li><a href="#lec12">Lec 12 — Maxima/Minima worked problems</a></li>
+      </ul>
+
+      <h3 class="navhead">∫ Integration</h3>
+      <ul>
+        <li><a href="#integration">Integration — introduction</a></li>
+        <li><a href="#lec15">Lec 15 — Definite Integration</a></li>
+        <li><a href="#lec16">Lec 16 — A sinx±B cosx, Binomial, AP/GP</a></li>
+      </ul>
+
+      <h3 class="navhead">➤ Vectors</h3>
+      <ul>
+        <li><a href="#vectors">Vectors — introduction &amp; types</a></li>
+        <li><a href="#lec18">Lec 18 — Position, Displacement, Unit vectors</a></li>
+        <li><a href="#lec19">Lec 19 — Polygon law, Resolution of vectors</a></li>
+        <li><a href="#lec20">Lec 20 — Special angles, Subtraction</a></li>
+        <li><a href="#cartesian">Cartesian form of vectors</a></li>
+        <li><a href="#lec21">Lec 21 — Dot Product</a></li>
+        <li><a href="#lec22">Lec 22 — Cross Product, Direction Cosines</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">Digitised from handwritten notes — content, order, colour-coding (blue = formulas, pink = definitions/highlights, orange = lecture headers) and Hindi/Hinglish lines preserved as written. Click any topic to jump.</div>
+</div>
+
+<!-- ===================== LEC 1 ===================== -->
+<div class="page" id="lec1">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 1</span>
+  <h3 class="topic">Mathematical Tool → Trigonometry</h3>
+  <p class="blue formula">
+    1° (degree) = 60′ (minutes) &nbsp;|&nbsp; 1′ (minute) = 60″ (seconds) &nbsp;|&nbsp; 1° (degree) = 3600″ (seconds)
+  </p>
+
+  <h4 class="sub">① Angle 'θ'</h4>
+  <p class="black">Definition: The amount of rotation of a line from its <span class="pink">initial position</span>, measured in terms of θ.</p>
+  <svg class="diagram" width="260" height="110" viewBox="0 0 260 110">
+    <line x1="20" y1="90" x2="220" y2="90" stroke="#1a3fa0" stroke-width="2"/>
+    <line x1="20" y1="90" x2="150" y2="25" stroke="#1a3fa0" stroke-width="2"/>
+    <path d="M 55 90 A 35 35 0 0 1 68 63" fill="none" stroke="#c21e7a" stroke-width="2"/>
+    <text x="60" y="55" fill="#c21e7a" font-size="14">θ</text>
+    <text x="225" y="94" fill="#1c1c1c" font-size="13">initial pos&#8319;</text>
+    <text x="150" y="18" fill="#1c1c1c" font-size="13">final pos&#8319;</text>
+  </svg>
+
+  <h4 class="sub">Planar angle</h4>
+  <p class="formula blue">θ = length of arc / radius &nbsp;→&nbsp; unit: <span class="pink">radian (S.I.)</span>, practical unit: <span class="pink">degree</span></p>
+  <p class="black">1<sup>c</sup> → one radian: when length of arc is same as radius, θ = l/r = 1 (dimensionless)</p>
+
+  <div class="box">
+    <p class="formula blue">degree ⟷ radian &nbsp; π<sup>c</sup> ⟶ 180°</p>
+    <p class="formula blue">1<sup>c</sup> = 180°/π &nbsp;&nbsp; 1° = π/180</p>
+    <p class="formula blue">θ<sup>c</sup> = (180/π × θ)° &nbsp;&nbsp; θ° = (π/180 × θ)<sup>c</sup></p>
+  </div>
+  <p class="black">l = θ<sup>c</sup>·r &nbsp; l = 2πr &nbsp; ⟹ 2πr = ρ<sup>c</sup>r &nbsp; ⟹ π = 180°</p>
+  <p class="black">60° = π/3 <sup>c</sup> = π/3 rad &nbsp;&nbsp; 90° = π/2 <sup>c</sup> = π/2 rad</p>
+
+  <h4 class="sub">Sign convention</h4>
+  <p class="black">θ (+ve sense) — anticlockwise &nbsp;|&nbsp; θ (−ve sense) — clockwise</p>
+
+  <h4 class="sub">Right triangle basics</h4>
+  <p class="formula blue">h = √(p² + b²) &nbsp;&nbsp; <span class="box pinkbox">PBP : HHB</span> (Perpendicular/Base/Perpendicular : Hypotenuse/Hypotenuse/Base — mnemonic for sin,cos,tan)</p>
+
+  <div class="box">
+    <p class="formula blue">① sinθ = P/H &nbsp; ② cosθ = B/H &nbsp; ③ tanθ = P/B</p>
+    <p class="formula blue">④ cosecθ = H/P &nbsp; ⑤ secθ = H/B &nbsp; ⑥ cotθ = B/P</p>
+  </div>
+
+  <h4 class="sub">Special angle quick facts</h4>
+  <p class="black">at θ = 0°: sin0° = P/H = 0, cos0° = H/H = 1, tan0° = P/B = 0</p>
+  <p class="black">at θ = 45°: sin45 = 1/√2, cos45 = 1/√2, tan45 = 1</p>
+  <p class="hindi">(saath hi 30°,60°,90°,270°,360° ke liye bhi values nikaali gayi)</p>
+  <div class="pagenum">1</div>
+</div>
+
+<!-- ===================== TRIG RATIO TABLE + LEC2 SINE ===================== -->
+<div class="page" id="lec2">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic">Trigonometric Ratio Table</h3>
+  <table class="trigtab">
+    <tr><th>Angle</th><th>0°</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th></tr>
+    <tr><td class="pink">Sin</td><td>0</td><td>1/2</td><td>1/√2</td><td>√3/2</td><td>1</td></tr>
+    <tr><td class="pink">Cos</td><td>1</td><td>√3/2</td><td>1/√2</td><td>1/2</td><td>0</td></tr>
+    <tr><td class="pink">Tan</td><td>0</td><td>1/√3</td><td>1</td><td>√3</td><td>N.D.</td></tr>
+  </table>
+
+  <span class="lec-tag">Lec – 2</span>
+  <h3 class="topic hlyellow">Sine° = P/H</h3>
+
+  <svg class="diagram" width="620" height="180" viewBox="0 0 620 180">
+    <line x1="10" y1="90" x2="610" y2="90" stroke="#333" stroke-width="1"/>
+    <line x1="130" y1="10" x2="130" y2="170" stroke="#ddd" stroke-dasharray="2,2"/>
+    <line x1="250" y1="10" x2="250" y2="170" stroke="#ddd" stroke-dasharray="2,2"/>
+    <line x1="370" y1="10" x2="370" y2="170" stroke="#ddd" stroke-dasharray="2,2"/>
+    <line x1="490" y1="10" x2="490" y2="170" stroke="#ddd" stroke-dasharray="2,2"/>
+    <path d="M 10.0,150.0 L 31.0,141.2 L 52.0,117.2 L 73.0,85.3 L 94.0,54.7 L 115.0,34.5 L 136.1,30.8 L 157.1,44.4 L 178.1,71.6 L 199.1,104.1 L 220.1,132.5 L 241.1,148.4 L 262.1,147.0 L 283.1,128.8 L 304.1,99.2 L 325.1,66.9 L 346.1,41.3 L 367.1,30.2 L 388.2,36.6 L 409.2,58.9 L 430.2,90.3 L 451.2,121.6 L 472.2,143.6 L 493.2,149.8 L 514.2,138.4 L 535.2,112.7 L 556.2,80.3 L 577.2,50.8 L 598.2,32.8"
+          fill="none" stroke="#1a3fa0" stroke-width="2.5"/>
+    <text x="18" y="164" font-size="11">-π/2</text>
+    <text x="120" y="164" font-size="11">π/2</text>
+    <text x="235" y="164" font-size="11">π</text>
+    <text x="345" y="164" font-size="11">3π/2</text>
+    <text x="475" y="164" font-size="11">2π</text>
+    <text x="8" y="24" font-size="13" class="axis-label">y = sin θ</text>
+    <text x="6" y="20" font-size="10" class="axis-label">+1</text>
+    <text x="4" y="163" font-size="10" class="axis-label">-1</text>
+    <text x="588" y="104" font-size="12" class="axis-label">θ →</text>
+  </svg>
+
+  <h4 class="sub">Unit-circle construction (rotating radius) — sign of sine at each quadrant</h4>
+  <svg class="diagram" width="220" height="220" viewBox="0 0 220 220">
+    <circle cx="110" cy="110" r="90" fill="none" stroke="#1a3fa0" stroke-width="1.5"/>
+    <line x1="10" y1="110" x2="210" y2="110" stroke="#999" stroke-width="1"/>
+    <line x1="110" y1="10" x2="110" y2="210" stroke="#999" stroke-width="1"/>
+    <g stroke="#c21e7a" stroke-width="1">
+      <line x1="110" y1="110" x2="200" y2="110"/>
+      <line x1="110" y1="110" x2="185" y2="65"/>
+      <line x1="110" y1="110" x2="155" y2="33"/>
+      <line x1="110" y1="110" x2="110" y2="20"/>
+      <line x1="110" y1="110" x2="65" y2="33"/>
+      <line x1="110" y1="110" x2="35" y2="65"/>
+      <line x1="110" y1="110" x2="20" y2="110"/>
+      <line x1="110" y1="110" x2="35" y2="155"/>
+      <line x1="110" y1="110" x2="65" y2="187"/>
+      <line x1="110" y1="110" x2="110" y2="200"/>
+      <line x1="110" y1="110" x2="155" y2="187"/>
+      <line x1="110" y1="110" x2="185" y2="155"/>
+    </g>
+    <text x="205" y="105" font-size="11">0°</text>
+    <text x="105" y="15" font-size="11">90°</text>
+    <text x="5" y="105" font-size="11">180°</text>
+    <text x="100" y="215" font-size="11">270°</text>
+  </svg>
+
+  <p class="black">Period (T): 90° → 180° P decreases, sinθ value decreases</p>
+  <p class="black">180° → 270° (P III): sinθ → negative (value increases) &nbsp;&nbsp; 270° → 360° (P IV): sinθ → negative (value decreases)</p>
+
+  <h4 class="sub">Properties of Sine</h4>
+  <ol class="black">
+    <li>Periodic function: repeats after a fixed interval.</li>
+    <li>Time period: 2π interval</li>
+    <li class="formula blue">+1 ≥ sinθ ≥ −1 &nbsp;or&nbsp; −1 ≤ sinθ ≤ +1</li>
+    <li>sinθ may be increasing or decreasing depending upon the interval:
+      (0–90°) ↑ &nbsp; (90–180°) ↓ &nbsp; (180–270°) ↓ &nbsp; (270–360°) ↑</li>
+    <li>Sine is an <span class="pink">odd function</span>: sin30° = 1/2, sin(−30°) = −1/2</li>
+    <li class="formula blue">sin(nπ) = 0 ; n is integer</li>
+    <li class="formula blue">sin(2n+1)π/2 = ±1</li>
+    <li>Sign of Sin (ASTC quadrant pattern):
+      <svg class="diagram" width="150" height="150" viewBox="0 0 150 150">
+        <line x1="75" y1="10" x2="75" y2="140" stroke="#333"/>
+        <line x1="10" y1="75" x2="140" y2="75" stroke="#333"/>
+        <text x="95" y="45" fill="#c21e7a">+</text>
+        <text x="45" y="45" fill="#c21e7a">+</text>
+        <text x="95" y="105" fill="#c21e7a">−</text>
+        <text x="45" y="105" fill="#c21e7a">−</text>
+      </svg>
+    </li>
+  </ol>
+  <div class="pagenum">2</div>
+</div>
+
+<!-- ===================== COSINE ===================== -->
+<div class="page" id="lec3cos">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlblue">Cosine° = B/H</h3>
+  <table class="trigtab">
+    <tr><th>Interval</th><th>value range</th></tr>
+    <tr><td>0°–90°</td><td>1 → 0 (↓)</td></tr>
+    <tr><td>90°–180°</td><td>0 → −1</td></tr>
+    <tr><td>180°–270°</td><td>−1 → 0</td></tr>
+    <tr><td>270°–360°</td><td>0 → 1</td></tr>
+  </table>
+
+  <svg class="diagram" width="620" height="170" viewBox="0 0 620 170">
+    <line x1="10" y1="85" x2="610" y2="85" stroke="#333" stroke-width="1"/>
+    <line x1="209" y1="10" x2="209" y2="160" stroke="#ddd" stroke-dasharray="2,2"/>
+    <line x1="409" y1="10" x2="409" y2="160" stroke="#ddd" stroke-dasharray="2,2"/>
+    <path d="M 10.0,140.0 L 45.0,131.9 L 80.0,109.9 L 115.0,80.6 L 150.1,52.6 L 185.1,34.2 L 220.1,30.7 L 255.1,43.2 L 290.1,68.1 L 325.1,97.9 L 360.1,124.0 L 395.2,138.5 L 430.2,137.3 L 465.2,120.6 L 500.2,93.4 L 535.2,63.8 L 570.2,40.4 L 605.2,30.2"
+          fill="none" stroke="#1a3fa0" stroke-width="2.5"/>
+    <text x="0" y="155" font-size="11">-π</text>
+    <text x="98" y="155" font-size="11">-π/2</text>
+    <text x="200" y="155" font-size="11">π/2</text>
+    <text x="300" y="155" font-size="11">π</text>
+    <text x="398" y="155" font-size="11">3π/2</text>
+    <text x="505" y="155" font-size="11">2π</text>
+    <text x="8" y="24" font-size="13" class="axis-label">y = cos θ</text>
+    <text x="6" y="20" font-size="10" class="axis-label">+1</text>
+    <text x="4" y="153" font-size="10" class="axis-label">-1</text>
+    <text x="588" y="99" font-size="12" class="axis-label">θ →</text>
+  </svg>
+
+  <h4 class="sub">Unit-circle construction — sign of cosine at each quadrant</h4>
+  <svg class="diagram" width="220" height="220" viewBox="0 0 220 220">
+    <circle cx="110" cy="110" r="90" fill="none" stroke="#1a3fa0" stroke-width="1.5"/>
+    <line x1="10" y1="110" x2="210" y2="110" stroke="#999" stroke-width="1"/>
+    <line x1="110" y1="10" x2="110" y2="210" stroke="#999" stroke-width="1"/>
+    <g stroke="#c21e7a" stroke-width="1">
+      <line x1="110" y1="110" x2="200" y2="110"/>
+      <line x1="110" y1="110" x2="185" y2="65"/>
+      <line x1="110" y1="110" x2="155" y2="33"/>
+      <line x1="110" y1="110" x2="65" y2="33"/>
+      <line x1="110" y1="110" x2="35" y2="65"/>
+      <line x1="110" y1="110" x2="20" y2="110"/>
+      <line x1="110" y1="110" x2="35" y2="155"/>
+      <line x1="110" y1="110" x2="65" y2="187"/>
+      <line x1="110" y1="110" x2="155" y2="187"/>
+      <line x1="110" y1="110" x2="185" y2="155"/>
+    </g>
+    <text x="205" y="105" font-size="11">0°</text>
+    <text x="5" y="105" font-size="11">180°</text>
+  </svg>
+
+  <h4 class="sub">Property of Cosine</h4>
+  <ol class="black">
+    <li>Periodic function: repeat after a fixed interval</li>
+    <li>Time period: 2π interval</li>
+    <li class="formula blue">−1 ≤ cosθ ≤ 1</li>
+    <li>cosθ may be increasing or decreasing depending upon the interval: (0–90°)↑ (90–180°)&(180–270°)↑ (270–360°)↑</li>
+    <li>cosθ is an <span class="pink">even function</span>: cos30° = 1/2, cos(−30°) = 1/2</li>
+    <li class="formula blue">cos(nπ) = ±1</li>
+    <li class="formula blue">cos(2n+1)π/2 = 0</li>
+    <li>Sign of Cos:
+      <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+        <line x1="75" y1="10" x2="75" y2="110" stroke="#333"/>
+        <line x1="10" y1="60" x2="140" y2="60" stroke="#333"/>
+        <text x="95" y="40" fill="#c21e7a">+</text>
+        <text x="45" y="40" fill="#c21e7a">−</text>
+        <text x="95" y="90" fill="#c21e7a">+</text>
+        <text x="45" y="90" fill="#c21e7a">−</text>
+      </svg>
+    </li>
+  </ol>
+  <div class="pagenum">3</div>
+</div>
+
+<!-- ===================== LEC 3 TAN ===================== -->
+<div class="page" id="lec3">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 3</span>
+  <h3 class="topic hlyellow">Tan θ = P/B</h3>
+
+  <svg class="diagram" width="620" height="220" viewBox="0 0 620 220">
+    <line x1="10" y1="110" x2="600" y2="110" stroke="#333" stroke-width="1"/>
+    <line x1="18" y1="10" x2="18" y2="210" stroke="#eee" stroke-dasharray="2,2"/>
+    <line x1="162" y1="10" x2="162" y2="210" stroke="#eee" stroke-dasharray="2,2"/>
+    <line x1="307" y1="10" x2="307" y2="210" stroke="#eee" stroke-dasharray="2,2"/>
+    <line x1="451" y1="10" x2="451" y2="210" stroke="#eee" stroke-dasharray="2,2"/>
+    <line x1="595" y1="10" x2="595" y2="210" stroke="#eee" stroke-dasharray="2,2"/>
+    <path d="M 20.2,198.4 L 21.6,186.6 L 24.4,170.1 L 27.1,159.2 L 32.6,145.4 L 40.9,133.6 L 49.2,126.4 L 58.9,120.5 L 69.9,115.4 L 80.9,110.9 L 92.0,106.5 L 103.0,101.7 L 114.1,95.7 L 125.1,86.8 L 132.0,77.9 L 137.5,66.3 L 141.7,52.0 L 145.8,25.9"
+          fill="none" stroke="#1a3fa0" stroke-width="2.2"/>
+    <path d="M 164.7,198.4 L 166.1,186.6 L 168.9,170.1 L 171.6,159.2 L 177.1,145.4 L 185.4,133.6 L 193.7,126.4 L 203.4,120.5 L 214.4,115.4 L 225.4,110.9 L 236.5,106.5 L 247.5,101.7 L 258.6,95.7 L 269.6,86.8 L 276.5,77.9 L 282.0,66.3 L 286.2,52.0 L 290.3,25.9"
+          fill="none" stroke="#1a3fa0" stroke-width="2.2"/>
+    <path d="M 309.2,198.4 L 310.6,186.6 L 313.4,170.1 L 316.1,159.2 L 321.7,145.4 L 329.9,133.6 L 338.2,126.4 L 347.9,120.5 L 358.9,115.4 L 370.0,110.9 L 381.0,106.5 L 392.0,101.7 L 403.1,95.7 L 414.1,86.8 L 421.0,77.9 L 426.5,66.3 L 430.7,52.0 L 434.8,25.9"
+          fill="none" stroke="#1a3fa0" stroke-width="2.2"/>
+    <path d="M 453.7,198.4 L 455.1,186.6 L 457.9,170.1 L 460.6,159.2 L 466.2,145.4 L 474.4,133.6 L 482.7,126.4 L 492.4,120.5 L 503.4,115.4 L 514.5,110.9 L 525.5,106.5 L 536.5,101.7 L 547.6,95.7 L 558.6,86.8 L 565.5,77.9 L 571.0,66.3 L 575.2,52.0 L 579.3,25.9"
+          fill="none" stroke="#1a3fa0" stroke-width="2.2"/>
+    <text x="0" y="128" font-size="11">-3π/2</text>
+    <text x="150" y="128" font-size="11">-π/2</text>
+    <text x="298" y="128" font-size="11">π/2</text>
+    <text x="440" y="128" font-size="11">3π/2</text>
+    <text x="580" y="128" font-size="11">5π/2</text>
+    <text x="8" y="24" font-size="13" class="axis-label">y = tan θ</text>
+    <text x="595" y="124" font-size="12" class="axis-label">θ →</text>
+  </svg>
+
+  <h4 class="sub">Property of Tan</h4>
+  <ol class="black">
+    <li>Periodic function</li>
+    <li>Time interval: π</li>
+    <li class="formula blue">−∞ &lt; tanθ &lt; ∞</li>
+    <li>Odd function: tan(−θ) = −tanθ</li>
+    <li class="formula blue">tan(nπ) = 0</li>
+    <li class="formula blue">tan(2n±1)π/2 = not defined</li>
+    <li>Sign of Tan: same ASTC pattern (+ in I & III, − in II & IV)</li>
+  </ol>
+
+  <hr class="divider" id="biggerangle">
+  <h4 class="sub">How to find T-ratios for bigger angle</h4>
+  <ol class="black">
+    <li>(π, 2π, 3π, 4π, 5π...) → No θ change in argument</li>
+    <li>(π/2, 3π/2, 5π/2...) → Argument changes: sin⟷cos, tan⟷cot, sec⟷cosec</li>
+    <li>Put sign according to <span class="pink hlpink">ASTC rule</span> (All-Sin-Tan-Cos, quadrants I–IV)</li>
+  </ol>
+  <p class="black">Formats of writing an angle: α = π/2 + θ = π − α (and similar forms for 3π/2 ± θ, 2π − θ)</p>
+
+  <h4 class="sub">Examples</h4>
+  <p class="formula blue">sin135° = sin(180−45°) = +sin45° = 1/√2</p>
+  <p class="formula blue">sin225° = sin(360−180+45) = −cos45° = −1/√2</p>
+
+  <hr class="divider">
+  <h4 class="sub">Trigonometry Identities</h4>
+  <div class="box">
+  <p class="formula blue">① sin²θ + cos²θ = 1</p>
+  <p class="formula blue">② 1 + tan²θ = sec²θ</p>
+  <p class="formula blue">③ 1 + cot²θ = cosec²θ</p>
+  <p class="formula blue">④ sin2θ = 2sinθcosθ</p>
+  <p class="formula blue">⑤ sin(A+B) = sinAcosB + cosAsinB</p>
+  <p class="formula blue">⑥ sin(A−B) = sinAcosB − cosAsinB</p>
+  <p class="formula blue">⑦ cos(A+B) = cosAcosB − sinAsinB</p>
+  <p class="formula blue">⑧ cos(A−B) = cosAcosB + sinAsinB</p>
+  <p class="formula blue">⑨ cos2θ = cos²θ − sin²θ = (cosθ+sinθ)(cosθ−sinθ)</p>
+  <p class="formula blue">⑩ tan(A+B) = (tanA+tanB)/(1−tanAtanB)</p>
+  <p class="formula blue">⑪ tan(A−B) = (tanA−tanB)/(1+tanAtanB)</p>
+  <p class="formula blue">⑫ tan2A = 2tanA/(1−tan²A)</p>
+  </div>
+  <div class="pagenum">4</div>
+</div>
+
+<!-- ===================== LEC 4 ===================== -->
+<div class="page" id="lec4">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 4</span>
+  <h3 class="topic hlblue">Cute Triangle (3-4-5)</h3>
+  <svg class="diagram" width="180" height="130" viewBox="0 0 180 130">
+    <polygon points="20,110 150,110 20,20" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+    <text x="75" y="125" font-size="13">4</text>
+    <text x="5" y="65" font-size="13">3</text>
+    <text x="85" y="60" font-size="13">5</text>
+    <text x="35" y="100" font-size="12" fill="#c21e7a">37°</text>
+    <text x="120" y="105" font-size="12" fill="#c21e7a">53°</text>
+  </svg>
+  <p class="formula black">sin37 = 3/5, cos53 = 3/5, sin53 = 4/5, cos53° = 3/5, tan37 = 3/4, tan53 = 4/3</p>
+
+  <h4 class="sub">Small Angle Approximation (θ &lt; 10°)</h4>
+  <div class="box">
+    <p class="formula blue">① sinθ = P/H = rθ/r ≈ θ &nbsp; (P ≈ length of arc ≈ rθ)</p>
+    <p class="formula blue">② cosθ ≈ 1</p>
+    <p class="formula blue">③ tanθ ≈ θ</p>
+    <p class="formula blue">④ sinθ ≈ tanθ &nbsp;&nbsp;(θ in radian)</p>
+  </div>
+
+  <h3 class="topic hlyellow">Calculus</h3>
+  <p class="black">Constant: whose value is fixed (e, π, G, etc.) &nbsp;&nbsp; Variable: whose value is not fixed.</p>
+  <p class="black">Independent variable (x-axis) &nbsp;→&nbsp; Dependent Variable (y-axis), value depends on independent variable.</p>
+
+  <h4 class="sub">Relation</h4>
+  <p class="black">A relation defines the order/dependency of D.V. on I.V.</p>
+  <ul class="black">
+    <li>y ∝ x → linear relation</li>
+    <li>y ∝ x² → quadratic relation</li>
+    <li>y ∝ x³ → cubic relation</li>
+    <li>y ∝ 1/x → inverse relation</li>
+    <li>y ∝ 1/x² → inverse square relation</li>
+    <li>y ∝ eˣ → exponential relation</li>
+    <li>y ∝ log x → logarithmic relation</li>
+    <li>y ∝ sinx → trigonometric relation</li>
+  </ul>
+
+  <h4 class="sub">Function</h4>
+  <p class="black">A mathematical expression which defines an exact relationship between D.V. and I.V.</p>
+  <p class="formula blue">Ex: s(t) = ut + ½at², u,a = constant → displacement as a function of time</p>
+  <p class="formula blue">v(t) = u + at → velocity as a function of time</p>
+  <div class="pagenum">5</div>
+</div>
+
+<!-- ===================== LEC 5 ===================== -->
+<div class="page" id="lec5">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 5</span>
+  <h3 class="topic hlblue">Linear Relationship</h3>
+  <p class="black">y ∝ x → always passes through origin, straight line. y = mx, m = proportionality const.</p>
+  <p class="formula blue">−∞ &lt; m ≤ 0 → slope in II &amp; IV quadrant &nbsp;&nbsp; ∞ &gt; m ≥ 0 → slope in I &amp; III quadrant</p>
+
+  <div class="diagram-row">
+    <svg class="diagram" width="180" height="140" viewBox="0 0 180 140">
+      <line x1="10" y1="70" x2="170" y2="70" stroke="#999"/>
+      <line x1="90" y1="10" x2="90" y2="130" stroke="#999"/>
+      <line x1="20" y1="120" x2="160" y2="20" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="10" y="15" font-size="12">y = x (m=1, θ=45°)</text>
+    </svg>
+    <svg class="diagram" width="180" height="140" viewBox="0 0 180 140">
+      <line x1="10" y1="70" x2="170" y2="70" stroke="#999"/>
+      <line x1="90" y1="10" x2="90" y2="130" stroke="#999"/>
+      <line x1="60" y1="125" x2="120" y2="15" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="10" y="15" font-size="12">y = 2x (θ&gt;45°)</text>
+    </svg>
+    <svg class="diagram" width="180" height="140" viewBox="0 0 180 140">
+      <line x1="10" y1="70" x2="170" y2="70" stroke="#999"/>
+      <line x1="90" y1="10" x2="90" y2="130" stroke="#999"/>
+      <line x1="20" y1="90" x2="160" y2="50" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="10" y="15" font-size="12">y = ½x (θ&lt;45°)</text>
+    </svg>
+  </div>
+  <p class="black">m=0: y = 0·x (x-axis itself) &nbsp;&nbsp; m=∞: vertical line (y-axis itself)</p>
+  <p class="formula blue">tanθ = mx/x = m &nbsp;⟹&nbsp; θ = tan⁻¹(m)</p>
+
+  <hr class="divider" id="quad">
+  <h4 class="sub">Addition of constant: y = mx + c</h4>
+  <p class="black">Straight line having intercept at 'c'. Compare with y = mx (no intercept, passes through origin).</p>
+
+  <h3 class="topic hlyellow">Quadratic Relationship: y ∝ x²</h3>
+  <p class="formula blue">y = kx², k = proportionality const.</p>
+  <p class="formula blue">−∞ &lt; k ≤ 0 → downward parabola (III &amp; IV quad) &nbsp;&nbsp; 0 ≤ k &lt; ∞ → upward parabola (I &amp; II quad)</p>
+  <div class="diagram-row">
+    <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+      <line x1="10" y1="100" x2="140" y2="100" stroke="#999"/>
+      <line x1="75" y1="10" x2="75" y2="110" stroke="#999"/>
+      <path d="M 30 100 Q 75 10 120 100" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="15" y="15" font-size="11">y=x², y=2x² family</text>
+    </svg>
+    <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+      <line x1="10" y1="20" x2="140" y2="20" stroke="#999"/>
+      <line x1="75" y1="10" x2="75" y2="110" stroke="#999"/>
+      <path d="M 30 20 Q 75 105 120 20" fill="none" stroke="#c21e7a" stroke-width="2"/>
+      <text x="10" y="115" font-size="11">y=−kx² (downward)</text>
+    </svg>
+  </div>
+  <div class="pagenum">6</div>
+</div>
+
+<!-- ===================== LEC 6 ===================== -->
+<div class="page" id="lec6">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 6</span>
+  <h3 class="topic hlblue">Addition of Constant (shift): y = f(x) + c</h3>
+  <p class="black">If c = +ve → whole curve shifts 'c' units <span class="pink">upward</span>.</p>
+  <p class="black">If c = −ve → whole curve shifts 'c' units <span class="pink">downward</span>.</p>
+
+  <p class="note-callout"><b>Note:</b> x → (x−a) means f(x) → f(x−a): <span class="pink">delay by "a" unit</span>. And f(x) → f(x+a): <span class="pink">advance by "a" unit</span>.</p>
+
+  <div class="diagram-row">
+    <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+      <line x1="10" y1="100" x2="140" y2="100" stroke="#999"/>
+      <line x1="75" y1="10" x2="75" y2="110" stroke="#999"/>
+      <path d="M 30 100 Q 75 10 120 100" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="10" y="20" font-size="11">y=x² at origin</text>
+    </svg>
+    <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+      <line x1="10" y1="100" x2="140" y2="100" stroke="#999"/>
+      <line x1="35" y1="10" x2="35" y2="110" stroke="#999"/>
+      <path d="M 5 100 Q 35 10 65 100" fill="none" stroke="#c21e7a" stroke-width="2"/>
+      <text x="70" y="60" font-size="11">y=(x−a)² shifted right</text>
+    </svg>
+    <svg class="diagram" width="150" height="120" viewBox="0 0 150 120">
+      <line x1="10" y1="100" x2="140" y2="100" stroke="#999"/>
+      <line x1="110" y1="10" x2="110" y2="110" stroke="#999"/>
+      <path d="M 80 100 Q 110 10 140 100" fill="none" stroke="#1c7a3e" stroke-width="2"/>
+      <text x="8" y="60" font-size="11">y=(x+a)² shifted left</text>
+    </svg>
+  </div>
+
+  <p class="hindi">जो फ़ंक्शन f(x) में x=0 पे हो रहा था वो f(x+a) में x=−a पे हो रहा होगा, और f(x−a) में x=a पे हो रहा होगा। मतलब y=0 पहले x=0 पे हो रहा था तो अब f(x−a)=y में y=0 तब होगा जब x=a होगा और y=f(x+a) में y=0 तब होगा जब x=−a होगा।</p>
+
+  <hr class="divider" id="cubic">
+  <h3 class="topic hlyellow">Cubic Relationship: y ∝ x³</h3>
+  <p class="formula blue">y = kx³</p>
+  <table class="trigtab">
+    <tr><th>x</th><td>0</td><td>−1</td><td>1</td><td>2</td><td>−2</td></tr>
+    <tr><th>y</th><td>0</td><td>−1</td><td>1</td><td>8</td><td>−8</td></tr>
+  </table>
+
+  <h4 class="sub">Other xⁿ</h4>
+  <p class="black">y = x<sup>even</sup> → curve lies in adjacent quadrants, like parabola.</p>
+  <p class="black">y = x<sup>odd</sup> → curve lies in opposite quadrants.</p>
+
+  <h4 class="sub">Inverse Relationship</h4>
+  <p class="formula blue">y ∝ 1/x → y = k/x → y₁/y₂ = x₂/x₁ &nbsp;(rectangular hyperbola, asymptotic curve)</p>
+  <table class="trigtab">
+    <tr><th>x</th><td>1</td><td>1/2</td><td>2</td><td>0</td><td>−2</td><td>∞</td></tr>
+    <tr><th>y</th><td>1</td><td>2</td><td>1/2</td><td>∞</td><td>−1/2</td><td>0</td></tr>
+  </table>
+  <div class="pagenum">7</div>
+</div>
+
+<!-- ===================== LEC 7 ===================== -->
+<div class="page" id="lec7">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 7</span>
+  <h3 class="topic hlblue">Inverse Square Relationship: y ∝ 1/x²</h3>
+  <p class="black">y is directly proportional to 1/x², y is inversely proportional to x².</p>
+  <table class="trigtab">
+    <tr><th>x</th><td>0</td><td>∞</td><td>1</td><td>−1</td><td>−2</td><td>2</td></tr>
+    <tr><th>y</th><td>∞</td><td>0</td><td>1</td><td>1</td><td>1/4</td><td>1/4</td></tr>
+  </table>
+  <p class="black">Compare '1/x' with '1/x²' in Quadrant I — same graph shape near x large, different near 0.</p>
+  <table class="trigtab">
+    <tr><th>x</th><th>1/x</th><th>1/x²</th></tr>
+    <tr><td>0</td><td>∞</td><td>∞</td></tr>
+    <tr><td>1</td><td>1</td><td>1</td></tr>
+    <tr><td>∞</td><td>0</td><td>0</td></tr>
+    <tr><td>2</td><td>0.5</td><td>0.25</td></tr>
+    <tr><td>1/2</td><td>2</td><td>4</td></tr>
+  </table>
+
+  <h3 class="topic hlyellow">Exponential Relationship: y = eˣ</h3>
+  <table class="trigtab">
+    <tr><th>x</th><td>0</td><td>1</td><td>∞</td><td>−∞</td></tr>
+    <tr><th>y</th><td>1</td><td>e</td><td>∞</td><td>0</td></tr>
+  </table>
+  <p class="black">y = e⁻ˣ (mirror image about y-axis):</p>
+  <table class="trigtab">
+    <tr><th>x</th><td>0</td><td>1</td><td>2</td><td>−1</td><td>−2</td></tr>
+    <tr><th>y</th><td>1</td><td>1/e</td><td>1/e²</td><td>e</td><td>e²</td></tr>
+  </table>
+
+  <div class="diagram-row">
+    <svg class="diagram" width="180" height="130" viewBox="0 0 180 130">
+      <line x1="10" y1="110" x2="170" y2="110" stroke="#999"/>
+      <line x1="30" y1="10" x2="30" y2="120" stroke="#999"/>
+      <path d="M 30 110 Q 80 108 170 20" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="70" y="20" font-size="11">y=eˣ</text>
+    </svg>
+    <svg class="diagram" width="180" height="130" viewBox="0 0 180 130">
+      <line x1="10" y1="110" x2="170" y2="110" stroke="#999"/>
+      <line x1="150" y1="10" x2="150" y2="120" stroke="#999"/>
+      <path d="M 10 20 Q 100 108 150 110" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+      <text x="60" y="20" font-size="11">y=e⁻ˣ</text>
+    </svg>
+  </div>
+
+  <p class="black">y = 1 − eˣ, x&gt;0: passes through (0,0), asymptotic to line y=1 as x→∞ (mirror/flip of eˣ about x-axis, shifted).</p>
+  <p class="black">y = 1 − e⁻ˣ, x&gt;0: rises from (0,0) and saturates towards y=1.</p>
+  <div class="pagenum">8</div>
+</div>
+
+<!-- ===================== SLOPE THEORY ===================== -->
+<div class="page" id="slope">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlblue">Slope Theory</h3>
+  <p class="formula blue">tanθ = (y₂−y₁)/(x₂−x₁) = Δy/Δx ≡ slope &nbsp;&nbsp; θ = tan⁻¹(Δy/Δx)</p>
+  <p class="black">Slope of a straight line gives an idea about the <span class="pink">inclination of line with x-axis</span>.</p>
+  <p class="formula blue">y = mx → tanθ = y/x → y = (tanθ)x → y = mx, slope = m</p>
+  <p class="black">Slope will remain <span class="pink">same at each and every point</span> in a straight line graph.</p>
+
+  <h4 class="sub">Slope at a point on curve</h4>
+  <p class="black">y = x²: slope at point "p" = tanθ<sub>p</sub> — draw a tangent at that pt, its inclination with x-axis gives the slope.</p>
+  <svg class="diagram" width="200" height="150" viewBox="0 0 200 150">
+    <line x1="10" y1="130" x2="190" y2="130" stroke="#999"/>
+    <line x1="30" y1="10" x2="30" y2="140" stroke="#999"/>
+    <path d="M 30 130 Q 100 20 180 20" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+    <circle cx="110" cy="55" r="3" fill="#c21e7a"/>
+    <text x="115" y="50" font-size="12" fill="#c21e7a">P</text>
+    <line x1="60" y1="110" x2="160" y2="20" stroke="#e07b1a" stroke-dasharray="4,2"/>
+    <text x="60" y="125" font-size="11">tangent at pt "p"</text>
+  </svg>
+  <p class="black">Slope decreasing (↓) vs slope increasing (↑) — shown for concave-down vs concave-up sections of a curve, and for sinx: slope goes max(+ve) → 0 → max(−ve) → 0 across one period, i.e. slope(0), slope max(−ve) at π/2, slope(0) at π, slope max(+ve) at 3π/2, slope(0) at 2π.</p>
+  <div class="pagenum">9</div>
+</div>
+
+<!-- ===================== LEC 8 ===================== -->
+<div class="page" id="lec8">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 8</span>
+  <h3 class="topic hlyellow">Differentiation</h3>
+  <p class="black">Differentiation is a process of analysing change in <span class="pink">dependent variable</span> w.r.t. change in <span class="pink">independent variable</span>.</p>
+  <p class="black">It is a tool that gives us the ability to analyse <span class="pink">small change</span> at each and every point — infinitesimal change in I.V. → change in D.V. ⟹ analysing = Differentiation.</p>
+
+  <div class="box">
+    <p class="formula blue">dy/dx = lim<sub>Δx→0</sub> (Δy/Δx)</p>
+  </div>
+  <p class="black">lim<sub>Δx→0</sub> ⟹ Δx = 0.00000...→1 (infinitesimally small, but not zero)</p>
+  <p class="black">dy/dx = analysing change in (y) w.r.t only (infinitesimal) small change in (x). &nbsp;d/dx → differentiator</p>
+  <p class="formula blue">d(voltage)/d(current) = dV/dI = Resistance — analysing small change in voltage w.r.t small change in current.</p>
+  <div class="pagenum">10</div>
+</div>
+
+<!-- ===================== LEC 9 ===================== -->
+<div class="page" id="lec9">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 9</span>
+  <h3 class="topic hlblue">Differentiation Rules</h3>
+
+  <h4 class="sub">① Power rule</h4>
+  <p class="formula blue">y = xⁿ &nbsp;⟹&nbsp; dy/dx = nxⁿ⁻¹</p>
+  <p class="black">e.g. y=√x → dy/dx = 1/(2√x); y=1/√x → dy/dx = −1/(2x^3/2); y=x⁹ → dy/dx=9x⁸; y=∛x → dy/dx = 1/(3x^2/3); y=1/x → dy/dx = −1/x²</p>
+
+  <h4 class="sub">② Differentiation of a constant</h4>
+  <p class="formula blue">d(constant)/dx = 0 &nbsp;&nbsp; e.g. de/dx=0, dπ/dx=0, d(6)/dx=0</p>
+
+  <h4 class="sub">③ Differentiation of trigonometric relation</h4>
+  <div class="box">
+  <p class="formula blue">d(sinx)/dx = cosx &nbsp;&nbsp; d(cosx)/dx = −sinx</p>
+  <p class="formula blue">d(tanx)/dx = sec²x &nbsp;&nbsp; d(cotx)/dx = −cosec²x</p>
+  </div>
+
+  <h4 class="sub">④ ⑤ Exponential &amp; log</h4>
+  <p class="formula blue">d(eˣ)/dx = eˣ &nbsp;&nbsp; d(logx)/dx = 1/x</p>
+
+  <h4 class="sub">⑥ Constant multiple rule</h4>
+  <p class="formula blue">y = k·f(x) &nbsp;⟹&nbsp; dy/dx = k(df(x)/dx)</p>
+  <p class="black">e.g. Circle A=πr² → dA/dr = 2πr; circumference = 2πr → d/dr = 2π</p>
+  <p class="black">Sphere A=4πr² → dA/dr = 8πr; V=(4/3)πr³ → dV/dr = 4πr²</p>
+
+  <h4 class="sub"># Differentiation in addition/subtraction</h4>
+  <p class="formula blue">y = f(x) ± g(x) &nbsp;⟹&nbsp; dy/dx = df(x)/dx ± dg(x)/dx</p>
+  <p class="black">e.g. y = x² ± sinx → dy/dx = 2x ± cosx</p>
+
+  <h4 class="sub"># Differentiation in product (product rule)</h4>
+  <p class="formula blue">y = f(x)·g(x) = u·v &nbsp;⟹&nbsp; dy/dx = u(dv/dx) + v(du/dx)</p>
+  <p class="black">e.g. y = x²sinx → dy/dx = x²cosx + sinx(2x)</p>
+
+  <h4 class="sub"># Division rule</h4>
+  <p class="formula blue">y = f(x)/g(x) = u/v &nbsp;⟹&nbsp; dy/dx = [u(dv/dx) − v(du/dx)] / v²</p>
+  <p class="black">e.g. y = x²/sinx → dy/dx = [x²cosx − sinx(2x)] / x⁴</p>
+  <div class="pagenum">11</div>
+</div>
+
+<!-- ===================== LEC 10 ===================== -->
+<div class="page" id="lec10">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 10</span>
+  <h4 class="sub">d(sinx/cosx)/dx</h4>
+  <p class="formula blue">= [cosx(dsinx/dx) − sinx(dcosx/dx)] / cos²x = (cos²x + sin²x)/cos²x = 1/cos²x = sec²x</p>
+
+  <h4 class="sub">d(eˣ·logx)/dx</h4>
+  <p class="formula blue">= eˣ(dlogx/dx) + logx(deˣ/dx) = eˣ/x + logx·eˣ = eˣ(1/x + logx)</p>
+
+  <h4 class="sub">y = sin2x</h4>
+  <p class="formula blue">dy/dx = d(sin2x)/dx = d(2sinxcosx)/dx = 2[(−sin²x)+cos²x] = 2[cos²x − sin²x] = 2cos2x</p>
+
+  <hr class="divider">
+  <h3 class="topic hlyellow">Physical meaning of differentiation</h3>
+  <p class="formula blue">tanθ = dy/dx &nbsp;&nbsp; Slope at point "p" = dy/dx</p>
+  <p class="hindi">किसी curve पे एक particular point पे curve पिचकी हो तो उस pt पे dy/dx करते पर slope मिल जाती है।</p>
+
+  <p class="black">Ex: find slope at x=3 on curve y=x²: slope(p) = dx²/dx = 2x; dy/dx|<sub>x=3</sub> = 6</p>
+  <p class="black">Ex: find slope on curve y=sinx at (i) x=0 (ii) x=π/2 (iii) x=π (iv) x=3π/2:</p>
+  <p class="formula blue">dy/dx = cosx &nbsp;⟹&nbsp; at x=0: 1 &nbsp; at x=π/2: 0 &nbsp; at x=π: −1 &nbsp; at x=3π/2: 0</p>
+
+  <hr class="divider" id="doublediff">
+  <h3 class="topic hlblue">Double Differentiation</h3>
+  <p class="black">Differentiation ka differentiation. dy/dx = analysing change in (y) w.r.t change in (x) ≡ slope. d(dy/dx)/dx = analysing change in (slope) w.r.t change in (x).</p>
+  <p class="black">e.g. dx/dt → velocity(v); d(dx/dt)/dt = acceleration(a).</p>
+  <p class="formula blue">y →(1st dy/dx)→ y′ →(2nd d/dx)→ d(dy/dx)/dx = d²y/dx² = y″ → 2nd derivative</p>
+  <p class="black">dy/dt = ẏ (where t is time); d²y/dt² = ÿ</p>
+
+  <h4 class="sub">Chain Rule</h4>
+  <p class="hindi">जब fun<sup>c</sup> के अंदर milta fun<sup>c</sup> हो तब उस fun<sup>c</sup> पे chain rule।</p>
+  <p class="black">x → [fun1: square] → x² → [fun2: sin] → sinx² → [fun3: exponential] → e<sup>sinx²</sup></p>
+  <p class="formula blue">y = g(f(x)) &nbsp;or&nbsp; y = f(g(f(x)))</p>
+  <p class="black">Examples: sin(Ax), (Ax+B)², sin(x²), e^(Ax+B), 1/(Ax+B)</p>
+  <div class="pagenum">12</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <p class="hindi">जैसे प्याज़ के छिलके सबसे ऊपर वाला हटाते हैं फिर उसके अंदर वाला — वैसे ही chain rule है।</p>
+  <p class="black">Ex: y = e<sup>sin(x²)</sup></p>
+  <p class="formula blue">dy/dx = d(e^α)/dα × d(sinβ)/dβ × dx²/dx = e<sup>sinx²</sup> · cosx² · 2x</p>
+
+  <h4 class="sub">y = Dada(Papa(Beta))</h4>
+  <p class="formula blue">dy/dx = dDada/dx |<sub>(Papa(Beta))</sub> × dPapa/dx |<sub>(Beta)</sub> × dBeta/dx</p>
+
+  <p class="black">y = sin(Ax+B), where A &amp; B are constants:</p>
+  <p class="formula blue">dy/dx = dsin(Ax+B)/dx × d(Ax+B)/dx = cos(Ax+B) × [A + 0] = (cos(Ax+B))·A</p>
+  <div class="pagenum">13</div>
+</div>
+
+<!-- ===================== LEC 11 ===================== -->
+<div class="page" id="lec11">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 11</span>
+  <p class="black">Q) Radius of sphere = 0.5t² {t = time}. Volume of sphere changing with time. Find rate of change of volume when (t=4).</p>
+  <p class="formula blue">V = (4/3)πr³</p>
+  <p class="black"><b>Method 1</b> (substitute r first):</p>
+  <p class="formula blue">dV/dt = d[(4/3)π(0.5t²)³]/dt = (4/3)π(0.5)³ · d(t⁶)/dt = (4/3)π(0.5)³·6t⁵ = 8π(0.5)³t⁵ |<sub>t=4</sub></p>
+  <p class="black"><b>Method 2</b> (chain rule):</p>
+  <p class="formula blue">dV/dt = (4/3)π·3r²·dr/dt = 4πr²·0.5(2t) = 4π(0.5t²)²·(t) |<sub>t=4</sub></p>
+
+  <div class="note-callout">life style(L) → papa salary(S) → month(M): L = S²+2S+6 ; S = −M²+2M ⟹ dL/dM = dL/dS × dS/dM</div>
+
+  <h4 class="sub">y = ax² &amp; x = √t</h4>
+  <p class="formula blue">dy/dx = a·2x = 2ax</p>
+  <p class="formula blue">dy/dt = dy/dx × dx/dt = 2ax × d√t/dt = 2ax × 1/(2√t) = a√t × 1/√t = a</p>
+  <p class="black">or directly: y = a(√t)² = at → dy/dt = a</p>
+
+  <h4 class="sub">Velocity as a function of position (x)</h4>
+  <p class="formula blue">v = −x² + 2x + 6, and x as a function of time(t): x = 1+2t. Find dv/dt.</p>
+  <p class="formula blue">dv/dt = d(−x²+2x+6)/dx × d(1+2t)/dt = (−2x+2)(2) = 4−4x = 4−4(1+2t) = −8t</p>
+
+  <h3 class="topic hlyellow">Maxima &amp; Minima</h3>
+  <svg class="diagram" width="300" height="130" viewBox="0 0 300 130">
+    <line x1="10" y1="110" x2="290" y2="110" stroke="#999"/>
+    <path d="M 20 60 Q 50 20 80 60 Q 110 100 140 60 Q 170 20 200 90 Q 230 110 260 40" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+    <text x="45" y="15" font-size="10" fill="#c21e7a">local maxima</text>
+    <text x="200" y="15" font-size="10" fill="#c21e7a">global maxima</text>
+    <text x="90" y="120" font-size="10" fill="#c21e7a">local minima</text>
+    <text x="235" y="128" font-size="10" fill="#c21e7a">global minima</text>
+  </svg>
+  <div class="pagenum">14</div>
+</div>
+
+<div class="page" id="maxima">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <p class="black">At maxima: slope goes +ve → 0 → −ve &nbsp;&nbsp; At minima: slope goes −ve → 0 → +ve</p>
+  <p class="formula blue">d(slope)/dx |<sub>dy/dx=0</sub> = (−ve)−(+ve) = (−ve) → maximum &nbsp;&nbsp; d(slope)/dx |<sub>dy/dx=0</sub> = (+ve)−(−ve) = (+ve) → minimum</p>
+  <p class="hindi">जिस function में maxima, minima निकालनी है, उस function को 1st differentiation करके जिस pt पे "0" आता है, वो pt possibility होती है maxima या minima के लिए (slope is 0 where maxima and minima may occur)।</p>
+  <p class="black">कहा maxima होगा कहा minima इसे जानने के लिए, "0" वाले pt पे 2nd derivative slope निकालकर confirm कर लेंगे।</p>
+  <div class="pagenum">15</div>
+</div>
+
+<!-- ===================== LEC 12 ===================== -->
+<div class="page" id="lec12">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 12</span>
+  <p class="black">Q) No. of commuters = t³ − 3t² + 6, where 't' is time. Find time when N is maximum &amp; minimum; also find max/min value of "N" (for range −1&lt;t&lt;3).</p>
+  <p class="formula blue">N = t³−3t²+6 &nbsp;&nbsp; dN/dt = 3t²−6t = 0 ⟹ 3t(t−2)=0 ⟹ t=0, t=2</p>
+  <p class="formula blue">d²N/dt² = 6t−6 &nbsp;&nbsp; at t=0: −6 (maxima) &nbsp;&nbsp; at t=2: +6 (minima)</p>
+  <p class="black">Maxima at t=0: N<sub>max</sub> = (t³−3t²+6)|<sub>t=0</sub> = <b>6</b></p>
+  <p class="black">Minima at t=2: N<sub>min</sub> = (t³−3t²+6)|<sub>t=2</sub> = <b>2</b></p>
+
+  <hr class="divider">
+  <p class="black">Q) Heat(H) produced by body defined in terms of temp 'T': H(T) = 5T² − 9T + 3. Find what temp is maxima/minima, and find max/min heat.</p>
+  <p class="formula blue">dH/dT = 10T − 9 = 0 ⟹ T = 9/10 (possible temp where max or min may occur)</p>
+  <p class="formula blue">d²H/dT² = 10 &gt; 0 ⟹ at T=9/10, minima will occur</p>
+  <p class="formula blue">H<sub>min</sub>|<sub>T=9/10</sub> = 5(81/100) − 9(9/10) + 3 = (405 − 810 + 300)/100 = −105/100 = <b>−21/20</b></p>
+  <div class="pagenum">16</div>
+</div>
+
+<!-- ===================== INTEGRATION ===================== -->
+<div class="page" id="integration">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlyellow">Integration</h3>
+  <p class="formula blue">Σ<sub>i=1</sub><sup>n</sup> dxᵢ = ∫dx</p>
+  <p class="black">It is a process of summation, or the reverse process of differentiation. It is also called <span class="pink">anti-derivative</span>.</p>
+  <p class="note-callout">Note: To add discrete values we use "Σ". e.g. Σ Mᵢ = M₁+M₂+M₃+...+M₅₀.<br>A process of addition of infinitesimal, continuous changes is known as integration.</p>
+
+  <h4 class="sub">Applications</h4>
+  <ol class="black"><li>To calculate net change in physical quantity.</li><li>Area under the curve.</li></ol>
+  <p class="formula blue">dx/dt = v ⟹ dx = v·dt (small change in position in time "dt")</p>
+  <p class="formula blue">Σdxᵢ ⟹ ∫dx → integration of dx, gives net change in position Δx</p>
+  <p class="formula blue">∫v·dt → integrating velocity w.r.t time; ∫dx → Δx</p>
+
+  <h4 class="sub">Area under curve concept</h4>
+  <p class="black">Area of strip = f(x)Δx = A₁. If Δx is very very small, f(x) ≈ f(x+Δx). For ∞ no. of strips: Total area = ∫dA = ∫f(x)dx.</p>
+  <div class="pagenum">17</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlblue">Mathematical Formulae (Integration)</h3>
+  <h4 class="sub">① Power rule</h4>
+  <div class="box">
+  <p class="formula blue">∫xⁿdx = xⁿ⁺¹/(n+1) + C &nbsp;(n≠−1)</p>
+  <p class="formula blue">∫(1/x)dx = ln x + C</p>
+  </div>
+  <p class="black">e.g. ∫x⁰dx = x+C; ∫x¹dx = x²/2+C</p>
+  <p class="black">Area = ∫x²dx = x³/3 + C &nbsp;(for y=x² curve, shaded region 0 to x)</p>
+  <p class="black">Area = ∫√x dx = (2/3)x^(3/2) + C &nbsp;(for y=√x curve)</p>
+
+  <h4 class="sub">② ③ Trig &amp; exponential</h4>
+  <div class="box">
+  <p class="formula blue">∫sinx dx = −cosx + C &nbsp;&nbsp; ∫cosx dx = sinx + C</p>
+  <p class="formula blue">∫eˣdx = eˣ + C</p>
+  </div>
+
+  <h4 class="sub">④ Constant multiple rule</h4>
+  <p class="formula blue">∫k·f(x)dx = k∫f(x)dx + C &nbsp;&nbsp; e.g. ∫4x²dx = 4∫x²dx = 4x³/3 + C</p>
+
+  <h4 class="sub">⑤ Circle / Sphere examples</h4>
+  <p class="formula blue">∫2πr dr = 2π·r²/2 + C = πr² + C &nbsp;(dA = 2πr·dr, ∫dA = ∫2πr dr = πr²+C)</p>
+  <p class="formula blue">∫4πr²dr = dV = 4πr²dr, ∫dV = ∫4πr²dr = 4πr³/3 + C</p>
+  <div class="pagenum">18</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h4 class="sub">⑤ Addition &amp; Subtraction</h4>
+  <p class="formula blue">y = f(x) ± g(x) &nbsp;⟹&nbsp; ∫y dx = ∫f(x)dx ± ∫g(x)dx</p>
+  <p class="black">e.g. y = x²+sinx → ∫y dx = x³/3 + (−cosx) + C = x³/3 + cosx + C</p>
+
+  <h4 class="sub">⑥ Product Rule (Integration by Parts)</h4>
+  <p class="formula blue">y = f(x)·g(x) = I·II &nbsp;⟹&nbsp; ∫y dx = I∫II dx − ∫(dI/dx · ∫II dx) dx</p>
+  <p class="black">Order of preference: <span class="pink hlpink">I L A T E</span> — Inverse trigo, Log, Algebraic, Trigo, Exponent</p>
+  <p class="black">e.g. y = x·eˣ (I=x, II=eˣ): ∫y dx = x∫eˣdx − ∫(dx/dx·∫eˣdx)dx = x·eˣ − eˣ + C</p>
+
+  <h4 class="sub">Substitution: ∫Papa(Beta)dx = ∫(Papa)dx / (dBeta/dx), Beta → linear function</h4>
+  <p class="black">e.g. ∫sin(Ax)dx = −cos(Ax)/A + C</p>
+  <p class="black">y = (Ax+B)² &nbsp;⟹&nbsp; ∫y dx = (Ax+B)³/(3A) + C</p>
+  <p class="black">y = sin(ωt+θ) &nbsp;⟹&nbsp; ∫y dt = −cos(ωt+θ)/ω + C</p>
+
+  <h4 class="sub">Short table: Differentiation vs Integration</h4>
+  <table class="trigtab">
+    <tr><th>Differentiation</th><th>Integration</th></tr>
+    <tr><td>d(xⁿ)/dx = nxⁿ⁻¹</td><td>∫xⁿdx = xⁿ⁺¹/(n+1)+C, n≠−1</td></tr>
+    <tr><td>dc/dx = 0</td><td>∫c dx = cx+C</td></tr>
+    <tr><td>d(kx²)/dx = k·dx²/dx</td><td>∫kx²dx = k∫x²dx</td></tr>
+    <tr><td>deˣ/dx = eˣ</td><td>∫eˣdx = eˣ+C</td></tr>
+    <tr><td>d(aˣ)/dx = aˣlna</td><td>∫aˣdx = aˣ/lna + C</td></tr>
+    <tr><td>d(lnx)/dx = 1/x</td><td>∫(1/x)dx = lnx</td></tr>
+    <tr><td>d(sinx)/dx = cosx</td><td>∫sinx dx = −cosx+C</td></tr>
+    <tr><td>d(cosx)/dx = −sinx</td><td>∫cosx dx = sinx+C</td></tr>
+    <tr><td>d(tanx)/dx = sec²x</td><td>—</td></tr>
+    <tr><td>d(cotx)/dx = −cosec²x</td><td>—</td></tr>
+    <tr><td>d(log₁₀x)/dx = 1/(x lna)</td><td>—</td></tr>
+  </table>
+  <div class="pagenum">19</div>
+</div>
+
+<!-- ===================== LEC 15 ===================== -->
+<div class="page" id="lec15">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 15</span>
+  <h3 class="topic hlyellow">Definite Integration</h3>
+  <p class="formula blue">∫<sub>a</sub><sup>b</sup> f(x)dx = [g(x)]<sub>a</sub><sup>b</sup> = g(b) − g(a)</p>
+  <p class="note-callout">|ˣ ⟶ this is not "modulus", it is just a symbol (evaluation bracket).</p>
+
+  <p class="black">Example, y=x², area between x=3 to x=5:</p>
+  <p class="formula blue">∫x²dx = x³/3 + C &nbsp;&nbsp; ∫<sub>3</sub><sup>5</sup> y dx = [x³/3]<sub>3</sub><sup>5</sup> = 125/3 − 27/3 = 98/3 sq unit</p>
+
+  <p class="black">Example, y=x, area between x=3 to x=5:</p>
+  <p class="formula blue">Area = 25/2 − 9/2 = 16/2 = 8 sq unit &nbsp;(matches ∫<sub>3</sub><sup>5</sup> x dx = [x²/2]<sub>3</sub><sup>5</sup> = 8)</p>
+
+  <p class="note-callout">definite integration numerical value देती है, इसलिए constant "C" cancel out हो जाता है। जबकि indefinite में constant C add होता है (all datasets valid).</p>
+  <div class="pagenum">20</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <p class="black">Q) Find area between 0° to π/2 in sinx graph.</p>
+  <p class="formula blue">∫<sub>0</sub><sup>π/2</sup> sinx dx = [−cosx]<sub>0</sub><sup>π/2</sup> = −0−(−1) = <b>1</b> unit</p>
+
+  <p class="black">Q) Find ∫<sub>R</sub><sup>∞</sup> F dx, where F = Gm₁m₂/x² (gravitational force, earth of radius R, mass m₁, unit mass m₂ moving to infinity):</p>
+  <p class="formula blue">∫<sub>R</sub><sup>∞</sup> F dx = ∫<sub>R</sub><sup>∞</sup> Gm₁m₂/x² dx = Gm₁m₂·(−1/x)|<sub>R</sub><sup>∞</sup> = 0 − Gm₁m₂(−1/R) = <b>Gm₁m₂/R</b></p>
+
+  <p class="black">Indefinite integration examples (each family differs only by constant C — the initial condition fixes C):</p>
+  <table class="trigtab">
+    <tr><th>y</th><th>dy/dx</th><th>∫dx</th></tr>
+    <tr><td>y=x²+1</td><td>2x</td><td>x²+C</td></tr>
+    <tr><td>y=x²+8</td><td>2x</td><td>x²+C</td></tr>
+    <tr><td>y=x²+3</td><td>2x</td><td>x²+C</td></tr>
+  </table>
+  <p class="hindi">indefinite integration करते वक़्त एक तरह की miss हो जाती है — ये मिस x=0 पे constant C fix करके सही किया जाता है (y(x=0)=1, y(x=0)=8, y(x=0)=3 conditions से)।</p>
+
+  <hr class="divider">
+  <p class="formula blue">a = dv/dt ⟹ dv = a dt ⟹ ∫dv = ∫a dt ⟹ ∫<sub>v₁</sub><sup>v₂</sup> dv = a∫<sub>0</sub><sup>t</sup> dt ⟹ |v|<sub>v₁</sub><sup>v₂</sup> = a|t|<sub>0</sub><sup>t</sup> ⟹ v₂−v₁ = at ⟹ <b>v₂ = v₁+at</b></p>
+  <p class="formula blue">v = dx/dt ⟹ dx = v dt ⟹ ∫<sub>x₁</sub><sup>x₂</sup>dx = ∫<sub>0</sub><sup>t</sup>(u+at)dt ⟹ x₂−x₁ = ut + at²/2 ⟹ <b>x₂ = ut + ½at² + x₁</b></p>
+  <p class="black">∫dv w.r.t velocity v: y-axis; ∫a dt w.r.t time t: a·t; ∫dx w.r.t position x: x₂−x₁; ∫t dt w.r.t time t: t²/2</p>
+  <p class="hindi">जो variable के ऊपर द लगे हैं, integration उस respect में होता है।</p>
+  <div class="pagenum">21</div>
+</div>
+
+<!-- ===================== LEC 16 ===================== -->
+<div class="page" id="lec16">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 16</span>
+  <h4 class="sub">Note: y = A sinx ± B cosx</h4>
+  <p class="formula blue">y<sub>max</sub> = +√(A²+B²) &nbsp;&nbsp; y<sub>min</sub> = −√(A²+B²)</p>
+  <p class="black">Proof: y = √(A²+B²) · [ A/√(A²+B²) sinx + B/√(A²+B²) cosx ] &nbsp; (draw right triangle with legs A,B, hyp √(A²+B²), angle θ)</p>
+  <p class="formula blue">y = √(A²+B²) (cosθ sinx + sinθ cosx) = √(A²+B²) · sin(θ+x)</p>
+  <p class="formula blue">−√(A²+B²) ≤ y ≤ √(A²+B²) &nbsp;&nbsp;(since sin function max/min is ±1)</p>
+
+  <hr class="divider">
+  <h3 class="topic hlblue">Binomial Approximation</h3>
+  <p class="formula blue">(1+x)² = 1+2x+x² &nbsp;&nbsp; (1+x)³ = 1+x³+3x²+3x &nbsp;&nbsp; (1+x)⁴ = 1+4x+6x²+4x³+x⁴</p>
+  <p class="black">(1+x)^(1/2), (1+x)^(1/9), (1+x)^(2/3) ... ?</p>
+  <p class="black">Condition: x&lt;&lt;&lt;1° ⟹ x²,x³,5x²,4x²... ≈ 0</p>
+  <div class="box"><p class="formula blue">(1±x)ⁿ ≈ 1±nx &nbsp; (Binomial approximation)</p></div>
+  <p class="black">Ex: (1003)² = (1000+3)² = (1000)²[1+3/1000]² = 10⁶[1+2(0.003)]</p>
+
+  <h4 class="sub">Arithmetic Progression (A.P)</h4>
+  <p class="black">1st term a, 2nd term a+d, 3rd term a+2d, ... nth term a+(n−1)d; d = common difference</p>
+  <p class="formula blue">S<sub>n</sub> = n/2(a+aₙ) = n/2(2a+(n−1)d)</p>
+
+  <h4 class="sub">Geometric Progression (G.P)</h4>
+  <p class="black">1st term a, 2nd term ar, 3rd term ar², ... nth term ar<sup>n−1</sup>; r = common ratio</p>
+  <p class="formula blue">S<sub>n</sub> = a(rⁿ−1)/(r−1) = a(1−rⁿ)/(1−r)</p>
+  <p class="black">when x&lt;1: infinite G.P → S<sub>n</sub> = a/(1−r)</p>
+  <p class="black">e.g. 1+1/2+1/4+1/8+1/16+...∞ = 1/(1−1/2) = 2</p>
+  <p class="black">e.g. 1+1/e+1/e²+1/e³+...∞ = 1/(1−1/e) = e/(e−1)</p>
+  <div class="pagenum">22</div>
+</div>
+
+<!-- ===================== VECTORS ===================== -->
+<div class="page" id="vectors">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlyellow">Vectors</h3>
+  <p class="black">Physical Quantity: those quantities which can be measured and have some physical significance. e.g. mass, area, force, etc.</p>
+  <p class="black">→ <span class="pink">Scalar Quantity</span>: physical quantity which has no direction significance, only magnitude should be significant. e.g. mass, area.</p>
+  <p class="black">→ <span class="pink">Vector Quantity</span>: physical quantity which has significance of magnitude along with direction. e.g. force, velocity.</p>
+
+  <h4 class="sub">Representation of vectors</h4>
+  <ol class="black"><li>Arrow representation</li><li>Magnitude representation</li><li>Cartesian form</li></ol>
+
+  <svg class="diagram" width="260" height="120" viewBox="0 0 260 120">
+    <line x1="20" y1="30" x2="220" y2="30" stroke="#1a3fa0" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="10" y="20" font-size="12">B</text>
+    <text x="225" y="34" font-size="11" fill="#1a3fa0">v₁ = 5 km/hr east</text>
+    <line x1="220" y1="80" x2="20" y2="80" stroke="#c21e7a" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="225" y="84" font-size="11" fill="#c21e7a">v₂ = 5 km/hr west</text>
+    <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1a3fa0"/></marker></defs>
+  </svg>
+  <p class="black">Note: BA ≠ AB (direction matters — arrowhead represents direction, length represents magnitude)</p>
+
+  <p class="formula blue">Vector = Magnitude ⊕ direction &nbsp;&nbsp; <span class="vec">A</span> = |<span class="vec">A</span>|·<span class="uv">A</span></p>
+
+  <h4 class="sub">Magnitude Representation</h4>
+  <p class="black">e.g. <span class="vec">F</span> = 10N, 30°N of E; wind velocity (V<sub>w</sub>) = 15 knots (SE), 45° from N towards E</p>
+
+  <h4 class="sub">Types of Vectors</h4>
+  <ol class="black">
+    <li><span class="pink">Co-initial vectors</span> — two or more vectors having same initial point.</li>
+    <li><span class="pink">Co-planar vectors</span> — two or more vectors lying in the same plane.</li>
+    <li><span class="pink">Co-linear vectors</span> — two or more vectors lying along the same line.
+      <ul>
+        <li><b>Parallel vectors</b> — same direction; angle between parallel vectors = 0°, different or same magnitude.</li>
+        <li><b>Antiparallel vectors</b> — opposite direction; angle between antiparallel vectors = 180°, different or same magnitude.</li>
+      </ul>
+    </li>
+    <li><span class="pink">Equal vectors</span> — same magnitude ⊕ same direction ⊕ same physical quantity.</li>
+    <li><span class="pink">Anti / negative vectors</span> — direction of a vector made by rotating 180° of another vector: <span class="vec">B</span>=−<span class="vec">A</span>, <span class="vec">A</span>=−<span class="vec">B</span> (B is antiparallel of A, |<span class="vec">A</span>|=|<span class="vec">B</span>|).</li>
+    <li><span class="pink">Null vector</span> — a vector with 0 magnitude, denoted by "•" (dot), direction = undefined (∞). e.g. 4N+4N opposing with 2N,2N: resultant = 0N.</li>
+  </ol>
+  <div class="pagenum">23</div>
+</div>
+
+<div class="page" id="lec18">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 18</span>
+  <ol class="black" start="7">
+    <li><span class="pink">Orthogonal Vectors</span> — two vectors perpendicular to each other.</li>
+    <li><span class="pink">Position Vector</span> — <span class="vec">OP</span> = position of point 'P' w.r.t. 'origin'.</li>
+    <li><span class="pink">Displacement Vector</span> — <span class="vec">OP</span> = position vector of pt P w.r.t origin; <span class="vec">OQ</span> = position vector of pt Q w.r.t origin; <span class="vec">PQ</span> = displacement vector from P to Q.</li>
+    <li><span class="pink">Unit Vector</span> — a vector with magnitude 1 but has direction of a parent vector, i.e. represents direction of parent vector. <span class="uv">A</span> = unit vector in the direction of <span class="vec">A</span>.
+      <p class="black">e.g. <span class="uv">i</span> — unit vector along x-axis; <span class="uv">j</span> — along y-axis; <span class="uv">k</span> — along z-axis</p>
+    </li>
+  </ol>
+
+  <h4 class="sub">Angle between two vectors</h4>
+  <p class="black">(join them from tail→tail or extend tail→head)</p>
+  <p class="formula blue">Angle between <span class="vec">A</span> &amp; <span class="vec">B</span> = <span class="vec">A</span>∧<span class="vec">B</span></p>
+
+  <h4 class="sub">Vector Law of Addition</h4>
+  <ol class="black"><li>Law of triangle</li><li>Law of parallelogram</li><li>Polygon Law</li></ol>
+
+  <h4 class="sub"># Law of triangle / Δ law of addition (used to add two vectors)</h4>
+  <p class="formula blue"><span class="vec">R</span> = <span class="vec">A</span> + <span class="vec">B</span> = <span class="vec">B</span> + <span class="vec">A</span> &nbsp;(Commutative law)</p>
+  <svg class="diagram" width="260" height="160" viewBox="0 0 260 160">
+    <defs><marker id="ah1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1a3fa0"/></marker>
+    <marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c21e7a"/></marker></defs>
+    <line x1="20" y1="130" x2="140" y2="130" stroke="#1a3fa0" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="140" y1="130" x2="200" y2="30" stroke="#1a3fa0" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="20" y1="130" x2="200" y2="30" stroke="#c21e7a" stroke-width="2.5" marker-end="url(#ah2)"/>
+    <text x="70" y="145" font-size="13"><span class="vec">A</span></text>
+    <text x="175" y="80" font-size="13"><span class="vec">B</span></text>
+    <text x="95" y="60" font-size="13" fill="#c21e7a"><span class="vec">R</span> = <span class="vec">A</span>+<span class="vec">B</span></text>
+  </svg>
+  <p class="hindi">Step①: दो-दो vector को add करना हो, उनको same sense में arrange करें ताकि दोनों vector triangle की adjacent sides represent करें।</p>
+  <p class="hindi">Step②: अब triangle की 3rd side opposite sense में (first vector की tail से second vector के head तक), वो resultant vector देगी।</p>
+
+  <h4 class="sub"># Parallelogram law of addition (used to add two vectors only)</h4>
+  <svg class="diagram" width="260" height="180" viewBox="0 0 260 180">
+    <line x1="20" y1="150" x2="130" y2="150" stroke="#1a3fa0" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="20" y1="150" x2="80" y2="40" stroke="#1a3fa0" stroke-width="2" marker-end="url(#ah1)"/>
+    <line x1="130" y1="150" x2="190" y2="40" stroke="#999" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <line x1="80" y1="40" x2="190" y2="40" stroke="#999" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <line x1="20" y1="150" x2="190" y2="40" stroke="#c21e7a" stroke-width="2.5" marker-end="url(#ah2)"/>
+    <text x="65" y="165" font-size="13"><span class="vec">A</span></text>
+    <text x="45" y="95" font-size="13"><span class="vec">B</span></text>
+    <text x="110" y="90" font-size="13" fill="#c21e7a"><span class="vec">R</span> = <span class="vec">A</span>+<span class="vec">B</span></text>
+  </svg>
+  <p class="hindi">Step①: दो वेक्टर को add करना है, उन्हें co-initial sense में arrange करें ताकि वो parallelogram की adjacent sides represent करें।</p>
+  <p class="hindi">Step②: अब उनके बीच का diagonal resultant vector देगा।</p>
+  <div class="pagenum">24</div>
+</div>
+
+<!-- ===================== LEC 19 ===================== -->
+<div class="page" id="lec19">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 19</span>
+  <h4 class="sub"># Polygon Law — used to add multiple vectors</h4>
+  <svg class="diagram" width="220" height="180" viewBox="0 0 220 180">
+    <polygon points="30,150 120,160 190,110 150,40 60,50" fill="none" stroke="#1a3fa0" stroke-width="2"/>
+    <line x1="30" y1="150" x2="190" y2="110" stroke="#c21e7a" stroke-dasharray="3,2"/>
+    <line x1="30" y1="150" x2="150" y2="40" stroke="#c21e7a" stroke-dasharray="3,2"/>
+  </svg>
+  <p class="formula blue"><span class="vec">P</span> = <span class="vec">A</span>+<span class="vec">B</span> &nbsp; <span class="vec">Q</span> = <span class="vec">P</span>+<span class="vec">C</span> &nbsp; <span class="vec">R</span> = <span class="vec">Q</span>+<span class="vec">D</span> &nbsp; ⟹ <span class="vec">R</span> = <span class="vec">A</span>+<span class="vec">B</span>+<span class="vec">C</span>+<span class="vec">D</span></p>
+
+  <hr class="divider">
+  <h3 class="topic hlyellow">Resolution of vectors</h3>
+  <p class="hindi">किसी भी vector को 'n' number independent vectors में split/resolve कर सकते हैं जिनके sum से parent vector वापस मिले: <span class="vec">F</span> = <span class="vec">f₁</span>+<span class="vec">f₂</span>+...<span class="vec">fₙ</span></p>
+  <p class="black">A trigonometry method of resolution: splitting a vector into two vectors which are perpendicular to each other (rectangular resolution).</p>
+  <p class="formula blue"><span class="vec">F</span> = Fsinθ <span class="uv">j</span> + Fcosθ <span class="uv">i</span></p>
+  <p class="formula blue"><span class="vec">OA</span> = <span class="vec">F</span>ₓ = component of F along x-axis; <span class="vec">AB</span> = <span class="vec">F</span>ᵧ = component of F along y-axis</p>
+  <p class="formula blue">sinθ = AB/OB = Fᵧ/F ⟹ Fᵧ = Fsinθ &nbsp;&nbsp; cosθ = OA/OB = Fₓ/F ⟹ Fₓ = Fcosθ</p>
+
+  <h4 class="sub">Examples</h4>
+  <p class="formula blue"><span class="vec">F</span> = Fsinα <span class="uv">i</span> + Fcosα <span class="uv">j</span></p>
+  <p class="black">Inclined plane, mass m on incline θ: mg cosθ → perpendicular resolution to surface, responsible for making contact with surface; mg sinθ → resolution along incline plane, responsible for downward pull on mass along the incline plane.</p>
+  <div class="pagenum">25</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h4 class="sub">To find resultant of vectors (<span class="vec">A</span> + <span class="vec">B</span>)</h4>
+  <p class="black">Using pythagoras theorem on the parallelogram/triangle formed by <span class="vec">A</span>, Bcosθ, Bsinθ:</p>
+  <p class="formula blue">|<span class="vec">R</span>| = √[(A+Bcosθ)² + (Bsinθ)²] = √[A²+2ABcosθ+B²cos²θ+B²sin²θ] = √[A²+2ABcosθ+B²]</p>
+  <h4 class="sub">Direction of <span class="vec">R</span></h4>
+  <p class="formula blue">tanα = Bsinθ/(A+Bcosθ) &nbsp;⟹&nbsp; α = tan⁻¹[Bsinθ/(A+Bcosθ)]</p>
+  <p class="black">if θ=0: <span class="vec">R</span>=A+B, α=0 (resultant max)</p>
+  <p class="black">if θ=180°: <span class="vec">R</span>=A−B, α=0 (resultant min)</p>
+  <p class="black">if θ=90°: <span class="vec">R</span>=√(A²+B²), α = B/A (direction angle)</p>
+  <div class="pagenum">26</div>
+</div>
+
+<!-- ===================== LEC 20 ===================== -->
+<div class="page" id="lec20">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 20</span>
+  <h4 class="sub">If θ=120° &amp; |F₁|=|F₂|=F</h4>
+  <p class="formula blue">|<span class="vec">R</span>| = √[F₁²+F₂²+2F₁F₂×(−1/2)] = √[2F²−F²] = F √3·F₁ = F</p>
+  <p class="formula blue">⟹ |<span class="vec">R</span>| = F, α = 60°</p>
+  <p class="formula blue">α: tan(Fsin120)/(F+Fcos120) = [(√3/2)F] / [F(1−1/2)] = √3 ⟹ α = tan⁻¹(√3) = 60°</p>
+  <p class="note-callout">अगर 2 vector equal in magnitude हैं तो उनका resultant exactly बीच में half angle पर होगा, लेकिन जरूरी नहीं magnitude half हो।</p>
+
+  <h4 class="sub">Subtraction of vectors</h4>
+  <p class="formula blue"><span class="vec">P</span> = <span class="vec">A</span>−<span class="vec">B</span> = <span class="vec">A</span>+<span class="vec">C</span> &nbsp;(where <span class="vec">C</span> = −<span class="vec">B</span>, new vector)</p>
+  <p class="formula blue"><span class="vec">P</span> = √[A²+B²+2ABcos(π−θ)] = √[A²+B²+(−2ABcosθ)] = √[A²+B²−2ABcosθ]</p>
+  <p class="formula blue">tanα = Bsinθ/(A−Bcosθ)</p>
+  <p class="note-callout">Subtraction में बस θ → 180−θ को replace कर देते हैं (compared to addition formula)।</p>
+  <div class="pagenum">27</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h4 class="sub">Example 1</h4>
+  <p class="black">v₁ = 10 m/s east (initial); v₂ = 10 m/s, 30° N of E (final). Find ΔV = <span class="vec">v₂</span>−<span class="vec">v₁</span>.</p>
+  <p class="formula blue">|ΔV| = √[(10)²+(10)²−2(100)×(√3/2)] = √[200−100√3] = 10√(2−√3) = 10×0.27 = <b>2.7 m/s</b></p>
+  <p class="formula blue">tanα = (10×1/2)/(10−10×√3/2) = 5/(10−5√3) = 1/(2−√3) = 1/2−1/√3(...)</p>
+  <p class="black">direction: tail-to-tail form → <b>2.7 m/s, 15° W of N</b></p>
+
+  <h4 class="sub">Example 2</h4>
+  <p class="black">v₁ = u = 10 m/s along east; v = 10 m/s, 30°W of N. Find ΔV = <span class="vec">v</span> − <span class="vec">u</span>.</p>
+  <p class="formula blue">|<span class="vec">v</span>−<span class="vec">u</span>| = √[v²+u²−2vu cos60°] = √[200−200×½] = √100 = <b>10</b></p>
+  <p class="black"><b>Ans ⟹ 10 m/s, 30° N of W</b></p>
+
+  <p class="black">Addition &amp; Subtraction shown in a single diagram: <span class="vec">R</span> = <span class="vec">A</span>+<span class="vec">B</span> (one diagonal), <span class="vec">P</span> = <span class="vec">A</span>−<span class="vec">B</span> (other diagonal) of the parallelogram formed by <span class="vec">A</span>, <span class="vec">B</span>, −<span class="vec">B</span>.</p>
+
+  <hr class="divider">
+  <p class="black">Q) Two vectors <span class="vec">A</span> and <span class="vec">B</span>: if |<span class="vec">A</span>+<span class="vec">B</span>| = 2|<span class="vec">A</span>−<span class="vec">B</span>| &amp; |<span class="vec">A</span>|=|<span class="vec">B</span>|, find angle between <span class="vec">A</span> and <span class="vec">B</span>.</p>
+  <p class="formula blue">√[A²+B²+2ABcosθ] = 2√[A²+B²−2ABcosθ]</p>
+  <p class="formula blue">A²+B²+2ABcosθ = 4(A²+B²−2ABcosθ)</p>
+  <p class="formula blue">(A²+B²+2ABcosθ)/(A²+B²−2ABcosθ) = 4</p>
+  <div class="pagenum">28</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <p class="formula blue">⟹ 2(A²+B²)/(4ABcosθ) = 5/3 ⟹ (A²+B²)/(2ABcosθ) = 5/3</p>
+  <p class="black">Let |<span class="vec">A</span>|=|<span class="vec">B</span>|=x: 2x²/(2x²cosθ) = 5/3 ⟹ 3 = 5cosθ ⟹ cosθ = 3/5 ⟹ θ = cos⁻¹(3/5) ⟹ <b>θ = 53°</b></p>
+
+  <hr class="divider" id="cartesian">
+  <h3 class="topic hlyellow">Cartesian form of vectors</h3>
+  <p class="black"><span class="uv">i</span> — unit vector along x-axis, <span class="uv">j</span> — unit vector along y-axis, <span class="uv">k</span> — unit vector along z-axis</p>
+  <p class="black">Example: 10m along x-axis: 10<span class="uv">i</span> m, then 5m along y-axis: 5<span class="uv">j</span> m. Net displacement <span class="vec">S</span> = <span class="vec">S</span>₁+<span class="vec">S</span>₂ = (10<span class="uv">i</span> + 5<span class="uv">j</span>) m</p>
+  <p class="formula blue"><span class="vec">OP</span> = a<span class="uv">i</span> + b<span class="uv">j</span> &nbsp;(2D) &nbsp;&nbsp; <span class="vec">OP</span> = a<span class="uv">i</span> + b<span class="uv">j</span> + c<span class="uv">k</span> &nbsp;(3D, P=(a,b,c))</p>
+  <p class="black">x component of OP = a; y component = b; z component = c</p>
+
+  <p class="black">Example: Force <span class="vec">F</span> = (2<span class="uv">i</span>+3<span class="uv">j</span>+1<span class="uv">k</span>) N</p>
+  <h4 class="sub">Magnitude and direction of Cartesian form of vector</h4>
+  <p class="formula blue"><span class="vec">A</span> = a₁<span class="uv">i</span> + a₂<span class="uv">j</span> + a₃<span class="uv">k</span> &nbsp;&nbsp; |<span class="vec">A</span>| = √(a₁²+a₂²+a₃²) → magnitude of <span class="vec">A</span></p>
+  <p class="formula blue"><span class="vec">A</span> = |<span class="vec">A</span>|·<span class="uv">A</span> &nbsp;⟹&nbsp; <span class="uv">A</span> = <span class="vec">A</span>/|<span class="vec">A</span>| → unit vector along/direction of <span class="vec">A</span></p>
+
+  <p class="black">Example: If <span class="vec">F</span> = 3<span class="uv">i</span>+2<span class="uv">j</span>+4<span class="uv">k</span>, find magnitude &amp; direction of <span class="vec">F</span>.</p>
+  <p class="formula blue">|<span class="vec">F</span>| = √(9+4+16) = √29 &nbsp;&nbsp; <span class="uv">F</span> = (3<span class="uv">i</span>+2<span class="uv">j</span>+4<span class="uv">k</span>)/√29</p>
+
+  <h4 class="sub">Addition &amp; Subtraction in Cartesian form</h4>
+  <p class="formula blue"><span class="vec">A</span> = a₁<span class="uv">i</span>+a₂<span class="uv">j</span>+a₃<span class="uv">k</span> &nbsp;&nbsp; <span class="vec">B</span> = b₁<span class="uv">i</span>+b₂<span class="uv">j</span>+b₃<span class="uv">k</span></p>
+  <p class="formula blue"><span class="vec">A</span>+<span class="vec">B</span> = (a₁+b₁)<span class="uv">i</span> + (a₂+b₂)<span class="uv">j</span> + (a₃+b₃)<span class="uv">k</span></p>
+  <p class="formula blue"><span class="vec">A</span>−<span class="vec">B</span> = (a₁−b₁)<span class="uv">i</span> + (a₂−b₂)<span class="uv">j</span> + (a₃−b₃)<span class="uv">k</span></p>
+  <div class="pagenum">29</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <p class="black">Example: <span class="vec">S₁</span> = 2<span class="uv">i</span>+<span class="uv">j</span>−3<span class="uv">k</span>; <span class="vec">S₂</span> = <span class="uv">i</span>+3<span class="uv">j</span>+5<span class="uv">k</span>; <span class="vec">S₃</span> = 3<span class="uv">i</span>+<span class="uv">j</span>−<span class="uv">k</span>. Find <span class="vec">S</span> = <span class="vec">S₁</span>+<span class="vec">S₂</span>+<span class="vec">S₃</span></p>
+  <p class="formula blue"><span class="vec">S</span> = 6<span class="uv">i</span>+5<span class="uv">j</span>+<span class="uv">k</span> &nbsp;&nbsp; |<span class="vec">S</span>| = √(36+25+1) = √62</p>
+
+  <h3 class="topic hlblue">Multiplication of vectors</h3>
+  <ol class="black"><li>Scalar Multiple</li><li>Dot product / Scalar Product</li><li>Cross product / Vector product</li></ol>
+
+  <h4 class="sub">① Scalar multiple (Scaling of vectors)</h4>
+  <p class="black">2×<span class="vec">A</span>, 0.5×<span class="vec">A</span> — only magnitude changes, direction should remain same.</p>
+  <p class="formula blue"><span class="vec">B</span> = k<span class="vec">A</span> (k = number) &nbsp;&nbsp; <span class="uv">B</span> = <span class="uv">A</span></p>
+
+  <h4 class="sub">② Scalar Product / Dot Product</h4>
+  <p class="formula blue"><span class="vec">A</span>·<span class="vec">B</span> ≡ <span class="vec">A</span> dot <span class="vec">B</span> = |<span class="vec">A</span>||<span class="vec">B</span>| cosθ</p>
+  <p class="formula blue">cosθ = <span class="vec">A</span>·<span class="vec">B</span> / (|<span class="vec">A</span>||<span class="vec">B</span>|)</p>
+  <p class="black">The dot product of two vectors <span class="vec">A</span> &amp; <span class="vec">B</span> is defined as the product of magnitude of both the vectors and cosine of angle between them.</p>
+  <p class="formula blue">A(Bcosθ) = ABcosθ &nbsp;(projection form, either way)</p>
+  <div class="pagenum">30</div>
+</div>
+
+<!-- ===================== LEC 21 ===================== -->
+<div class="page" id="lec21">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 21</span>
+  <p class="formula blue"><span class="vec">A</span>∧<span class="vec">B</span> = 0° &nbsp;⟹&nbsp; <span class="vec">A</span>·<span class="vec">B</span> = ABcos0° = <b>AB</b></p>
+  <p class="formula blue"><span class="vec">A</span>∧<span class="vec">B</span> = 180° &nbsp;⟹&nbsp; <span class="vec">A</span>·<span class="vec">B</span> = ABcos180° = <b>−AB</b></p>
+  <p class="formula blue"><span class="vec">A</span>∧<span class="vec">B</span> = 90° &nbsp;⟹&nbsp; <span class="vec">A</span>·<span class="vec">B</span> = ABcos90° = <b>0</b></p>
+  <p class="formula blue">Dot product of a vector with itself: <span class="vec">A</span>·<span class="vec">A</span> = |A||A|cos0° = A²</p>
+  <p class="formula blue"><span class="uv">i</span>·<span class="uv">j</span> = <span class="uv">j</span>·<span class="uv">k</span> = <span class="uv">i</span>·<span class="uv">k</span> = 0 &nbsp;(since <span class="uv">i</span>⊥<span class="uv">j</span>⊥<span class="uv">k</span>) &nbsp;&nbsp; <span class="uv">i</span>·<span class="uv">i</span> = 1 = <span class="uv">k</span>·<span class="uv">k</span> = <span class="uv">j</span>·<span class="uv">j</span></p>
+
+  <p class="black">Applications of dot product ⟹ Calculation of workdone (W = <span class="vec">F</span>·<span class="vec">d</span>)</p>
+
+  <h4 class="sub">Dot product in Cartesian form</h4>
+  <p class="formula blue"><span class="vec">A</span> = a₁<span class="uv">i</span>+a₂<span class="uv">j</span>+a₃<span class="uv">k</span> &nbsp;&nbsp; <span class="vec">B</span> = b₁<span class="uv">i</span>+b₂<span class="uv">j</span>+b₃<span class="uv">k</span></p>
+  <p class="formula blue"><span class="vec">A</span>·<span class="vec">B</span> = a₁b₁ + a₂b₂ + a₃b₃ = <span class="vec">B</span>·<span class="vec">A</span></p>
+
+  <p class="note-callout">Note: If <span class="vec">A</span>∥<span class="vec">B</span> ⟹ a₁/b₁ = a₂/b₂ = a₃/b₃ = m (constant)<br>If <span class="vec">A</span>⊥<span class="vec">B</span> ⟹ a₁b₁ + a₂b₂ + a₃b₃ = 0</p>
+
+  <p class="black">Example: <span class="vec">A</span> = 2<span class="uv">i</span>+<span class="uv">j</span>+<span class="uv">k</span>, <span class="vec">B</span> = m<span class="uv">i</span>+6<span class="uv">j</span>+2<span class="uv">k</span>. Find m if (a) <span class="vec">A</span>∥<span class="vec">B</span> (b) <span class="vec">A</span>⊥<span class="vec">B</span></p>
+  <p class="formula blue">(a) <span class="vec">A</span>∥<span class="vec">B</span> ⟹ 2/m = 1/6 ⟹ <b>m=12</b></p>
+  <p class="formula blue">(b) <span class="vec">A</span>⊥<span class="vec">B</span> ⟹ 2m+6+2=0 ⟹ 2m=−8 ⟹ <b>m=−4</b></p>
+  <p class="black">Dot product is distributive: <span class="vec">A</span>·(<span class="vec">B</span>+<span class="vec">C</span>−<span class="vec">D</span>) = <span class="vec">A</span>·<span class="vec">B</span> + <span class="vec">A</span>·<span class="vec">C</span> − <span class="vec">A</span>·<span class="vec">D</span></p>
+
+  <h4 class="sub">Projection of a vector</h4>
+  <p class="formula blue">Projection of <span class="vec">B</span> on <span class="vec">A</span> = Bcosθ = B(<span class="vec">A</span>·<span class="vec">B</span>/|A||B|) = <span class="uv">B</span>·<span class="vec">A</span> ...(component form: B(<span class="vec">A</span>·<span class="uv">B</span>))</p>
+  <p class="formula blue">Projection of <span class="vec">A</span> on <span class="vec">B</span> = Acosθ = A(<span class="vec">A</span>·<span class="vec">B</span>/|A||B|) = <span class="uv">A</span>·<span class="vec">B</span></p>
+  <p class="black">Example: <span class="vec">F</span>=<span class="uv">i</span>+2<span class="uv">j</span>+<span class="uv">k</span>, <span class="vec">S</span>=<span class="uv">i</span>+<span class="uv">j</span>+<span class="uv">k</span>. Find component of <span class="vec">F</span> along <span class="vec">S</span>:</p>
+  <p class="formula blue"><span class="vec">F</span>·<span class="uv">S</span> = (<span class="uv">i</span>+2<span class="uv">j</span>+<span class="uv">k</span>)·(<span class="uv">i</span>+<span class="uv">j</span>+<span class="uv">k</span>)/√3 = (1+2+1)/√3 = 4/√3</p>
+  <div class="pagenum">31</div>
+</div>
+
+<!-- ===================== LEC 22 ===================== -->
+<div class="page" id="lec22">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <span class="lec-tag">Lec – 22</span>
+  <h3 class="topic hlblue">③ Cross Product / Vector Product</h3>
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">B</span> = |<span class="vec">A</span>||<span class="vec">B</span>| sinθ (<span class="uv">n</span>) &nbsp;&nbsp; <span class="uv">n</span> = unit normal vector, ⊥ to both <span class="vec">A</span> and <span class="vec">B</span></p>
+  <p class="black">Direction: using right-hand thumb rule. सीधे हाथ की 4 fingers को <span class="vec">A</span> से <span class="vec">B</span> की ओर मोड़ें (<span class="vec">A</span>×<span class="vec">B</span> में <span class="vec">A</span> से <span class="vec">B</span> की तरफ़ चलें) — right hand की fold direction se thumb की direction milegi.</p>
+
+  <div class="box">
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">B</span> ≠ <span class="vec">B</span>×<span class="vec">A</span> &nbsp;&nbsp; |<span class="vec">A</span>×<span class="vec">B</span>| = |<span class="vec">B</span>×<span class="vec">A</span>| &nbsp;&nbsp; <span class="vec">A</span>×<span class="vec">B</span> = −(<span class="vec">B</span>×<span class="vec">A</span>)</p>
+  </div>
+  <p class="black">The cross product of <span class="vec">A</span> &amp; <span class="vec">B</span> is defined as the product of magnitude of both the vectors and sine of angle between them, with direction perpendicular to the plane containing <span class="vec">A</span> and <span class="vec">B</span> (as per right hand screw rule).</p>
+
+  <p class="formula blue"><span class="vec">A</span>∥<span class="vec">B</span> &amp; <span class="vec">A</span>∧<span class="vec">B</span>=0° ⟹ <span class="vec">A</span>×<span class="vec">B</span> = 0</p>
+  <p class="formula blue"><span class="vec">A</span> antiparallel to <span class="vec">B</span>, <span class="vec">A</span>∧<span class="vec">B</span>=180° ⟹ <span class="vec">A</span>×<span class="vec">B</span> = 0</p>
+  <p class="formula blue"><span class="vec">A</span>⊥<span class="vec">B</span> &amp; <span class="vec">A</span>∧<span class="vec">B</span>=90° ⟹ <span class="vec">A</span>×<span class="vec">B</span> = AB <span class="uv">n</span> → Max at 90°</p>
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">A</span> = 0</p>
+
+  <p class="formula blue"><span class="uv">i</span>×<span class="uv">i</span> = 0 = <span class="uv">j</span>×<span class="uv">j</span> = <span class="uv">k</span>×<span class="uv">k</span> &nbsp;&nbsp; <span class="uv">i</span>×<span class="uv">j</span>=<span class="uv">k</span>, <span class="uv">j</span>×<span class="uv">k</span>=<span class="uv">i</span>, <span class="uv">k</span>×<span class="uv">i</span>=<span class="uv">j</span> &nbsp;&nbsp; <span class="uv">j</span>×<span class="uv">i</span>=−<span class="uv">k</span>, <span class="uv">k</span>×<span class="uv">j</span>=−<span class="uv">i</span>, <span class="uv">i</span>×<span class="uv">k</span>=−<span class="uv">j</span></p>
+  <p class="black">Trick: <span class="uv">i</span> <span class="uv">j</span> <span class="uv">k</span> <span class="uv">i</span> <span class="uv">j</span> (write in cycle) — forward direction (+ve), backward (−ve).</p>
+
+  <h4 class="sub">Cross Product in Cartesian form</h4>
+  <p class="formula blue"><span class="vec">A</span> = a₁<span class="uv">i</span>+b₁<span class="uv">j</span>+c₁<span class="uv">k</span> &nbsp;&nbsp; <span class="vec">B</span> = a₂<span class="uv">i</span>+b₂<span class="uv">j</span>+c₂<span class="uv">k</span></p>
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">B</span> = (b₁c₂−c₁b₂)<span class="uv">i</span> − (a₁c₂−a₂c₁)<span class="uv">j</span> + (a₁b₂−a₂b₁)<span class="uv">k</span> &nbsp;(determinant expansion)</p>
+
+  <p class="black">Example: <span class="vec">A</span>=<span class="uv">i</span>+2<span class="uv">j</span>−<span class="uv">k</span>, <span class="vec">B</span>=2<span class="uv">i</span>+<span class="uv">k</span>. Find <span class="vec">A</span>×<span class="vec">B</span>:</p>
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">B</span> = (2+0)<span class="uv">i</span> + (1+2)(−<span class="uv">j</span>) + (0−4)<span class="uv">k</span> = 2<span class="uv">i</span>−3<span class="uv">j</span>−4<span class="uv">k</span> &nbsp;(let this = <span class="vec">C</span>; note <span class="vec">C</span>⊥<span class="vec">A</span> and <span class="vec">C</span>⊥<span class="vec">B</span>)</p>
+  <div class="pagenum">32</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h4 class="sub">Physical meaning of Cross Product</h4>
+  <p class="formula blue"><span class="vec">A</span>×<span class="vec">B</span> = AB sinθ = (Base)(height) = <b>Area of parallelogram</b></p>
+
+  <h4 class="sub">If <span class="vec">A</span>, <span class="vec">B</span>, <span class="vec">C</span> are coplanar vectors</h4>
+  <p class="formula blue">(<span class="vec">A</span>×<span class="vec">B</span>) ⊥ <span class="vec">C</span> ⟹ (<span class="vec">A</span>×<span class="vec">B</span>)·<span class="vec">C</span> = 0 &nbsp;(vector triple product = 0 for coplanar vectors)</p>
+
+  <h4 class="sub">If <span class="vec">A</span>, <span class="vec">B</span>, <span class="vec">C</span> are non-coplanar vectors</h4>
+  <p class="black">They form a "Parallelopiped": (<span class="vec">A</span>×<span class="vec">B</span>)·<span class="vec">C</span> = <b>Volume of parallelopiped</b></p>
+  <p class="black">Application of cross product ⟹ Calculation of Torque (<span class="vec">τ</span> = <span class="vec">r</span>×<span class="vec">F</span>) — very useful in study of rotational dynamics.</p>
+
+  <hr class="divider">
+  <h4 class="sub">Q) If |<span class="vec">A</span>×<span class="vec">B</span>| = |<span class="vec">A</span>·<span class="vec">B</span>|, find θ</h4>
+  <p class="formula blue">ABsinθ = ABcosθ ⟹ tanθ = 1 ⟹ θ = tan⁻¹(1) ⟹ <b>θ = 45°</b></p>
+
+  <h3 class="topic hlyellow">Direction Cosine</h3>
+  <svg class="diagram" width="160" height="150" viewBox="0 0 160 150">
+    <line x1="80" y1="140" x2="80" y2="10" stroke="#999"/>
+    <line x1="10" y1="100" x2="150" y2="100" stroke="#999"/>
+    <line x1="80" y1="100" x2="40" y2="130" stroke="#999"/>
+    <line x1="80" y1="100" x2="140" y2="50" stroke="#1a3fa0" stroke-width="2"/>
+    <text x="145" y="48" font-size="12">P</text>
+  </svg>
+  <p class="formula blue"><span class="vec">OP</span>∧<span class="uv">i</span> = α &nbsp;&nbsp; <span class="vec">OP</span>∧<span class="uv">j</span> = β &nbsp;&nbsp; <span class="vec">OP</span>∧<span class="uv">k</span> = γ</p>
+  <div class="box"><p class="formula blue">cos²α + cos²β + cos²γ = 1</p></div>
+
+  <h4 class="sub">Proof</h4>
+  <p class="black"><span class="vec">OP</span> = x<span class="uv">i</span>+y<span class="uv">j</span>+z<span class="uv">k</span>, |<span class="vec">OP</span>| = √(x²+y²+z²)</p>
+  <p class="formula blue">cos²α+cos²β+cos²γ = OA²/OP² + OB²/OP² + OC²/OP² = (x²+y²+z²)/(x²+y²+z²) = <b>1</b></p>
+  <div class="pagenum">33</div>
+</div>
+
+<div class="page">
+<div class="brandbar"><img src="assets/images/logo-full.webp" loading="lazy" alt="AyuVerse logo"></div>
+
+  <h3 class="topic hlblue">Theorem of Change of Vector</h3>
+  <p class="black">(Continuing direction-cosine geometry — relates the components of a position vector <span class="vec">OP</span> along the box edges, using the same setup: <span class="vec">OP</span>∧<span class="uv">i</span>=α, <span class="vec">OP</span>∧<span class="uv">j</span>=β, <span class="vec">OP</span>∧<span class="uv">k</span>=γ)</p>
+  <p class="formula blue">|<span class="vec">OP</span>| = √(x²+y²+z²)</p>
+  <p class="formula blue">cos²α+cos²β+cos²γ = OA²/OP² + OB²/OP² + OC²/OP² = 1</p>
+  <p class="note-callout">(This final page continues the 3D box diagram proving direction cosines sum to 1, consistent with the previous page — end of notes.)</p>
+  <div class="pagenum">34</div>
+</div>
+
+<a href="#top" class="backtotop">↑ Top / Index</a>
+<a href="basic-maths-and-vectors.pdf" download class="rawpdfbtn">⬇ Raw PDF</a>
+<button class="pdfbtn" onclick="window.print()">⬇ Download as PDF</button>
+<script>
+  function toggleAyuTheme(){
+    var html = document.documentElement;
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    if(isDark){ html.removeAttribute('data-theme'); }
+    else{ html.setAttribute('data-theme','dark'); }
+    try{ localStorage.setItem('ayuverse-theme', isDark ? 'light' : 'dark'); }catch(e){}
+    document.getElementById('themeToggleBtn').textContent = isDark ? '🌓 Theme' : '☀️ Theme';
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.getElementById('themeToggleBtn').textContent = isDark ? '☀️ Theme' : '🌓 Theme';
+  });
+</script>
+</body>
+</html>
