@@ -788,3 +788,170 @@ p { margin: 0; }
   }
   .ticker { overflow-x: auto; }
 }
+
+/* ==========================================================
+   Periodic Table
+========================================================== */
+.pt-hub { padding-top: 2.5rem; }
+
+.pt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.6rem;
+}
+
+.pt-search {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex: 1 1 260px;
+  min-width: 220px;
+  padding: .7rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+.pt-search svg { width: 18px; height: 18px; color: var(--text-tertiary); flex-shrink: 0; }
+.pt-search input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: .95rem;
+}
+.pt-search input::placeholder { color: var(--text-tertiary); }
+
+.pt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.pt-legend__chip {
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: .4rem .75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color .2s var(--ease), color .2s var(--ease), transform .2s var(--ease);
+}
+.pt-legend__chip:hover { transform: translateY(-1px); color: var(--text-primary); }
+.pt-legend__chip.is-active { color: var(--text-primary); border-color: var(--border-strong); background: var(--bg-surface-3); }
+.pt-legend__chip::before {
+  content: "";
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: .45rem;
+  vertical-align: middle;
+  background: var(--pt-color);
+}
+
+/* Category colours, shared by legend chips and grid cells */
+.pt-legend__chip--alkali-metal, .pt-cell--alkali-metal { --pt-color: #ff6b6b; }
+.pt-legend__chip--alkaline-earth-metal, .pt-cell--alkaline-earth-metal { --pt-color: #ffa94d; }
+.pt-legend__chip--transition-metal, .pt-cell--transition-metal { --pt-color: #ffd43b; }
+.pt-legend__chip--post-transition-metal, .pt-cell--post-transition-metal { --pt-color: #94d82d; }
+.pt-legend__chip--metalloid, .pt-cell--metalloid { --pt-color: #20c997; }
+.pt-legend__chip--nonmetal, .pt-cell--nonmetal { --pt-color: #00c3fa; }
+.pt-legend__chip--halogen, .pt-cell--halogen { --pt-color: #4b9bff; }
+.pt-legend__chip--noble-gas, .pt-cell--noble-gas { --pt-color: #845ef7; }
+.pt-legend__chip--lanthanide, .pt-cell--lanthanide { --pt-color: #f06595; }
+.pt-legend__chip--actinide, .pt-cell--actinide { --pt-color: #e64980; }
+
+.pt-scroll {
+  overflow-x: auto;
+  padding-bottom: .5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pt-grid {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(56px, 1fr));
+  grid-auto-rows: minmax(56px, auto);
+  gap: 4px;
+  min-width: 1080px;
+}
+
+.pt-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 2px;
+  border-radius: 8px;
+  border: 1px solid var(--pt-color, var(--border-soft));
+  background: color-mix(in srgb, var(--pt-color, var(--border-soft)) 14%, var(--bg-surface));
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: transform .15s var(--ease), opacity .2s var(--ease), box-shadow .15s var(--ease);
+}
+.pt-cell:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.pt-cell.is-dimmed { opacity: .18; }
+
+.pt-cell__z { font-size: .58rem; color: var(--text-tertiary); align-self: flex-start; margin-left: 2px; }
+.pt-cell__sym { font-family: var(--font-display); font-weight: 700; font-size: 1rem; line-height: 1; }
+.pt-cell__name { font-size: .5rem; color: var(--text-secondary); text-align: center; line-height: 1.1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pt-cell--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px dashed var(--border-soft);
+  color: var(--text-tertiary);
+  font-size: .68rem;
+  background: var(--bg-surface);
+}
+
+/* Element detail modal — extends the shared .notes-modal styles */
+.pt-modal__panel { max-width: 380px; }
+.pt-modal__head {
+  display: flex;
+  align-items: baseline;
+  gap: .8rem;
+  margin-bottom: .6rem;
+}
+.pt-modal__z { font-family: var(--font-mono); color: var(--text-tertiary); font-size: .9rem; }
+.pt-modal__sym {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.4rem;
+  line-height: 1;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.pt-modal__facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .9rem 1.2rem;
+  margin: 1.2rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+}
+.pt-modal__facts dt { font-size: .72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .2rem; }
+.pt-modal__facts dd { margin: 0; font-weight: 600; font-size: .95rem; }
+.pt-modal__config-label { font-size: .72rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; }
+.pt-modal__config { font-family: var(--font-mono); font-size: .95rem; color: var(--text-primary); word-break: break-word; }
+
+@media (max-width: 640px) {
+  .pt-toolbar { flex-direction: column; align-items: stretch; }
+  .pt-grid { grid-template-columns: repeat(18, minmax(46px, 1fr)); min-width: 900px; }
+  .pt-cell__name { display: none; }
+}
+
+/* Chemistry Coming Soon page — periodic table callout card */
+.chem-pt-callout { max-width: 420px; margin: 0 auto 1.75rem; text-align: left; }
