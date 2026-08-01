@@ -692,6 +692,90 @@ p { margin: 0; }
 @media (max-width: 980px) { .hub-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .hub-grid { grid-template-columns: 1fr; } .hub { padding: 3.5rem 0 4.5rem; } }
 
+/* Notes tile is a <button>; strip default button chrome so it matches the anchor tiles */
+.notes-launch {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+
+/* ==========================================================
+   Notes subject-picker modal
+========================================================== */
+.notes-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.notes-modal[hidden] { display: none; }
+
+.notes-modal__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 5, 12, .72);
+  backdrop-filter: blur(4px);
+}
+
+.notes-modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.8rem 1.8rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+  animation: notesModalIn .25s var(--ease);
+}
+@keyframes notesModalIn {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.notes-modal__panel h3 { font-size: 1.4rem; margin-bottom: .4rem; }
+.notes-modal__sub { color: var(--text-secondary); font-size: .92rem; margin-bottom: 1.4rem; }
+
+.notes-modal__close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-surface-3);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+.notes-modal__close:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.notes-modal__close svg { width: 16px; height: 16px; }
+
+.notes-modal__options { display: flex; flex-direction: column; gap: .7rem; }
+.notes-modal__option {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .9rem 1rem;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-weight: 600;
+  transition: border-color .2s var(--ease), transform .2s var(--ease), background .2s var(--ease);
+}
+.notes-modal__option:hover { border-color: var(--border-strong); transform: translateX(4px); background: var(--bg-surface-3); }
+.notes-modal__option img { width: 34px; height: 34px; object-fit: contain; }
+
 /* ==========================================================
    Reduced motion
 ========================================================== */
