@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chemistry — AyuVerse</title>
-<link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/chemistry.html" />
-  <meta name="description" content="Free JEE Advanced Chemistry preparation on AyuVerse — notes, PYQs, and practice tests." />
+  <title>Interactive Periodic Table — AyuVerse</title>
+<link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/periodic-table.html" />
+  <meta name="description"
+    content="A free, interactive periodic table for JEE Advanced Chemistry — all 118 elements with electron configuration, category, group, period and block, searchable and colour-coded." />
   <meta name="theme-color" content="#060814" />
 
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Interactive Periodic Table — AyuVerse" />
+  <meta property="og:description"
+    content="All 118 elements — searchable, colour-coded, with electron configuration and group/period/block details. Built for JEE Advanced Chemistry prep." />
+  <meta property="og:url" content="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/periodic-table.html" />
+  <meta property="og:image" content="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/assets/images/logo-full.webp" />
+
   <!-- Security headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
   <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
@@ -22,10 +32,13 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css?v=pt2" />
 </head>
+
 <body>
 <script src="js/pwa-splash.js"></script>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -62,9 +75,13 @@
         <ul class="nav__links">
           <li><a href="index.html#home">Home</a></li>
           <li class="nav__dropdown">
-            <button class="nav__dropdown-toggle" id="subjectsToggle" aria-expanded="false" aria-controls="subjectsPanel">
+            <button class="nav__dropdown-toggle" id="subjectsToggle" aria-expanded="false"
+              aria-controls="subjectsPanel">
               Subjects
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+                <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
             </button>
             <div class="nav__dropdown-panel" id="subjectsPanel">
               <a href="physics.html"><img src="assets/images/physics.webp" alt="" /><span>Physics</span></a>
@@ -82,26 +99,56 @@
     </nav>
   </header>
   <main id="main">
-    <section class="subject-hero">
+    <section class="hub pt-hub">
       <div class="container">
-        <p class="eyebrow" style="justify-content:center">Coming Soon</p>
-        <img class="subject-hero__art" src="assets/images/chemistry.webp" alt="Chemistry symbol" width="747" height="687" />
-        <h1>Chemistry <span class="text-gradient">hub</span></h1>
-        <p>Physical, organic, and inorganic chemistry — reactions and concepts explained so they actually stick. This page is where the full Chemistry notes, previous year papers, and practice tests will live — we're building it next.</p>
+        <div class="hub__head">
+          <p class="eyebrow">Chemistry · Reference</p>
+          <h1>Interactive <span class="text-gradient">periodic table</span></h1>
+          <p>All 118 elements, colour-coded by category. Search by name, symbol or atomic number, or tap any element
+            for its electron configuration, group, period and block.</p>
+        </div>
 
-        <a href="periodic-table.html" class="hub-card hub-card--live resource-tile chem-pt-callout">
-          <span class="hub-card__badge hub-card__badge--live">Live</span>
-          <div class="resource-tile__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+        <div class="pt-toolbar">
+          <div class="pt-search">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input type="text" id="ptSearch" placeholder="Search element or symbol… (e.g. Iron, Fe, 26)" aria-label="Search elements" />
           </div>
-          <h3>Interactive Periodic Table</h3>
-          <p>While the rest of Chemistry is being built, all 118 elements are ready to explore — searchable, colour-coded, with full electron configuration.</p>
-          <span class="hub-card__cta">Explore elements <span aria-hidden="true">→</span></span>
-        </a>
+          <div class="pt-legend" id="ptLegend" aria-label="Filter by category"></div>
+        </div>
 
-        <a href="index.html#subjects" class="btn btn--primary">Back to Subjects</a>
+        <div class="pt-scroll">
+          <div class="pt-grid" id="ptGrid"></div>
+        </div>
+
+        <div style="text-align:center;margin-top:3rem;">
+          <a href="chemistry.html" class="btn btn--ghost">← Back to Chemistry Hub</a>
+        </div>
       </div>
     </section>
+
+    <!-- Element detail modal -->
+    <div class="notes-modal pt-modal" id="ptModal" role="dialog" aria-modal="true" aria-labelledby="ptModalName" hidden>
+      <div class="notes-modal__scrim" id="ptModalScrim"></div>
+      <div class="notes-modal__panel pt-modal__panel">
+        <button type="button" class="notes-modal__close" id="ptModalClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="pt-modal__head">
+          <span class="pt-modal__z" id="ptModalZ"></span>
+          <span class="pt-modal__sym" id="ptModalSym"></span>
+        </div>
+        <h3 id="ptModalName"></h3>
+        <p class="notes-modal__sub" id="ptModalCat"></p>
+        <dl class="pt-modal__facts">
+          <div><dt>Atomic mass</dt><dd id="ptModalMass"></dd></div>
+          <div><dt>Group</dt><dd id="ptModalGroup"></dd></div>
+          <div><dt>Period</dt><dd id="ptModalPeriod"></dd></div>
+          <div><dt>Block</dt><dd id="ptModalBlock"></dd></div>
+        </dl>
+        <p class="pt-modal__config-label">Electron configuration</p>
+        <p class="pt-modal__config" id="ptModalConfig"></p>
+      </div>
+    </div>
   </main>
   <footer class="footer">
     <div class="container footer__inner">
@@ -142,30 +189,14 @@
       </div>
     </div>
     <div class="container footer__bottom">
-      <p>© 2026 AyuVerse. Free forever for JEE Advanced aspirants. · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></p>
+      <p>© 2026 AyuVerse. Free forever for JEE Advanced aspirants. · <a href="terms.html"
+          style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></p>
     </div>
   </footer>
 
-  <!-- Cookie Consent Banner -->
-  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite" hidden>
-    <div class="cookie-banner__inner">
-      <div class="cookie-banner__text">
-        <p class="cookie-banner__title">🍪 We use cookies</p>
-        <p>We use cookies to improve your experience. By clicking "Allow All", you also agree to receive browser notifications when new content is added.</p>
-      </div>
-      <div class="cookie-banner__actions">
-        <button class="btn btn--ghost btn--sm" id="cookieDeny">Decline</button>
-        <button class="btn btn--primary btn--sm" id="cookieAllow">Allow All</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast notification -->
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/></svg>
-    <span>Notifications Enabled! You will now be notified when new content is added to the website.</span>
-  </div>
-
   <script src="js/script.js?v=notes1"></script>
+  <script src="js/periodic-table-data.js"></script>
+  <script src="js/periodic-table.js"></script>
 </body>
+
 </html>
