@@ -2,6 +2,15 @@
    AyuVerse — Interactions
 ========================================================== */
 
+// ===== PWA: register service worker (enables install + offline) =====
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      /* fails silently on unsupported browsers / file:// */
+    });
+  });
+}
+
 // ===== Anti-cloning domain check (deterrent) =====
 (function () {
   const allowed = 'maurya-ayush02.github.io';
@@ -247,4 +256,38 @@
 
   resize();
   start();
+})();
+
+// ===== Notes subject-picker modal (homepage Resources section) =====
+(() => {
+  const launchBtn = document.getElementById('notesLaunchBtn');
+  const modal = document.getElementById('notesSubjectModal');
+  if (!launchBtn || !modal) return; // only present on index.html
+
+  const scrim = document.getElementById('notesModalScrim');
+  const closeBtn = document.getElementById('notesModalClose');
+  let lastFocused = null;
+
+  function openModal() {
+    lastFocused = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+    document.addEventListener('keydown', onKeydown);
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onKeydown);
+    if (lastFocused) lastFocused.focus();
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') closeModal();
+  }
+
+  launchBtn.addEventListener('click', openModal);
+  scrim.addEventListener('click', closeModal);
+  closeBtn.addEventListener('click', closeModal);
 })();
