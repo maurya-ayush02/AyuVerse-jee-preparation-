@@ -8,7 +8,7 @@
  * The cache is only a fallback for repeat visits and offline use.
  */
 
-const CACHE_NAME = "ayuverse-cache-v4";
+const CACHE_NAME = "ayuverse-cache-v6";
 
 // Core files precached on install so the app shell works offline.
 // Paths are relative to this file's own location, so this works
@@ -34,6 +34,7 @@ const PRECACHE_URLS = [
   "./js/physics-quiz.js",
   "./js/sw-register.js",
   "./js/pwa-splash.js",
+  "./js/pwa-update.js",
   "./js/periodic-table-data.js",
   "./js/periodic-table.js",
   "./site.webmanifest",

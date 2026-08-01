@@ -36,11 +36,12 @@
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=pt2" />
+  <link rel="stylesheet" href="css/style.css?v=pt3" />
 </head>
 
 <body>
 <script src="js/pwa-splash.js"></script>
+<script src="js/pwa-update.js"></script>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="ticker">
     <div class="ticker__track">
@@ -114,6 +115,10 @@
             <input type="text" id="ptSearch" placeholder="Search element or symbol… (e.g. Iron, Fe, 26)" aria-label="Search elements" />
           </div>
           <div class="pt-legend" id="ptLegend" aria-label="Filter by category"></div>
+        </div>
+        <div class="pt-toolbar pt-toolbar--block">
+          <span class="pt-toolbar__label">Block:</span>
+          <div class="pt-legend" id="ptBlockLegend" aria-label="Filter by block"></div>
         </div>
 
         <div class="pt-scroll">
