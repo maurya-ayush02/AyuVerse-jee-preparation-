@@ -257,3 +257,37 @@ if ("serviceWorker" in navigator) {
   resize();
   start();
 })();
+
+// ===== Notes subject-picker modal (homepage Resources section) =====
+(() => {
+  const launchBtn = document.getElementById('notesLaunchBtn');
+  const modal = document.getElementById('notesSubjectModal');
+  if (!launchBtn || !modal) return; // only present on index.html
+
+  const scrim = document.getElementById('notesModalScrim');
+  const closeBtn = document.getElementById('notesModalClose');
+  let lastFocused = null;
+
+  function openModal() {
+    lastFocused = document.activeElement;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+    document.addEventListener('keydown', onKeydown);
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onKeydown);
+    if (lastFocused) lastFocused.focus();
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') closeModal();
+  }
+
+  launchBtn.addEventListener('click', openModal);
+  scrim.addEventListener('click', closeModal);
+  closeBtn.addEventListener('click', closeModal);
+})();

@@ -166,13 +166,15 @@
         </div>
 
         <div class="resource-grid">
-          <div class="resource-tile">
+          <button type="button" class="hub-card hub-card--live resource-tile notes-launch" id="notesLaunchBtn" aria-haspopup="dialog" aria-controls="notesSubjectModal">
+            <span class="hub-card__badge hub-card__badge--live">Live</span>
             <div class="resource-tile__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M5 4a2 2 0 0 1 2-2h8l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 2v4a1 1 0 0 0 1 1h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 12h8M8 16h8M8 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
             <h3>Structured Notes</h3>
             <p>Concept-first notes for every chapter, written to build understanding, not just cover the syllabus.</p>
-          </div>
+            <span class="hub-card__cta">Choose a subject <span aria-hidden="true">→</span></span>
+          </button>
 
         <a class="hub-card hub-card--live resource-tile" href="jee-advanced-pyq-archive.html">
             <span class="hub-card__badge hub-card__badge--live">Live</span>
@@ -202,6 +204,33 @@
         </div>
       </div>
     </section>
+
+    <!-- Notes subject-picker modal -->
+    <div class="notes-modal" id="notesSubjectModal" role="dialog" aria-modal="true" aria-labelledby="notesModalTitle" hidden>
+      <div class="notes-modal__scrim" id="notesModalScrim"></div>
+      <div class="notes-modal__panel">
+        <button type="button" class="notes-modal__close" id="notesModalClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <p class="eyebrow">Structured Notes</p>
+        <h3 id="notesModalTitle">Select a subject</h3>
+        <p class="notes-modal__sub">Pick a subject to jump straight to its notes.</p>
+        <div class="notes-modal__options">
+          <a class="notes-modal__option" href="physics-notes.html">
+            <img src="assets/images/physics.webp" alt="" />
+            <span>Physics</span>
+          </a>
+          <a class="notes-modal__option" href="chemistry.html#main">
+            <img src="assets/images/chemistry.webp" alt="" />
+            <span>Chemistry</span>
+          </a>
+          <a class="notes-modal__option" href="maths.html#main">
+            <img src="assets/images/maths.webp" alt="" />
+            <span>Mathematics</span>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <!-- About -->
     <section class="about" id="about">
