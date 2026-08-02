@@ -30,7 +30,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=pt3" />
+  <link rel="stylesheet" href="css/style.css?v=pt4" />
 </head>
 <body>
 <script src="js/pwa-splash.js"></script>
@@ -187,15 +187,15 @@
             <span class="hub-card__cta">Browse papers <span aria-hidden="true">→</span></span>
         </a>
 
-        <a class="hub-card hub-card--live resource-tile" href="periodic-table.html">
+        <button type="button" class="hub-card hub-card--live resource-tile notes-launch" id="toolsLaunchBtn" aria-haspopup="dialog" aria-controls="toolsPickerModal">
             <span class="hub-card__badge hub-card__badge--live">Live</span>
             <div class="resource-tile__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
             </div>
-            <h3>Periodic Table</h3>
-            <p>All 118 elements — searchable and colour-coded, with electron configuration, group, period and block on tap.</p>
-            <span class="hub-card__cta">Explore elements <span aria-hidden="true">→</span></span>
-        </a>
+            <h3>Tools</h3>
+            <p>Periodic table, scientific calculator, and more utilities built right into the site — no app download needed.</p>
+            <span class="hub-card__cta">Open tools <span aria-hidden="true">→</span></span>
+        </button>
        
           <div class="resource-tile">
             <div class="resource-tile__icon" aria-hidden="true">
@@ -238,6 +238,29 @@
           <a class="notes-modal__option" href="maths.html#main">
             <img src="assets/images/maths.webp" alt="" />
             <span>Mathematics</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tools picker modal -->
+    <div class="notes-modal" id="toolsPickerModal" role="dialog" aria-modal="true" aria-labelledby="toolsModalTitle" hidden>
+      <div class="notes-modal__scrim" id="toolsModalScrim"></div>
+      <div class="notes-modal__panel">
+        <button type="button" class="notes-modal__close" id="toolsModalClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <p class="eyebrow">Tools</p>
+        <h3 id="toolsModalTitle">Choose a tool</h3>
+        <p class="notes-modal__sub">Free utilities built right into the site — more are on the way.</p>
+        <div class="notes-modal__options">
+          <a class="notes-modal__option" href="periodic-table.html">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>Periodic Table</span>
+          </a>
+          <a class="notes-modal__option" href="calculator.html">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 11h2M11 11h2M15 11h2M7 15h2M11 15h2M15 15h2M7 19h2M11 19h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Scientific Calculator</span>
           </a>
         </div>
       </div>
@@ -358,6 +381,6 @@
     <span>Notifications Enabled! You will now be notified when new content is added to the website.</span>
   </div>
 
-  <script src="js/script.js?v=notes1"></script>
+  <script src="js/script.js?v=tools1"></script>
 </body>
 </html>

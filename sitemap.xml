@@ -46,6 +46,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/calculator.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/jee-advanced-pyq-archive.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

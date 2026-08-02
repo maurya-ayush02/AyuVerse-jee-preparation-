@@ -4,17 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactive Periodic Table — AyuVerse</title>
-<link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/periodic-table.html" />
+  <title>Scientific Calculator — AyuVerse</title>
+<link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/calculator.html" />
   <meta name="description"
-    content="A free, interactive periodic table for JEE Advanced Chemistry — all 118 elements with electron configuration, category, group, period and block, searchable and colour-coded." />
+    content="A free scientific calculator for JEE Advanced prep — trigonometric, logarithmic and power functions, degree/radian modes, and calculation history." />
   <meta name="theme-color" content="#060814" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Interactive Periodic Table — AyuVerse" />
+  <meta property="og:title" content="Scientific Calculator — AyuVerse" />
   <meta property="og:description"
-    content="All 118 elements — searchable, colour-coded, with electron configuration and group/period/block details. Built for JEE Advanced Chemistry prep." />
-  <meta property="og:url" content="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/periodic-table.html" />
+    content="Trig, log, power functions, degree/radian modes, and calculation history — built for JEE Advanced prep." />
+  <meta property="og:url" content="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/calculator.html" />
   <meta property="og:image" content="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/assets/images/logo-full.webp" />
 
   <!-- Security headers -->
@@ -103,57 +103,71 @@
     <section class="hub pt-hub">
       <div class="container">
         <div class="hub__head">
-          <p class="eyebrow">Chemistry · Reference</p>
-          <h1>Interactive <span class="text-gradient">periodic table</span></h1>
-          <p>All 118 elements, colour-coded by category. Search by name, symbol or atomic number, or tap any element
-            for its electron configuration, group, period and block.</p>
+          <p class="eyebrow">Tools · Utility</p>
+          <h1>Scientific <span class="text-gradient">calculator</span></h1>
+          <p>Trig, log, and power functions with degree/radian modes — built right into the site, no app download
+            needed.</p>
         </div>
 
-        <div class="pt-toolbar">
-          <div class="pt-search">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <input type="text" id="ptSearch" placeholder="Search element or symbol… (e.g. Iron, Fe, 26)" aria-label="Search elements" />
+        <div class="calc-wrap">
+          <div class="calc">
+            <div class="calc__display">
+              <div class="calc__expr" id="calcExpression" aria-hidden="true"></div>
+              <div class="calc__value" id="calcDisplay">0</div>
+            </div>
+
+            <div class="calc__pad">
+              <button type="button" class="calc__key calc__key--fn" id="calcMode">DEG</button>
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="sin">sin</button>
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="cos">cos</button>
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="tan">tan</button>
+              <button type="button" class="calc__key calc__key--fn" id="calcBackspace" aria-label="Backspace">⌫</button>
+
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="log">log</button>
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="ln">ln</button>
+              <button type="button" class="calc__key calc__key--fn" data-calc-func="sqrt">√</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="^">^</button>
+              <button type="button" class="calc__key calc__key--clear" id="calcClear">C</button>
+
+              <button type="button" class="calc__key calc__key--fn" id="calcPi">π</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="7">7</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="8">8</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="9">9</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="/">÷</button>
+
+              <button type="button" class="calc__key calc__key--fn" id="calcE">e</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="4">4</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="5">5</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="6">6</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="*">×</button>
+
+              <button type="button" class="calc__key calc__key--op" data-calc-op="(">(</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="1">1</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="2">2</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="3">3</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="-">−</button>
+
+              <button type="button" class="calc__key calc__key--op" data-calc-op=")">)</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num="0">0</button>
+              <button type="button" class="calc__key calc__key--num" data-calc-num=".">.</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="%">%</button>
+              <button type="button" class="calc__key calc__key--op" data-calc-op="+">+</button>
+
+              <button type="button" class="calc__key calc__key--equals" id="calcEquals">=</button>
+            </div>
           </div>
-          <div class="pt-legend" id="ptLegend" aria-label="Filter by category"></div>
-        </div>
-        <div class="pt-toolbar pt-toolbar--block">
-          <span class="pt-toolbar__label">Block:</span>
-          <div class="pt-legend" id="ptBlockLegend" aria-label="Filter by block"></div>
-        </div>
 
-        <div class="pt-scroll">
-          <div class="pt-grid" id="ptGrid"></div>
+          <div class="calc__history-panel">
+            <p class="calc__history-title">History</p>
+            <ul class="calc__history" id="calcHistory"></ul>
+          </div>
         </div>
 
         <div style="text-align:center;margin-top:3rem;">
-          <a href="chemistry.html" class="btn btn--ghost">← Back to Chemistry Hub</a>
+          <a href="index.html#resources" class="btn btn--ghost">← Back to Home</a>
         </div>
       </div>
     </section>
-
-    <!-- Element detail modal -->
-    <div class="notes-modal pt-modal" id="ptModal" role="dialog" aria-modal="true" aria-labelledby="ptModalName" hidden>
-      <div class="notes-modal__scrim" id="ptModalScrim"></div>
-      <div class="notes-modal__panel pt-modal__panel">
-        <button type="button" class="notes-modal__close" id="ptModalClose" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-        <div class="pt-modal__head">
-          <span class="pt-modal__z" id="ptModalZ"></span>
-          <span class="pt-modal__sym" id="ptModalSym"></span>
-        </div>
-        <h3 id="ptModalName"></h3>
-        <p class="notes-modal__sub" id="ptModalCat"></p>
-        <dl class="pt-modal__facts">
-          <div><dt>Atomic mass</dt><dd id="ptModalMass"></dd></div>
-          <div><dt>Group</dt><dd id="ptModalGroup"></dd></div>
-          <div><dt>Period</dt><dd id="ptModalPeriod"></dd></div>
-          <div><dt>Block</dt><dd id="ptModalBlock"></dd></div>
-        </dl>
-        <p class="pt-modal__config-label">Electron configuration</p>
-        <p class="pt-modal__config" id="ptModalConfig"></p>
-      </div>
-    </div>
   </main>
   <footer class="footer">
     <div class="container footer__inner">
@@ -200,8 +214,7 @@
   </footer>
 
   <script src="js/script.js?v=tools1"></script>
-  <script src="js/periodic-table-data.js"></script>
-  <script src="js/periodic-table.js"></script>
+  <script src="js/calculator.js"></script>
 </body>
 
 </html>
