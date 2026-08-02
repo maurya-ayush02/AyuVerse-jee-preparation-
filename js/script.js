@@ -258,14 +258,14 @@ if ("serviceWorker" in navigator) {
   start();
 })();
 
-// ===== Notes subject-picker modal (homepage Resources section) =====
-(() => {
-  const launchBtn = document.getElementById('notesLaunchBtn');
-  const modal = document.getElementById('notesSubjectModal');
-  if (!launchBtn || !modal) return; // only present on index.html
+// ===== Picker modals (homepage Resources section: Notes, Tools) =====
+function setupPickerModal(launchId, modalId, scrimId, closeId) {
+  const launchBtn = document.getElementById(launchId);
+  const modal = document.getElementById(modalId);
+  if (!launchBtn || !modal) return; // not present on this page
 
-  const scrim = document.getElementById('notesModalScrim');
-  const closeBtn = document.getElementById('notesModalClose');
+  const scrim = document.getElementById(scrimId);
+  const closeBtn = document.getElementById(closeId);
   let lastFocused = null;
 
   function openModal() {
@@ -290,4 +290,7 @@ if ("serviceWorker" in navigator) {
   launchBtn.addEventListener('click', openModal);
   scrim.addEventListener('click', closeModal);
   closeBtn.addEventListener('click', closeModal);
-})();
+}
+
+setupPickerModal('notesLaunchBtn', 'notesSubjectModal', 'notesModalScrim', 'notesModalClose');
+setupPickerModal('toolsLaunchBtn', 'toolsPickerModal', 'toolsModalScrim', 'toolsModalClose');

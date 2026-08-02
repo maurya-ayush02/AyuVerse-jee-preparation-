@@ -58,14 +58,14 @@
     cell.setAttribute("aria-haspopup", "dialog");
     cell.setAttribute("aria-label", `${el.name}, atomic number ${el.z}, ${el.block}-block`);
 
-    if (el.series) {
-      // Lanthanide / actinide row, placed below the main table
+    if (el.group) {
+      cell.style.gridRow = String(el.period + ROW_OFFSET);
+      cell.style.gridColumn = String(el.group);
+    } else if (el.series) {
+      // Ce–Lu / Th–Lr only — La and Ac sit in the main table (group 3)
       const row = el.series === "lanthanide" ? 10 : 11;
       cell.style.gridRow = String(row);
       cell.style.gridColumn = String(el.seriesIndex + 3);
-    } else {
-      cell.style.gridRow = String(el.period + ROW_OFFSET);
-      cell.style.gridColumn = String(el.group);
     }
 
     cell.innerHTML = `
@@ -77,21 +77,6 @@
     frag.appendChild(cell);
   });
 
-  // Placeholder cells linking the main table to the f-block rows
-  const laPlaceholder = document.createElement("div");
-  laPlaceholder.className = "pt-cell pt-cell--placeholder";
-  laPlaceholder.style.gridRow = String(6 + ROW_OFFSET);
-  laPlaceholder.style.gridColumn = "3";
-  laPlaceholder.textContent = "57–71";
-
-  const acPlaceholder = document.createElement("div");
-  acPlaceholder.className = "pt-cell pt-cell--placeholder";
-  acPlaceholder.style.gridRow = String(7 + ROW_OFFSET);
-  acPlaceholder.style.gridColumn = "3";
-  acPlaceholder.textContent = "89–103";
-
-  grid.appendChild(laPlaceholder);
-  grid.appendChild(acPlaceholder);
   grid.appendChild(frag);
 
   // ---- Category legend ----

@@ -70,7 +70,7 @@ const PERIODIC_TABLE_DATA = [
   { z: 55, sym: "Cs", name: "Caesium", mass: "132.91", cat: "alkali-metal", group: 1, period: 6, block: "s", config: "[Xe] 6s¹" },
   { z: 56, sym: "Ba", name: "Barium", mass: "137.33", cat: "alkaline-earth-metal", group: 2, period: 6, block: "s", config: "[Xe] 6s²" },
 
-  { z: 57, sym: "La", name: "Lanthanum", mass: "138.91", cat: "lanthanide", period: 6, series: "lanthanide", seriesIndex: 0, block: "f", config: "[Xe] 5d¹ 6s²" },
+  { z: 57, sym: "La", name: "Lanthanum", mass: "138.91", cat: "lanthanide", group: 3, period: 6, series: "lanthanide", seriesIndex: 0, block: "d", config: "[Xe] 5d¹ 6s²" },
   { z: 58, sym: "Ce", name: "Cerium", mass: "140.12", cat: "lanthanide", period: 6, series: "lanthanide", seriesIndex: 1, block: "f", config: "[Xe] 4f¹ 5d¹ 6s²" },
   { z: 59, sym: "Pr", name: "Praseodymium", mass: "140.91", cat: "lanthanide", period: 6, series: "lanthanide", seriesIndex: 2, block: "f", config: "[Xe] 4f³ 6s²" },
   { z: 60, sym: "Nd", name: "Neodymium", mass: "144.24", cat: "lanthanide", period: 6, series: "lanthanide", seriesIndex: 3, block: "f", config: "[Xe] 4f⁴ 6s²" },
@@ -105,7 +105,7 @@ const PERIODIC_TABLE_DATA = [
   { z: 87, sym: "Fr", name: "Francium", mass: "[223]", cat: "alkali-metal", group: 1, period: 7, block: "s", config: "[Rn] 7s¹" },
   { z: 88, sym: "Ra", name: "Radium", mass: "[226]", cat: "alkaline-earth-metal", group: 2, period: 7, block: "s", config: "[Rn] 7s²" },
 
-  { z: 89, sym: "Ac", name: "Actinium", mass: "[227]", cat: "actinide", period: 7, series: "actinide", seriesIndex: 0, block: "f", config: "[Rn] 6d¹ 7s²" },
+  { z: 89, sym: "Ac", name: "Actinium", mass: "[227]", cat: "actinide", group: 3, period: 7, series: "actinide", seriesIndex: 0, block: "d", config: "[Rn] 6d¹ 7s²" },
   { z: 90, sym: "Th", name: "Thorium", mass: "232.04", cat: "actinide", period: 7, series: "actinide", seriesIndex: 1, block: "f", config: "[Rn] 6d² 7s²" },
   { z: 91, sym: "Pa", name: "Protactinium", mass: "231.04", cat: "actinide", period: 7, series: "actinide", seriesIndex: 2, block: "f", config: "[Rn] 5f² 6d¹ 7s²" },
   { z: 92, sym: "U", name: "Uranium", mass: "238.03", cat: "actinide", period: 7, series: "actinide", seriesIndex: 3, block: "f", config: "[Rn] 5f³ 6d¹ 7s²" },
