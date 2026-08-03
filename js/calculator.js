@@ -1,7 +1,7 @@
 /* AyuVerse — Scientific Calculator
-   A small hand-written tokenizer + recursive-descent parser/evaluator.
-   No eval()/Function() anywhere — the site's CSP has no 'unsafe-eval',
-   and hand-rolling this is safer and more predictable regardless. */
+   Fixed & Enhanced Hand-written tokenizer + recursive-descent parser/evaluator.
+   No eval()/Function() — CSP Compliant.
+*/
 (() => {
   const display = document.getElementById("calcDisplay");
   const expressionEl = document.getElementById("calcExpression");
@@ -19,15 +19,24 @@
   function tokenize(input) {
     const tokens = [];
     let i = 0;
+
+    // Normalize square root symbol prior to tokenization
+    input = input.replace(/√/g, "sqrt");
+
     while (i < input.length) {
       const c = input[i];
+
       if (c === " ") { i++; continue; }
+
+      // Numbers (including decimals)
       if (/[0-9.]/.test(c)) {
         let num = c; i++;
         while (i < input.length && /[0-9.]/.test(input[i])) { num += input[i]; i++; }
         tokens.push({ type: "num", value: parseFloat(num) });
         continue;
       }
+
+      // Identifiers / Functions / Constants
       if (/[a-zA-Z]/.test(c)) {
         let word = c; i++;
         while (i < input.length && /[a-zA-Z]/.test(input[i])) { word += input[i]; i++; }
@@ -37,19 +46,33 @@
         else throw new Error("Unknown token: " + word);
         continue;
       }
+
+      // Operators & Parentheses
       if ("+-*/^%()".includes(c)) { tokens.push({ type: "op", value: c }); i++; continue; }
       throw new Error("Unexpected character: " + c);
     }
-    return tokens;
+
+    // Insert implicit multiplication tokens (e.g., 2pi -> 2 * pi, 2(3) -> 2 * (3), 3sqrt(4) -> 3 * sqrt(4))
+    const implicitTokens = [];
+    for (let j = 0; j < tokens.length; j++) {
+      const curr = tokens[j];
+      const prev = tokens[j - 1];
+
+      if (prev) {
+        const prevIsValue = prev.type === "num" || (prev.type === "op" && prev.value === ")");
+        const currIsValue = curr.type === "num" || curr.type === "func" || (curr.type === "op" && curr.value === "(");
+
+        if (prevIsValue && currIsValue) {
+          implicitTokens.push({ type: "op", value: "*" });
+        }
+      }
+      implicitTokens.push(curr);
+    }
+
+    return implicitTokens;
   }
 
-  // ---------------- Recursive-descent parser ----------------
-  // expr := term (('+' | '-') term)*
-  // term := factor (('*' | '/') factor)*
-  // factor := unary ('^' factor)?      (right-assoc power)
-  // unary := ('-' | '+') unary | postfix
-  // postfix := primary ('%')?
-  // primary := number | func '(' expr ')' | '(' expr ')'
+  // ---------------- Recursive-Descent Parser ----------------
   function parse(tokens) {
     let pos = 0;
     const peek = () => tokens[pos];
@@ -85,7 +108,7 @@
       const base = parsePostfix();
       if (peek() && peek().type === "op" && peek().value === "^") {
         next();
-        const exponent = parseUnary(); // right-associative; also allows 2^-2
+        const exponent = parseUnary(); // Right-associative exponentiation
         return Math.pow(base, exponent);
       }
       return base;
@@ -106,14 +129,19 @@
 
       if (tok.type === "num") { next(); return tok.value; }
 
+      // Handle functions: supports both func(expr) and func expr (e.g., sqrt 9)
       if (tok.type === "func") {
-        next();
-        if (!peek() || peek().value !== "(") throw new Error("Expected ( after " + tok.value);
-        next();
-        const arg = parseExpr();
-        if (!peek() || peek().value !== ")") throw new Error("Expected )");
-        next();
-        return applyFunc(tok.value, arg);
+        const funcName = next().value;
+        let arg;
+        if (peek() && peek().type === "op" && peek().value === "(") {
+          next(); // Consume '('
+          arg = parseExpr();
+          if (!peek() || peek().value !== ")") throw new Error("Expected )");
+          next(); // Consume ')'
+        } else {
+          arg = parseUnary();
+        }
+        return applyFunc(funcName, arg);
       }
 
       if (tok.type === "op" && tok.value === "(") {
@@ -135,16 +163,37 @@
   function applyFunc(name, arg) {
     const toRad = (v) => (degMode ? (v * Math.PI) / 180 : v);
     const fromRad = (v) => (degMode ? (v * 180) / Math.PI : v);
+
     switch (name) {
-      case "sin": return Math.sin(toRad(arg));
-      case "cos": return Math.cos(toRad(arg));
-      case "tan": return Math.tan(toRad(arg));
+      case "sin": {
+        const rad = toRad(arg);
+        // Correct precision issues for sin(180deg), sin(360deg), etc.
+        const val = Math.sin(rad);
+        return Math.abs(val) < 1e-15 ? 0 : val;
+      }
+      case "cos": {
+        const rad = toRad(arg);
+        // Correct precision issues for cos(90deg), cos(270deg), etc.
+        const val = Math.cos(rad);
+        return Math.abs(val) < 1e-15 ? 0 : val;
+      }
+      case "tan": {
+        if (degMode && Math.abs(arg % 180) === 90) throw new Error("Undefined (tan 90°)");
+        const rad = toRad(arg);
+        return Math.tan(rad);
+      }
       case "asin": return fromRad(Math.asin(arg));
       case "acos": return fromRad(Math.acos(arg));
       case "atan": return fromRad(Math.atan(arg));
-      case "log": return Math.log10(arg);
-      case "ln": return Math.log(arg);
-      case "sqrt": return Math.sqrt(arg);
+      case "log": 
+        if (arg <= 0) throw new Error("Domain Error");
+        return Math.log10(arg);
+      case "ln": 
+        if (arg <= 0) throw new Error("Domain Error");
+        return Math.log(arg);
+      case "sqrt": 
+        if (arg < 0) throw new Error("Domain Error");
+        return Math.sqrt(arg);
       default: throw new Error("Unknown function: " + name);
     }
   }
@@ -156,7 +205,7 @@
 
   // ---------------- Display / UI ----------------
   function formatResult(n) {
-    if (!isFinite(n)) return "Error";
+    if (!isFinite(n) || isNaN(n)) return "Error";
     if (Number.isInteger(n)) return String(n);
     return String(Math.round(n * 1e10) / 1e10);
   }
@@ -196,6 +245,7 @@
   function clearAll() {
     expr = "";
     justEvaluated = false;
+    if (expressionEl) expressionEl.textContent = "";
     updateDisplay();
   }
 
@@ -210,6 +260,7 @@
     try {
       const result = evaluate(expr);
       const formatted = formatResult(result);
+      if (expressionEl) expressionEl.textContent = expr + " =";
       pushHistory(expr, formatted);
       expr = formatted;
       justEvaluated = true;
@@ -217,11 +268,11 @@
     } catch (e) {
       display.textContent = "Error";
       justEvaluated = true;
-      setTimeout(() => { expr = ""; justEvaluated = false; updateDisplay(); }, 900);
+      setTimeout(() => { expr = ""; justEvaluated = false; updateDisplay(); }, 1200);
     }
   }
 
-  // ---------------- Button wiring ----------------
+  // ---------------- Button Wiring ----------------
   document.querySelectorAll("[data-calc-num]").forEach((btn) => {
     btn.addEventListener("click", () => press(btn.dataset.calcNum));
   });
@@ -250,7 +301,7 @@
     });
   }
 
-  // ---------------- Keyboard support ----------------
+  // ---------------- Keyboard Support ----------------
   document.addEventListener("keydown", (e) => {
     if (!display) return;
     if (/[0-9.]/.test(e.key)) { press(e.key); return; }
