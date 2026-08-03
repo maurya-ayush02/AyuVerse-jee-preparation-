@@ -116,46 +116,95 @@
               <div class="calc__value" id="calcDisplay">0</div>
             </div>
 
-            <div class="calc__pad">
-              <button type="button" class="calc__key calc__key--fn" id="calcMode">DEG</button>
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="sin">sin</button>
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="cos">cos</button>
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="tan">tan</button>
-              <button type="button" class="calc__key calc__key--fn" id="calcBackspace" aria-label="Backspace">⌫</button>
+        <div class="calc-wrap" id="calcContainer">
+  <div class="calc">
+    <!-- Display -->
+    <div class="calc__display">
+      <div class="calc__expr" id="calcExpression" aria-hidden="true"></div>
+      <div class="calc__value" id="calcDisplay">0</div>
+    </div>
 
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="log">log</button>
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="ln">ln</button>
-              <button type="button" class="calc__key calc__key--fn" data-calc-func="sqrt">√</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="^">^</button>
-              <button type="button" class="calc__key calc__key--clear" id="calcClear">C</button>
+    <!-- Keypad -->
+    <div class="calc__pad">
+      <!-- Row 1: Modes & Memory Controls -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-action="mode" id="calcMode">DEG</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-action="displayMode" id="calcDisplayMode">STD</button>
+      <button type="button" class="calc__key calc__key--mem" data-calc-mem="MC">MC</button>
+      <button type="button" class="calc__key calc__key--mem" data-calc-mem="MR">MR</button>
+      <button type="button" class="calc__key calc__key--mem" data-calc-mem="MS">MS</button>
 
-              <button type="button" class="calc__key calc__key--fn" id="calcPi">π</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="7">7</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="8">8</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="9">9</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="/">÷</button>
+      <!-- Row 2: Advanced Memory & Functions -->
+      <button type="button" class="calc__key calc__key--mem" data-calc-mem="M+">M+</button>
+      <button type="button" class="calc__key calc__key--mem" data-calc-mem="M-">M−</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="sin">sin</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="cos">cos</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="tan">tan</button>
 
-              <button type="button" class="calc__key calc__key--fn" id="calcE">e</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="4">4</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="5">5</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="6">6</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="*">×</button>
+      <!-- Row 3: Extended Functions & Editing -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="asin">sin⁻¹</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="acos">cos⁻¹</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="atan">tan⁻¹</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="log">log</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="ln">ln</button>
 
-              <button type="button" class="calc__key calc__key--op" data-calc-op="(">(</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="1">1</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="2">2</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="3">3</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="-">−</button>
+      <!-- Row 4: Powers & Roots -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="sq">x²</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="cube">x³</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="^">xʸ</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="pow10">10ˣ</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="exp">eˣ</button>
 
-              <button type="button" class="calc__key calc__key--op" data-calc-op=")">)</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num="0">0</button>
-              <button type="button" class="calc__key calc__key--num" data-calc-num=".">.</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="%">%</button>
-              <button type="button" class="calc__key calc__key--op" data-calc-op="+">+</button>
+      <!-- Row 5: Square Roots, Factorials, Reciprocals & Clear -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="sqrt">√</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="cbrt">∛</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="!">!</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="recip">1/x</button>
+      <button type="button" class="calc__key calc__key--clear" data-calc-action="clear" id="calcClear">C</button>
 
-              <button type="button" class="calc__key calc__key--equals" id="calcEquals">=</button>
-            </div>
-          </div>
+      <!-- Row 6: Constants & Top Num Row -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-func="abs">abs</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="7">7</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="8">8</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="9">9</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="/">÷</button>
+
+      <!-- Row 7: Constants & Mid Num Row -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-num="pi">π</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="4">4</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="5">5</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="6">6</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="*">×</button>
+
+      <!-- Row 8: Brackets & Low Num Row -->
+      <button type="button" class="calc__key calc__key--fn" data-calc-num="e">e</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="1">1</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="2">2</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="3">3</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="-">−</button>
+
+      <!-- Row 9: Parentheses, Decimals & Modulo -->
+      <button type="button" class="calc__key calc__key--op" data-calc-op="(">(</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op=")">)</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num="0">0</button>
+      <button type="button" class="calc__key calc__key--num" data-calc-num=".">.</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="+">+</button>
+
+      <!-- Row 10: Special Actions -->
+      <button type="button" class="calc__key calc__key--op" data-calc-op="%">%</button>
+      <button type="button" class="calc__key calc__key--op" data-calc-op="mod">mod</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-action="ans">Ans</button>
+      <button type="button" class="calc__key calc__key--fn" data-calc-action="backspace" id="calcBackspace" aria-label="Backspace">⌫</button>
+      <button type="button" class="calc__key calc__key--equals" data-calc-action="equals" id="calcEquals">=</button>
+    </div>
+  </div>
+
+  <!-- History Panel -->
+  <div class="calc__history-panel">
+    <p class="calc__history-title">History</p>
+    <ul class="calc__history" id="calcHistory"></ul>
+  </div>
+</div>
+
 
           <div class="calc__history-panel">
             <p class="calc__history-title">History</p>
