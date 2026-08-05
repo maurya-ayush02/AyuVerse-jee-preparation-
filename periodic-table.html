@@ -7,7 +7,7 @@
   <title>Interactive Periodic Table — AyuVerse</title>
 <link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/periodic-table.html" />
   <meta name="description"
-    content="A free, interactive periodic table for JEE Advanced Chemistry — all 118 elements with electron configuration, category, group, period and block, searchable and colour-coded." />
+    content="A free, interactive periodic table for JEE Advanced Chemistry — all 118 elements with electron configuration, Pauling electronegativity, atomic &amp; ionic radius, common oxidation states, category, group, period and s/p/d/f block, searchable and colour-coded." />
   <meta name="theme-color" content="#060814" />
 
   <meta property="og:type" content="website" />
@@ -106,7 +106,7 @@
           <p class="eyebrow">Chemistry · Reference</p>
           <h1>Interactive <span class="text-gradient">periodic table</span></h1>
           <p>All 118 elements, colour-coded by category. Search by name, symbol or atomic number, or tap any element
-            for its electron configuration, group, period and block.</p>
+            for its electron configuration, electronegativity, atomic &amp; ionic radius, oxidation states and block.</p>
         </div>
 
         <div class="pt-toolbar">
@@ -119,6 +119,16 @@
         <div class="pt-toolbar pt-toolbar--block">
           <span class="pt-toolbar__label">Block:</span>
           <div class="pt-legend" id="ptBlockLegend" aria-label="Filter by block"></div>
+        </div>
+        <div class="pt-toolbar pt-toolbar--block">
+          <span class="pt-toolbar__label">Colour by:</span>
+          <div class="pt-legend" id="ptColorBy" aria-label="Choose what the grid colour represents"></div>
+        </div>
+        <div class="pt-scale" id="ptScale" hidden>
+          <span class="pt-scale__label" id="ptScaleMin"></span>
+          <span class="pt-scale__bar" id="ptScaleBar"></span>
+          <span class="pt-scale__label" id="ptScaleMax"></span>
+          <span class="pt-scale__nodata">grey = no established value</span>
         </div>
 
         <div class="pt-scroll">
@@ -149,9 +159,20 @@
           <div><dt>Group</dt><dd id="ptModalGroup"></dd></div>
           <div><dt>Period</dt><dd id="ptModalPeriod"></dd></div>
           <div><dt>Block</dt><dd id="ptModalBlock"></dd></div>
+          <div><dt>Electronegativity (Pauling)</dt><dd id="ptModalEN"></dd></div>
+          <div><dt>Ionic radius</dt><dd id="ptModalIR"></dd></div>
         </dl>
         <p class="pt-modal__config-label">Electron configuration</p>
         <p class="pt-modal__config" id="ptModalConfig"></p>
+
+        <p class="pt-modal__config-label pt-modal__section-gap">Atomic radius (covalent)</p>
+        <div class="pt-radius">
+          <div class="pt-radius__track"><div class="pt-radius__fill" id="ptModalRadiusFill"></div></div>
+          <span class="pt-radius__value" id="ptModalRadiusValue"></span>
+        </div>
+
+        <p class="pt-modal__config-label pt-modal__section-gap">Common oxidation states</p>
+        <div class="pt-ox" id="ptModalOx"></div>
       </div>
     </div>
   </main>
