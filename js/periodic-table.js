@@ -23,6 +23,39 @@
     { key: "f", label: "f-block" },
   ];
 
+  // "Colour by" modes — category is the original/default look, block reuses
+  // the s/p/d/f colours already defined for the block legend, and the last
+  // two paint a live heatmap from each element's en/ar value.
+  const PT_COLOR_MODES = [
+    { key: "category", label: "Category" },
+    { key: "block", label: "Block" },
+    { key: "en", label: "Electronegativity" },
+    { key: "ar", label: "Atomic radius" },
+  ];
+
+  // Domains used to normalise each heatmap (min/max across real, non-null
+  // data in the set — computed below so the scale always matches what's
+  // actually plotted rather than a guessed textbook range).
+  function domainOf(key) {
+    let min = Infinity, max = -Infinity;
+    PERIODIC_TABLE_DATA.forEach((el) => {
+      const v = el[key];
+      if (v === null || v === undefined) return;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    });
+    return { min, max };
+  }
+  const PT_DOMAINS = { en: domainOf("en"), ar: domainOf("ar") };
+
+  // Cool blue (low) → warm red (high). Used for both heatmaps so the
+  // reading is consistent: "redder" always means a bigger number.
+  function heatColor(value, domain) {
+    const t = Math.max(0, Math.min(1, (value - domain.min) / (domain.max - domain.min)));
+    const hue = 200 - t * 200;
+    return `hsl(${hue.toFixed(0)}, 78%, 56%)`;
+  }
+
   // Traditional CAS-style group labels (1A/2A…8A alongside the modern
   // 1-18 IUPAC numbering), shown in the header row above the table.
   const GROUP_OLD_LABELS = {
@@ -134,6 +167,69 @@
     });
   }
 
+  // ---- Colour-by mode (category / block / electronegativity / atomic radius) ----
+  const colorByBar = document.getElementById("ptColorBy");
+  const scaleWrap = document.getElementById("ptScale");
+  const scaleBar = document.getElementById("ptScaleBar");
+  const scaleMin = document.getElementById("ptScaleMin");
+  const scaleMax = document.getElementById("ptScaleMax");
+  let colorMode = "category";
+
+  function applyColorMode() {
+    grid.dataset.colorby = colorMode;
+    const heatmapKey = colorMode === "en" || colorMode === "ar" ? colorMode : null;
+    const domain = heatmapKey ? PT_DOMAINS[heatmapKey] : null;
+
+    grid.querySelectorAll(".pt-cell[data-z]").forEach((cellEl) => {
+      const el = PERIODIC_TABLE_DATA[Number(cellEl.dataset.z) - 1];
+      if (!heatmapKey) {
+        cellEl.style.removeProperty("--pt-color");
+        cellEl.classList.remove("pt-cell--nodata");
+        return;
+      }
+      const v = el[heatmapKey];
+      if (v === null || v === undefined) {
+        cellEl.style.removeProperty("--pt-color");
+        cellEl.classList.add("pt-cell--nodata");
+      } else {
+        cellEl.classList.remove("pt-cell--nodata");
+        cellEl.style.setProperty("--pt-color", heatColor(v, domain));
+      }
+    });
+
+    if (scaleWrap) {
+      if (heatmapKey) {
+        scaleWrap.hidden = false;
+        scaleBar.style.background = `linear-gradient(90deg, ${heatColor(domain.min, domain)}, ${heatColor((domain.min + domain.max) / 2, domain)}, ${heatColor(domain.max, domain)})`;
+        scaleMin.textContent = heatmapKey === "en" ? `${domain.min} (least electronegative)` : `${domain.min} pm (smallest)`;
+        scaleMax.textContent = heatmapKey === "en" ? `${domain.max} (most electronegative)` : `${domain.max} pm (largest)`;
+      } else {
+        scaleWrap.hidden = true;
+      }
+    }
+  }
+
+  if (colorByBar) {
+    PT_COLOR_MODES.forEach((m) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "pt-legend__chip pt-legend__chip--mode";
+      chip.dataset.mode = m.key;
+      chip.textContent = m.label;
+      if (m.key === colorMode) chip.classList.add("is-active");
+      colorByBar.appendChild(chip);
+    });
+
+    colorByBar.addEventListener("click", (e) => {
+      const chip = e.target.closest(".pt-legend__chip");
+      if (!chip) return;
+      colorMode = chip.dataset.mode;
+      colorByBar.querySelectorAll(".pt-legend__chip").forEach((c) => c.classList.toggle("is-active", c === chip));
+      applyColorMode();
+    });
+  }
+  applyColorMode();
+
   // ---- Search / filter ----
   const searchInput = document.getElementById("ptSearch");
   if (searchInput) {
@@ -154,6 +250,19 @@
     });
   }
 
+  // Ion notation for the ionic-radius line, e.g. 1 -> "+", -2 -> "2−"
+  // (magnitude only shown when it isn't 1 — matches standard Na⁺ / O²⁻ style).
+  function formatIonCharge(q) {
+    const mag = Math.abs(q) === 1 ? "" : String(Math.abs(q));
+    return `${mag}${q > 0 ? "+" : "\u2212"}`;
+  }
+
+  // Oxidation-state chip label, sign-first per convention, e.g. 3 -> "+3".
+  function formatOxState(n) {
+    if (n === 0) return "0";
+    return `${n > 0 ? "+" : "\u2212"}${Math.abs(n)}`;
+  }
+
   // ---- Detail modal ----
   const modal = document.getElementById("ptModal");
   const scrim = document.getElementById("ptModalScrim");
@@ -172,6 +281,36 @@
     document.getElementById("ptModalPeriod").textContent = el.period;
     document.getElementById("ptModalBlock").textContent = el.block.toUpperCase() + "-block";
     document.getElementById("ptModalConfig").textContent = el.config;
+
+    document.getElementById("ptModalEN").textContent = el.en === null ? "No established value" : el.en.toFixed(2);
+    document.getElementById("ptModalIR").textContent = el.ir
+      ? `${el.ir.r} pm (${el.sym}${formatIonCharge(el.ir.q)})`
+      : "Not well represented by a single ion";
+
+    const arMax = PT_DOMAINS.ar.max;
+    const radiusFill = document.getElementById("ptModalRadiusFill");
+    const radiusValue = document.getElementById("ptModalRadiusValue");
+    if (el.ar === null) {
+      radiusFill.style.width = "0%";
+      radiusValue.textContent = "Predicted value not established";
+    } else {
+      radiusFill.style.width = `${((el.ar / arMax) * 100).toFixed(1)}%`;
+      radiusValue.textContent = `${el.ar} pm`;
+    }
+
+    const oxWrap = document.getElementById("ptModalOx");
+    oxWrap.innerHTML = "";
+    if (!el.ox || el.ox.length === 0) {
+      oxWrap.innerHTML = `<span class="pt-ox__none">No well-established oxidation states</span>`;
+    } else {
+      el.ox.forEach((state) => {
+        const chip = document.createElement("span");
+        chip.className = "pt-ox__chip";
+        chip.textContent = formatOxState(state);
+        oxWrap.appendChild(chip);
+      });
+    }
+
     modal.className = `notes-modal pt-modal pt-modal--${el.cat}`;
     modal.hidden = false;
     document.body.style.overflow = "hidden";
