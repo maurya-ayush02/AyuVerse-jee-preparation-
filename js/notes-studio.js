@@ -8,7 +8,10 @@
 (() => {
   const PAGE_W = 850;
   const PAGE_H = 1100;
-  const STORAGE_KEY = "ayuverse-notes-studio-v1";
+  const STORAGE_KEY = "ayuverse-notes-studio-v1"; // legacy localStorage key, migrated on first load
+  const IDB_NAME = "ayuverse-notes-studio";
+  const IDB_STORE = "notebook";
+  const IDB_RECORD = "main";
   const HISTORY_LIMIT = 60;
   const PDF_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
 
@@ -166,47 +169,139 @@
   }
 
   // ---------------------------------------------------------------------
-  // Persistence
+  // Persistence — IndexedDB (localStorage's ~5-10MB quota was getting hit by
+  // Fabric JSON + page thumbnails + PDF page images; IndexedDB has a much
+  // higher, browser-managed quota and doesn't block the main thread).
   // ---------------------------------------------------------------------
+  let dbPromise = null;
+  function openDb() {
+    if (!window.indexedDB) return Promise.reject(new Error("IndexedDB unavailable"));
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+
+  async function idbGet(key) {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readonly");
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function idbSet(key, value) {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error("Save aborted"));
+    });
+  }
+
+  let saveGeneration = 0;
   function scheduleSave() {
     clearTimeout(NS.saveTimer);
     setStatus("Saving…");
-    NS.saveTimer = setTimeout(() => {
-      saveCurrentPageState();
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          pages: NS.pages, activeIndex: NS.activeIndex, color: NS.color, strokeWidth: NS.strokeWidth,
-        }));
-        setStatus("All changes saved");
-      } catch (err) {
-        setStatus("Could not save — browser storage may be full");
-      }
-      renderPagesList();
-    }, 700);
+    NS.saveTimer = setTimeout(doSave, 700);
   }
 
-  function loadPersisted() {
+  async function doSave() {
+    saveCurrentPageState();
+    const myGeneration = ++saveGeneration;
+    const payload = {
+      pages: NS.pages, activeIndex: NS.activeIndex, color: NS.color, strokeWidth: NS.strokeWidth,
+    };
+    try {
+      await idbSet(IDB_RECORD, payload);
+      if (myGeneration !== saveGeneration) return; // a newer save already landed
+      setStatus("All changes saved");
+      hideSaveWarning();
+    } catch (err) {
+      console.error("Autosave failed:", err);
+      if (myGeneration !== saveGeneration) return;
+      setStatus("Could not save — see warning above");
+      showSaveWarning();
+    }
+    renderPagesList();
+  }
+
+  function showSaveWarning() {
+    const el = document.getElementById("nsSaveWarn");
+    if (el) el.hidden = false;
+  }
+  function hideSaveWarning() {
+    const el = document.getElementById("nsSaveWarn");
+    if (el) el.hidden = true;
+  }
+  function wireSaveWarning() {
+    const btn = document.getElementById("nsSaveWarnExport");
+    if (btn) btn.addEventListener("click", () => exportNotebookPdf());
+  }
+
+  async function loadPersisted() {
+    try {
+      const fromIdb = await idbGet(IDB_RECORD);
+      if (fromIdb) return fromIdb;
+    } catch (err) {
+      console.warn("IndexedDB read failed, falling back to legacy storage:", err);
+    }
+    // One-time migration from the old localStorage-based save, if present.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        try {
+          await idbSet(IDB_RECORD, parsed);
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (err) {
+          console.warn("Could not migrate legacy save into IndexedDB:", err);
+        }
+        return parsed;
+      }
     } catch (err) {
-      return null;
+      // legacy data unreadable/corrupt — fall through to a fresh notebook
     }
+    return null;
   }
 
   function saveCurrentPageState() {
     const page = NS.pages[NS.activeIndex];
     if (!page || !NS.canvas) return;
-    page.json = NS.canvas.toJSON();
+    page.json = snapshotWithoutBackground();
     page.thumb = NS.canvas.toDataURL({ format: "png", multiplier: 0.22 });
   }
 
   // ---------------------------------------------------------------------
   // History (undo/redo) — snapshots the current page's fabric JSON
   // ---------------------------------------------------------------------
+  // The background (theme fill + ruling + watermark) was being baked into
+  // every snapshot as a base64 PNG via canvas.toJSON()'s backgroundImage
+  // property — that's the actual weight in "undo stores full canvas
+  // snapshots", far bigger than the drawn objects for most pages, and it's
+  // fully reconstructable from page.theme/page.ruled via
+  // refreshActiveBackground(). Stripping it out of both the undo stack and
+  // persisted page.json means every push/save only carries what changed.
+  function snapshotWithoutBackground() {
+    const json = NS.canvas.toJSON();
+    delete json.background;
+    delete json.backgroundImage;
+    delete json.overlay;
+    delete json.overlayImage;
+    return json;
+  }
+
   function pushHistory() {
     if (NS.suppressHistory) return;
-    const json = NS.canvas.toJSON();
+    const json = snapshotWithoutBackground();
     NS.undoStack.push(json);
     if (NS.undoStack.length > HISTORY_LIMIT) NS.undoStack.shift();
     NS.redoStack = [];
@@ -218,10 +313,17 @@
     NS.redoStack.push(NS.undoStack.pop());
     const prev = NS.undoStack[NS.undoStack.length - 1];
     NS.suppressHistory = true;
+    // loadFromJSON clears the canvas (and its background) first. Undo/redo
+    // never changes theme or ruling, so just re-attach the background image
+    // already rendered — rebuilding it from scratch (gradient + toDataURL +
+    // image reload) on every undo step would make undo noticeably laggy.
+    const bg = NS.canvas.backgroundImage;
     NS.canvas.loadFromJSON(prev, () => {
-      NS.canvas.renderAll();
-      NS.suppressHistory = false;
-      scheduleSave();
+      NS.canvas.setBackgroundImage(bg, () => {
+        NS.canvas.renderAll();
+        NS.suppressHistory = false;
+        scheduleSave();
+      });
     });
   }
   function redo() {
@@ -229,10 +331,13 @@
     const next = NS.redoStack.pop();
     NS.undoStack.push(next);
     NS.suppressHistory = true;
+    const bg = NS.canvas.backgroundImage;
     NS.canvas.loadFromJSON(next, () => {
-      NS.canvas.renderAll();
-      NS.suppressHistory = false;
-      scheduleSave();
+      NS.canvas.setBackgroundImage(bg, () => {
+        NS.canvas.renderAll();
+        NS.suppressHistory = false;
+        scheduleSave();
+      });
     });
   }
 
@@ -245,8 +350,6 @@
     const page = NS.pages[index];
 
     NS.suppressHistory = true;
-    NS.canvas.clear();
-    await refreshActiveBackground();
     if (page.json) {
       await new Promise((resolve) => {
         NS.canvas.loadFromJSON(page.json, () => {
@@ -254,8 +357,14 @@
           resolve();
         });
       });
+    } else {
+      NS.canvas.clear();
     }
-    NS.undoStack = [NS.canvas.toJSON()];
+    // Background is rebuilt from page.theme/page.ruled once, after objects
+    // load, instead of being built then immediately discarded by
+    // loadFromJSON's internal clear() and rebuilt again from stored JSON.
+    await refreshActiveBackground();
+    NS.undoStack = [snapshotWithoutBackground()];
     NS.redoStack = [];
     NS.suppressHistory = false;
 
@@ -581,7 +690,11 @@
         saveCurrentPageState();
 
         const insertAt = NS.activeIndex + 1;
-        const rendered = [];
+        const pageTheme = NS.pages[NS.activeIndex].theme;
+
+        // Render, insert, and place one PDF page at a time instead of
+        // rendering every page up front — holding N full-resolution page
+        // images in memory at once is what froze the tab on large PDFs.
         for (let i = 1; i <= pdf.numPages; i++) {
           showBusy(`Rendering PDF page ${i} of ${pdf.numPages}…`);
           const pdfPage = await pdf.getPage(i);
@@ -591,20 +704,20 @@
           const off = document.createElement("canvas");
           off.width = viewport.width;
           off.height = viewport.height;
-          await pdfPage.render({ canvasContext: off.getContext("2d"), viewport }).promise;
-          rendered.push({ dataUrl: off.toDataURL("image/png"), w: off.width, h: off.height });
-        }
+          const offCtx = off.getContext("2d");
+          await pdfPage.render({ canvasContext: offCtx, viewport }).promise;
+          const dataUrl = off.toDataURL("image/png");
+          // release the render target and pdf.js page resources immediately
+          off.width = off.height = 0;
+          if (pdfPage.cleanup) pdfPage.cleanup();
 
-        const pageTheme = NS.pages[NS.activeIndex].theme;
-        rendered.forEach((_, idx) => NS.pages.splice(insertAt + idx, 0, newPage({ theme: pageTheme, ruled: false })));
-
-        for (let idx = 0; idx < rendered.length; idx++) {
-          showBusy(`Placing page ${idx + 1} of ${rendered.length}…`);
-          await loadPage(insertAt + idx);
-          const entry = rendered[idx];
+          const idx = insertAt + (i - 1);
+          NS.pages.splice(idx, 0, newPage({ theme: pageTheme, ruled: false }));
+          showBusy(`Placing page ${i} of ${pdf.numPages}…`);
+          await loadPage(idx);
           await new Promise((resolve) => {
-            fabric.Image.fromURL(entry.dataUrl, (img) => {
-              img.set({ left: (PAGE_W - entry.w) / 2, top: 30, selectable: false, evented: false, hasControls: false });
+            fabric.Image.fromURL(dataUrl, (img) => {
+              img.set({ left: (PAGE_W - viewport.width) / 2, top: 30, selectable: false, evented: false, hasControls: false });
               NS.canvas.add(img);
               NS.canvas.sendToBack(img);
               NS.canvas.requestRenderAll();
@@ -630,7 +743,10 @@
   // ---------------------------------------------------------------------
   function exportCurrentPagePng() {
     saveCurrentPageState();
-    const url = NS.canvas.toDataURL({ format: "png", multiplier: 2 });
+    // toDataURL's multiplier is relative to the canvas's *current* zoomed
+    // size, so exporting while zoomed out silently downgraded resolution.
+    // Divide by the active zoom so exports are always full quality.
+    const url = NS.canvas.toDataURL({ format: "png", multiplier: 2 / NS.zoom });
     downloadDataUrl(url, `ayuverse-notes-page-${NS.activeIndex + 1}.png`);
   }
 
@@ -642,6 +758,8 @@
     showBusy("Preparing export…");
     saveCurrentPageState();
     const originalIndex = NS.activeIndex;
+    const originalZoom = NS.zoom;
+    setZoom(1); // export at full resolution regardless of on-screen zoom
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: [PAGE_W, PAGE_H] });
     for (let i = 0; i < NS.pages.length; i++) {
@@ -652,6 +770,7 @@
       doc.addImage(url, "JPEG", 0, 0, PAGE_W, PAGE_H);
     }
     await loadPage(originalIndex);
+    setZoom(originalZoom);
     doc.save("ayuverse-notes.pdf");
     hideBusy();
   }
@@ -728,6 +847,7 @@
   }
 
   function wireKeyboard() {
+    let clipboard = null;
     document.addEventListener("keydown", (e) => {
       const tag = (e.target.tagName || "").toLowerCase();
       const active = NS.canvas.getActiveObject();
@@ -737,6 +857,30 @@
       if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
       if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) { e.preventDefault(); redo(); return; }
       if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); scheduleSave(); return; }
+
+      if (mod && e.key.toLowerCase() === "c" && !isEditingText && active) {
+        e.preventDefault();
+        active.clone((cloned) => { clipboard = cloned; });
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "v" && !isEditingText && clipboard) {
+        e.preventDefault();
+        clipboard.clone((cloned) => {
+          NS.canvas.discardActiveObject();
+          cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20, evented: true });
+          if (cloned.type === "activeSelection") {
+            cloned.canvas = NS.canvas;
+            cloned.forEachObject((obj) => NS.canvas.add(obj));
+            cloned.setCoords();
+          } else {
+            NS.canvas.add(cloned);
+          }
+          NS.canvas.setActiveObject(cloned);
+          NS.canvas.requestRenderAll();
+          pushHistory();
+        });
+        return;
+      }
 
       if ((e.key === "Delete" || e.key === "Backspace") && !isEditingText && active) {
         e.preventDefault();
@@ -751,7 +895,7 @@
   // ---------------------------------------------------------------------
   // Init
   // ---------------------------------------------------------------------
-  function init() {
+  async function init() {
     if (typeof fabric === "undefined") {
       setStatus("Notes Studio couldn't load its drawing engine — check your connection and reload.");
       return;
@@ -761,7 +905,7 @@
     NS.canvas.setWidth(PAGE_W);
     NS.canvas.setHeight(PAGE_H);
 
-    const saved = loadPersisted();
+    const saved = await loadPersisted();
     if (saved && Array.isArray(saved.pages) && saved.pages.length) {
       NS.pages = saved.pages;
       NS.activeIndex = Math.min(saved.activeIndex || 0, NS.pages.length - 1);
@@ -783,6 +927,7 @@
     wirePdfImport();
     wireExportMenu();
     wireKeyboard();
+    wireSaveWarning();
 
     loadPage(NS.activeIndex, true);
   }
