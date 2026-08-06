@@ -1,19 +1,16 @@
 /* AyuVerse Notes Studio
-   A canvas note-making tool: pen/highlighter/eraser/text/shapes, per-page
-   dark or light theme with a translucent watermark, lined or plain ruling,
-   image import from the gallery, PDF import (renders each PDF page as a
-   locked background image you can annotate over), undo/redo, zoom, and
-   PNG/PDF export. Everything is stored in this browser's localStorage —
-   there is no backend, so nothing here ever leaves the device. */
+   A canvas note-making tool with IndexedDB storage, high-resolution rendering,
+   stylus pressure sensitivity, PDF background rendering, and lightweight memory state snapshots. */
 (() => {
   const PAGE_W = 850;
   const PAGE_H = 1100;
-  const STORAGE_KEY = "ayuverse-notes-studio-v1"; // legacy localStorage key, migrated on first load
+  const STORAGE_KEY = "ayuverse-notes-studio-v1";
   const IDB_NAME = "ayuverse-notes-studio";
   const IDB_STORE = "notebook";
   const IDB_RECORD = "main";
   const HISTORY_LIMIT = 60;
   const PDF_WORKER_SRC = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+  const GRID_SIZE = 20;
 
   const NS_PALETTE = [
     "#00c3fa", "#0d7cf5", "#6b28f0", "#f06595",
@@ -33,12 +30,14 @@
     undoStack: [],
     redoStack: [],
     suppressHistory: false,
-    watermarkImg: undefined, // undefined = not attempted yet, null = failed, Image = ready
+    watermarkImg: undefined,
     saveTimer: null,
+    snapToGrid: false,
+    clipboard: null,
   };
 
   // ---------------------------------------------------------------------
-  // Small helpers
+  // Helpers
   // ---------------------------------------------------------------------
   function hexToRgba(hex, alpha) {
     const h = hex.replace("#", "");
@@ -66,6 +65,7 @@
     if (txt) txt.textContent = text;
     if (busy) busy.hidden = false;
   }
+
   function hideBusy() {
     const busy = document.getElementById("nsBusy");
     if (busy) busy.hidden = true;
@@ -81,8 +81,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Page background (theme + ruling + translucent watermark), rendered to
-  // an offscreen canvas and handed to fabric as the page's background image.
+  // Dynamic Offscreen Background Rendering
   // ---------------------------------------------------------------------
   function buildPageBackground(theme, ruled) {
     return new Promise((resolve) => {
@@ -95,7 +94,6 @@
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, PAGE_W, PAGE_H);
 
-      // faint brand glow in the corner, echoing the site's own background
       const glow = ctx.createRadialGradient(PAGE_W * 0.1, 0, 0, PAGE_W * 0.1, 0, PAGE_W);
       glow.addColorStop(0, theme === "dark" ? "rgba(107,40,240,0.12)" : "rgba(107,40,240,0.05)");
       glow.addColorStop(1, "rgba(0,0,0,0)");
@@ -155,23 +153,20 @@
 
   function refreshActiveBackground() {
     const page = NS.pages[NS.activeIndex];
-    return buildPageBackground(page.theme, page.ruled).then(
-      (url) =>
-        new Promise((resolve) => {
-          fabric.Image.fromURL(url, (img) => {
-            NS.canvas.setBackgroundImage(img, () => {
-              NS.canvas.renderAll();
-              resolve();
-            }, { originX: "left", originY: "top" });
-          });
-        })
+    return buildPageBackground(page.theme, page.ruled).then((url) =>
+      new Promise((resolve) => {
+        fabric.Image.fromURL(url, (img) => {
+          NS.canvas.setBackgroundImage(img, () => {
+            NS.canvas.renderAll();
+            resolve();
+          }, { originX: "left", originY: "top" });
+        });
+      })
     );
   }
 
   // ---------------------------------------------------------------------
-  // Persistence — IndexedDB (localStorage's ~5-10MB quota was getting hit by
-  // Fabric JSON + page thumbnails + PDF page images; IndexedDB has a much
-  // higher, browser-managed quota and doesn't block the main thread).
+  // IndexedDB Persistence
   // ---------------------------------------------------------------------
   let dbPromise = null;
   function openDb() {
@@ -218,17 +213,20 @@
     saveCurrentPageState();
     const myGeneration = ++saveGeneration;
     const payload = {
-      pages: NS.pages, activeIndex: NS.activeIndex, color: NS.color, strokeWidth: NS.strokeWidth,
+      pages: NS.pages,
+      activeIndex: NS.activeIndex,
+      color: NS.color,
+      strokeWidth: NS.strokeWidth,
     };
     try {
       await idbSet(IDB_RECORD, payload);
-      if (myGeneration !== saveGeneration) return; // a newer save already landed
+      if (myGeneration !== saveGeneration) return;
       setStatus("All changes saved");
       hideSaveWarning();
     } catch (err) {
       console.error("Autosave failed:", err);
       if (myGeneration !== saveGeneration) return;
-      setStatus("Could not save — see warning above");
+      setStatus("Could not save to storage");
       showSaveWarning();
     }
     renderPagesList();
@@ -238,10 +236,12 @@
     const el = document.getElementById("nsSaveWarn");
     if (el) el.hidden = false;
   }
+
   function hideSaveWarning() {
     const el = document.getElementById("nsSaveWarn");
     if (el) el.hidden = true;
   }
+
   function wireSaveWarning() {
     const btn = document.getElementById("nsSaveWarnExport");
     if (btn) btn.addEventListener("click", () => exportNotebookPdf());
@@ -252,23 +252,18 @@
       const fromIdb = await idbGet(IDB_RECORD);
       if (fromIdb) return fromIdb;
     } catch (err) {
-      console.warn("IndexedDB read failed, falling back to legacy storage:", err);
+      console.warn("IndexedDB read failed, checking legacy storage:", err);
     }
-    // One-time migration from the old localStorage-based save, if present.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        try {
-          await idbSet(IDB_RECORD, parsed);
-          localStorage.removeItem(STORAGE_KEY);
-        } catch (err) {
-          console.warn("Could not migrate legacy save into IndexedDB:", err);
-        }
+        await idbSet(IDB_RECORD, parsed);
+        localStorage.removeItem(STORAGE_KEY);
         return parsed;
       }
     } catch (err) {
-      // legacy data unreadable/corrupt — fall through to a fresh notebook
+      // Fall through to empty session
     }
     return null;
   }
@@ -281,15 +276,8 @@
   }
 
   // ---------------------------------------------------------------------
-  // History (undo/redo) — snapshots the current page's fabric JSON
+  // Optimised Snapshot Management
   // ---------------------------------------------------------------------
-  // The background (theme fill + ruling + watermark) was being baked into
-  // every snapshot as a base64 PNG via canvas.toJSON()'s backgroundImage
-  // property — that's the actual weight in "undo stores full canvas
-  // snapshots", far bigger than the drawn objects for most pages, and it's
-  // fully reconstructable from page.theme/page.ruled via
-  // refreshActiveBackground(). Stripping it out of both the undo stack and
-  // persisted page.json means every push/save only carries what changed.
   function snapshotWithoutBackground() {
     const json = NS.canvas.toJSON();
     delete json.background;
@@ -313,10 +301,6 @@
     NS.redoStack.push(NS.undoStack.pop());
     const prev = NS.undoStack[NS.undoStack.length - 1];
     NS.suppressHistory = true;
-    // loadFromJSON clears the canvas (and its background) first. Undo/redo
-    // never changes theme or ruling, so just re-attach the background image
-    // already rendered — rebuilding it from scratch (gradient + toDataURL +
-    // image reload) on every undo step would make undo noticeably laggy.
     const bg = NS.canvas.backgroundImage;
     NS.canvas.loadFromJSON(prev, () => {
       NS.canvas.setBackgroundImage(bg, () => {
@@ -326,6 +310,7 @@
       });
     });
   }
+
   function redo() {
     if (!NS.redoStack.length) return;
     const next = NS.redoStack.pop();
@@ -342,7 +327,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Page navigation
+  // Page Navigation
   // ---------------------------------------------------------------------
   async function loadPage(index, isInitial) {
     if (!isInitial) saveCurrentPageState();
@@ -360,9 +345,6 @@
     } else {
       NS.canvas.clear();
     }
-    // Background is rebuilt from page.theme/page.ruled once, after objects
-    // load, instead of being built then immediately discarded by
-    // loadFromJSON's internal clear() and rebuilt again from stored JSON.
     await refreshActiveBackground();
     NS.undoStack = [snapshotWithoutBackground()];
     NS.redoStack = [];
@@ -398,7 +380,8 @@
     if (i === NS.activeIndex) saveCurrentPageState();
     const src = NS.pages[i];
     const copy = newPage({
-      theme: src.theme, ruled: src.ruled,
+      theme: src.theme,
+      ruled: src.ruled,
       json: src.json ? JSON.parse(JSON.stringify(src.json)) : null,
       thumb: src.thumb,
     });
@@ -421,7 +404,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Theme / ruling
+  // Theme & Ruling Toggle Controls
   // ---------------------------------------------------------------------
   function buildThemeToggle() {
     const wrap = document.getElementById("nsThemeToggle");
@@ -474,7 +457,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Colour + stroke width
+  // Colors & Stroke Width
   // ---------------------------------------------------------------------
   function buildColorSwatches() {
     const wrap = document.getElementById("nsColors");
@@ -542,7 +525,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Tools
+  // Drawing Tools & Object Creation
   // ---------------------------------------------------------------------
   function setTool(tool) {
     NS.tool = tool;
@@ -552,7 +535,7 @@
     NS.canvas.selection = true;
     NS.canvas.defaultCursor = "default";
     NS.canvas.hoverCursor = "move";
-    NS.canvas.forEachObject((o) => (o.selectable = true));
+    NS.canvas.forEachObject((o) => (o.selectable = !o.locked));
     NS.pendingPlace = null;
 
     if (tool === "pen" || tool === "highlighter") {
@@ -628,7 +611,101 @@
   }
 
   // ---------------------------------------------------------------------
-  // Zoom
+  // Object Formatting & Lock/Snap Extensions
+  // ---------------------------------------------------------------------
+  function wireFormattingControls() {
+    const boldBtn = document.getElementById("nsFormatBold");
+    const italicBtn = document.getElementById("nsFormatItalic");
+    const lockBtn = document.getElementById("nsLockObj");
+    const snapBtn = document.getElementById("nsSnapGrid");
+    const helpBtn = document.getElementById("nsHelpBtn");
+    const helpModal = document.getElementById("nsHelpModal");
+    const helpClose = document.getElementById("nsHelpClose");
+    const helpScrim = document.getElementById("nsHelpScrim");
+
+    boldBtn.addEventListener("click", () => {
+      const obj = NS.canvas.getActiveObject();
+      if (!obj) return;
+      const cur = obj.get("fontWeight");
+      obj.set("fontWeight", cur === "bold" ? "normal" : "bold");
+      NS.canvas.requestRenderAll();
+      pushHistory();
+    });
+
+    italicBtn.addEventListener("click", () => {
+      const obj = NS.canvas.getActiveObject();
+      if (!obj) return;
+      const cur = obj.get("fontStyle");
+      obj.set("fontStyle", cur === "italic" ? "normal" : "italic");
+      NS.canvas.requestRenderAll();
+      pushHistory();
+    });
+
+    lockBtn.addEventListener("click", () => {
+      const obj = NS.canvas.getActiveObject();
+      if (!obj) return;
+      const isLocked = !obj.locked;
+      obj.set({
+        locked: isLocked,
+        lockMovementX: isLocked,
+        lockMovementY: isLocked,
+        lockRotation: isLocked,
+        lockScalingX: isLocked,
+        lockScalingY: isLocked,
+      });
+      lockBtn.classList.toggle("is-active", isLocked);
+      NS.canvas.requestRenderAll();
+      pushHistory();
+    });
+
+    snapBtn.addEventListener("click", () => {
+      NS.snapToGrid = !NS.snapToGrid;
+      snapBtn.classList.toggle("is-active", NS.snapToGrid);
+    });
+
+    if (helpBtn && helpModal) {
+      helpBtn.addEventListener("click", () => helpModal.hidden = false);
+      helpClose.addEventListener("click", () => helpModal.hidden = true);
+      helpScrim.addEventListener("click", () => helpModal.hidden = true);
+    }
+
+    NS.canvas.on("object:moving", (options) => {
+      if (!NS.snapToGrid) return;
+      options.target.set({
+        left: Math.round(options.target.left / GRID_SIZE) * GRID_SIZE,
+        top: Math.round(options.target.top / GRID_SIZE) * GRID_SIZE,
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Stylus Pressure Sensitivity & Touch Handling
+  // ---------------------------------------------------------------------
+  function setupTouchAndStylus() {
+    const el = NS.canvas.upperCanvasEl;
+    el.style.touchAction = "none";
+
+    el.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "pen" && NS.tool === "pen") {
+        const pressure = e.pressure > 0 ? e.pressure : 0.5;
+        if (NS.canvas.freeDrawingBrush) {
+          NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
+        }
+      }
+    }, { passive: true });
+
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "pen" && NS.tool === "pen" && NS.canvas.isDrawingMode) {
+        const pressure = e.pressure > 0 ? e.pressure : 0.5;
+        if (NS.canvas.freeDrawingBrush) {
+          NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
+        }
+      }
+    }, { passive: true });
+  }
+
+  // ---------------------------------------------------------------------
+  // Zoom Controls
   // ---------------------------------------------------------------------
   function setZoom(z) {
     z = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
@@ -641,7 +718,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Import: gallery images
+  // Image Import
   // ---------------------------------------------------------------------
   function wireImageImport() {
     const btn = document.getElementById("nsImportImageBtn");
@@ -667,8 +744,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Import: AyuVerse PDF notes — each PDF page becomes a new notebook page
-  // with the rendered page locked in place, ready to annotate over.
+  // Sequential Low-Memory PDF Import
   // ---------------------------------------------------------------------
   function wirePdfImport() {
     const btn = document.getElementById("nsImportPdfBtn");
@@ -679,7 +755,7 @@
       input.value = "";
       if (!file) return;
       if (!window.pdfjsLib) {
-        alert("PDF import couldn't load. Check your connection and try again.");
+        alert("PDF import couldn't load. Check network connections.");
         return;
       }
       pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
@@ -692,28 +768,25 @@
         const insertAt = NS.activeIndex + 1;
         const pageTheme = NS.pages[NS.activeIndex].theme;
 
-        // Render, insert, and place one PDF page at a time instead of
-        // rendering every page up front — holding N full-resolution page
-        // images in memory at once is what froze the tab on large PDFs.
         for (let i = 1; i <= pdf.numPages; i++) {
           showBusy(`Rendering PDF page ${i} of ${pdf.numPages}…`);
           const pdfPage = await pdf.getPage(i);
           const baseViewport = pdfPage.getViewport({ scale: 1 });
           const scale = (PAGE_W - 40) / baseViewport.width;
           const viewport = pdfPage.getViewport({ scale });
+
           const off = document.createElement("canvas");
           off.width = viewport.width;
           off.height = viewport.height;
           const offCtx = off.getContext("2d");
           await pdfPage.render({ canvasContext: offCtx, viewport }).promise;
-          const dataUrl = off.toDataURL("image/png");
-          // release the render target and pdf.js page resources immediately
+
+          const dataUrl = off.toDataURL("image/webp", 0.85);
           off.width = off.height = 0;
           if (pdfPage.cleanup) pdfPage.cleanup();
 
           const idx = insertAt + (i - 1);
           NS.pages.splice(idx, 0, newPage({ theme: pageTheme, ruled: false }));
-          showBusy(`Placing page ${i} of ${pdf.numPages}…`);
           await loadPage(idx);
           await new Promise((resolve) => {
             fabric.Image.fromURL(dataUrl, (img) => {
@@ -728,10 +801,10 @@
         }
 
         await loadPage(insertAt);
-        setStatus(`Imported ${pdf.numPages} page${pdf.numPages > 1 ? "s" : ""} from PDF`);
+        setStatus(`Imported ${pdf.numPages} pages from PDF`);
       } catch (err) {
         console.error(err);
-        alert("Couldn't read that PDF. Try a different file.");
+        alert("Error loading PDF document.");
       } finally {
         hideBusy();
       }
@@ -739,29 +812,28 @@
   }
 
   // ---------------------------------------------------------------------
-  // Export
+  // Vector & Raster Export Options
   // ---------------------------------------------------------------------
   function exportCurrentPagePng() {
     saveCurrentPageState();
-    // toDataURL's multiplier is relative to the canvas's *current* zoomed
-    // size, so exporting while zoomed out silently downgraded resolution.
-    // Divide by the active zoom so exports are always full quality.
     const url = NS.canvas.toDataURL({ format: "png", multiplier: 2 / NS.zoom });
     downloadDataUrl(url, `ayuverse-notes-page-${NS.activeIndex + 1}.png`);
   }
 
   async function exportNotebookPdf() {
     if (!window.jspdf) {
-      alert("PDF export couldn't load. Check your connection and try again.");
+      alert("PDF library failed to load.");
       return;
     }
     showBusy("Preparing export…");
     saveCurrentPageState();
     const originalIndex = NS.activeIndex;
     const originalZoom = NS.zoom;
-    setZoom(1); // export at full resolution regardless of on-screen zoom
+    setZoom(1);
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: [PAGE_W, PAGE_H] });
+
     for (let i = 0; i < NS.pages.length; i++) {
       showBusy(`Exporting page ${i + 1} of ${NS.pages.length}…`);
       await loadPage(i);
@@ -769,6 +841,7 @@
       if (i > 0) doc.addPage([PAGE_W, PAGE_H], "portrait");
       doc.addImage(url, "JPEG", 0, 0, PAGE_W, PAGE_H);
     }
+
     await loadPage(originalIndex);
     setZoom(originalZoom);
     doc.save("ayuverse-notes.pdf");
@@ -793,7 +866,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Wiring
+  // UI & Event Wiring
   // ---------------------------------------------------------------------
   function wireToolbar() {
     document.getElementById("nsTools").addEventListener("click", (e) => {
@@ -844,10 +917,22 @@
     NS.canvas.on("object:removed", pushHistory);
     NS.canvas.on("path:created", pushHistory);
     NS.canvas.on("mouse:down", handleCanvasMouseDown);
+    NS.canvas.on("selection:created", updateSelectionUI);
+    NS.canvas.on("selection:updated", updateSelectionUI);
+    NS.canvas.on("selection:cleared", updateSelectionUI);
+  }
+
+  function updateSelectionUI() {
+    const active = NS.canvas.getActiveObject();
+    const lockBtn = document.getElementById("nsLockObj");
+    const boldBtn = document.getElementById("nsFormatBold");
+    const italicBtn = document.getElementById("nsFormatItalic");
+    if (lockBtn) lockBtn.classList.toggle("is-active", !!(active && active.locked));
+    if (boldBtn) boldBtn.classList.toggle("is-active", !!(active && active.get("fontWeight") === "bold"));
+    if (italicBtn) italicBtn.classList.toggle("is-active", !!(active && active.get("fontStyle") === "italic"));
   }
 
   function wireKeyboard() {
-    let clipboard = null;
     document.addEventListener("keydown", (e) => {
       const tag = (e.target.tagName || "").toLowerCase();
       const active = NS.canvas.getActiveObject();
@@ -860,12 +945,12 @@
 
       if (mod && e.key.toLowerCase() === "c" && !isEditingText && active) {
         e.preventDefault();
-        active.clone((cloned) => { clipboard = cloned; });
+        active.clone((cloned) => { NS.clipboard = cloned; });
         return;
       }
-      if (mod && e.key.toLowerCase() === "v" && !isEditingText && clipboard) {
+      if (mod && e.key.toLowerCase() === "v" && !isEditingText && NS.clipboard) {
         e.preventDefault();
-        clipboard.clone((cloned) => {
+        NS.clipboard.clone((cloned) => {
           NS.canvas.discardActiveObject();
           cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20, evented: true });
           if (cloned.type === "activeSelection") {
@@ -885,7 +970,7 @@
       if ((e.key === "Delete" || e.key === "Backspace") && !isEditingText && active) {
         e.preventDefault();
         const objs = active.type === "activeSelection" ? active.getObjects() : [active];
-        objs.forEach((o) => NS.canvas.remove(o));
+        objs.forEach((o) => { if (!o.locked) NS.canvas.remove(o); });
         NS.canvas.discardActiveObject();
         NS.canvas.requestRenderAll();
       }
@@ -893,11 +978,11 @@
   }
 
   // ---------------------------------------------------------------------
-  // Init
+  // Application Entry Point
   // ---------------------------------------------------------------------
   async function init() {
     if (typeof fabric === "undefined") {
-      setStatus("Notes Studio couldn't load its drawing engine — check your connection and reload.");
+      setStatus("Drawing engine couldn't load. Check network connections.");
       return;
     }
 
@@ -928,6 +1013,8 @@
     wireExportMenu();
     wireKeyboard();
     wireSaveWarning();
+    wireFormattingControls();
+    setupTouchAndStylus();
 
     loadPage(NS.activeIndex, true);
   }
