@@ -1,4 +1,5 @@
-/* AyuVerse Notes Studio - Fixed Async Flow & Storage Handling */
+/* AyuVerse Notes Studio
+   Robust Canvas Note-Taking Tool with Safe Async Guards & IndexedDB Storage */
 (() => {
   const PAGE_W = 850;
   const PAGE_H = 1100;
@@ -32,7 +33,26 @@
     saveTimer: null,
     snapToGrid: false,
     clipboard: null,
+    isSaving: false,
   };
+
+  // ---------------------------------------------------------------------
+  // Utilities & UI Helpers
+  // ---------------------------------------------------------------------
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace("#", "");
+    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    const n = parseInt(full, 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function newPage(overrides) {
+    return Object.assign(
+      { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), theme: "dark", ruled: true, json: null, thumb: null },
+      overrides || {}
+    );
+  }
 
   function setStatus(text) {
     const el = document.getElementById("nsStatus");
@@ -51,13 +71,26 @@
     if (busy) busy.hidden = true;
   }
 
-  function newPage(overrides) {
-    return Object.assign(
-      { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), theme: "dark", ruled: true, json: null, thumb: null },
-      overrides || {}
-    );
+  function downloadDataUrl(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
+  // Promise wrapper with built-in timeout guard to prevent hangs
+  function withTimeout(promise, ms = 4000, fallbackMsg = "Operation timed out") {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(fallbackMsg)), ms)),
+    ]);
+  }
+
+  // ---------------------------------------------------------------------
+  // Background Canvas Builder
+  // ---------------------------------------------------------------------
   function buildPageBackground(theme, ruled) {
     return new Promise((resolve) => {
       const off = document.createElement("canvas");
@@ -128,19 +161,31 @@
 
   async function refreshActiveBackground() {
     const page = NS.pages[NS.activeIndex];
-    if (!page) return;
-    const url = await buildPageBackground(page.theme, page.ruled);
-    return new Promise((resolve) => {
-      fabric.Image.fromURL(url, (img) => {
-        NS.canvas.setBackgroundImage(img, () => {
-          NS.canvas.renderAll();
-          resolve();
-        }, { originX: "left", originY: "top" });
-      });
-    });
+    if (!page || !NS.canvas) return;
+    try {
+      const url = await buildPageBackground(page.theme, page.ruled);
+      await withTimeout(
+        new Promise((resolve) => {
+          fabric.Image.fromURL(url, (img) => {
+            if (!img) { resolve(); return; }
+            NS.canvas.setBackgroundImage(img, () => {
+              NS.canvas.renderAll();
+              resolve();
+            }, { originX: "left", originY: "top" });
+          });
+        }),
+        3000,
+        "Background render timed out"
+      );
+    } catch (err) {
+      console.warn("Background refresh fallback:", err);
+      NS.canvas.renderAll();
+    }
   }
 
-  // Database Persistence Fixes
+  // ---------------------------------------------------------------------
+  // Storage (IndexedDB)
+  // ---------------------------------------------------------------------
   let dbPromise = null;
   function openDb() {
     if (!window.indexedDB) return Promise.reject(new Error("IndexedDB unavailable"));
@@ -154,38 +199,43 @@
     return dbPromise;
   }
 
+  async function idbGet(key) {
+    try {
+      const db = await openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const req = tx.objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function idbSet(key, value) {
     const db = await openDb();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(IDB_STORE, "readwrite");
-      tx.objectStore(IDB_STORE).put(value, key);
+      // Clean deep-clone payload to guarantee no DataCloneError occurs
+      const safeData = JSON.parse(JSON.stringify(value));
+      tx.objectStore(IDB_STORE).put(safeData, key);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error || new Error("Save aborted"));
-    });
-  }
-
-  async function idbGet(key) {
-    const db = await openDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(IDB_STORE, "readonly");
-      const req = tx.objectStore(IDB_STORE).get(key);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
+      tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
     });
   }
 
   function saveCurrentPageState() {
     const page = NS.pages[NS.activeIndex];
     if (!page || !NS.canvas) return;
-    const json = NS.canvas.toJSON();
-    delete json.background;
-    delete json.backgroundImage;
-    delete json.overlay;
-    delete json.overlayImage;
+    const json = snapshotWithoutBackground();
     page.json = json;
-    // Lower JPEG quality thumbnail to preserve storage space
-    page.thumb = NS.canvas.toDataURL({ format: "jpeg", quality: 0.3, multiplier: 0.15 });
+    try {
+      page.thumb = NS.canvas.toDataURL({ format: "jpeg", quality: 0.3, multiplier: 0.15 });
+    } catch (e) {
+      page.thumb = null;
+    }
   }
 
   let saveGeneration = 0;
@@ -196,6 +246,8 @@
   }
 
   async function doSave() {
+    if (NS.isSaving) return;
+    NS.isSaving = true;
     saveCurrentPageState();
     const myGeneration = ++saveGeneration;
     const payload = {
@@ -206,43 +258,119 @@
     };
     try {
       await idbSet(IDB_RECORD, payload);
-      if (myGeneration !== saveGeneration) return;
-      setStatus("All changes saved");
-      const warn = document.getElementById("nsSaveWarn");
-      if (warn) warn.hidden = true;
+      if (myGeneration === saveGeneration) {
+        setStatus("All changes saved");
+        hideSaveWarning();
+      }
     } catch (err) {
-      console.error("Autosave error:", err);
-      if (myGeneration !== saveGeneration) return;
-      setStatus("Error saving data");
-      const warn = document.getElementById("nsSaveWarn");
-      if (warn) warn.hidden = false;
+      console.error("Autosave failed:", err);
+      if (myGeneration === saveGeneration) {
+        setStatus("Save warning");
+        showSaveWarning();
+      }
+    } finally {
+      NS.isSaving = false;
+      renderPagesList();
     }
   }
 
+  function showSaveWarning() {
+    const el = document.getElementById("nsSaveWarn");
+    if (el) el.hidden = false;
+  }
+
+  function hideSaveWarning() {
+    const el = document.getElementById("nsSaveWarn");
+    if (el) el.hidden = true;
+  }
+
+  function wireSaveWarning() {
+    const btn = document.getElementById("nsSaveWarnExport");
+    if (btn) btn.addEventListener("click", () => exportNotebookPdf());
+  }
+
+  // ---------------------------------------------------------------------
+  // History & Snapshot Optimization
+  // ---------------------------------------------------------------------
+  function snapshotWithoutBackground() {
+    const json = NS.canvas.toJSON();
+    delete json.background;
+    delete json.backgroundImage;
+    delete json.overlay;
+    delete json.overlayImage;
+    return json;
+  }
+
+  function pushHistory() {
+    if (NS.suppressHistory) return;
+    const json = snapshotWithoutBackground();
+    NS.undoStack.push(json);
+    if (NS.undoStack.length > HISTORY_LIMIT) NS.undoStack.shift();
+    NS.redoStack = [];
+    scheduleSave();
+  }
+
+  function undo() {
+    if (NS.undoStack.length < 2) return;
+    NS.redoStack.push(NS.undoStack.pop());
+    const prev = NS.undoStack[NS.undoStack.length - 1];
+    NS.suppressHistory = true;
+    const bg = NS.canvas.backgroundImage;
+    NS.canvas.loadFromJSON(prev, () => {
+      NS.canvas.setBackgroundImage(bg, () => {
+        NS.canvas.renderAll();
+        NS.suppressHistory = false;
+        scheduleSave();
+      });
+    });
+  }
+
+  function redo() {
+    if (!NS.redoStack.length) return;
+    const next = NS.redoStack.pop();
+    NS.undoStack.push(next);
+    NS.suppressHistory = true;
+    const bg = NS.canvas.backgroundImage;
+    NS.canvas.loadFromJSON(next, () => {
+      NS.canvas.setBackgroundImage(bg, () => {
+        NS.canvas.renderAll();
+        NS.suppressHistory = false;
+        scheduleSave();
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Page Navigation
+  // ---------------------------------------------------------------------
   async function loadPage(index, isInitial) {
     if (!isInitial) saveCurrentPageState();
-    NS.activeIndex = index;
-    const page = NS.pages[index];
+    NS.activeIndex = Math.max(0, Math.min(index, NS.pages.length - 1));
+    const page = NS.pages[NS.activeIndex];
 
     NS.suppressHistory = true;
     if (page.json) {
-      await new Promise((resolve) => {
-        NS.canvas.loadFromJSON(page.json, () => {
-          NS.canvas.renderAll();
-          resolve();
-        });
-      });
+      try {
+        await withTimeout(
+          new Promise((resolve) => {
+            NS.canvas.loadFromJSON(page.json, () => {
+              NS.canvas.renderAll();
+              resolve();
+            });
+          }),
+          3500,
+          "Canvas load timed out"
+        );
+      } catch (err) {
+        console.warn("loadFromJSON guard fallback:", err);
+        NS.canvas.clear();
+      }
     } else {
       NS.canvas.clear();
     }
 
-    // Await background completion to prevent stuck promises
     await refreshActiveBackground();
-
-    const snapshot = NS.canvas.toJSON();
-    delete snapshot.background;
-    delete snapshot.backgroundImage;
-    NS.undoStack = [snapshot];
+    NS.undoStack = [snapshotWithoutBackground()];
     NS.redoStack = [];
     NS.suppressHistory = false;
 
@@ -251,10 +379,468 @@
     renderPagesList();
   }
 
-  // Safe Export Routine with Guaranteed Unblock
+  function renderPagesList() {
+    const wrap = document.getElementById("nsPagesList");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    NS.pages.forEach((p, i) => {
+      const item = document.createElement("div");
+      item.className = "ns-pagecard" + (i === NS.activeIndex ? " is-active" : "");
+      const thumbBg = p.theme === "dark" ? "#0d0f20" : "#ffffff";
+      item.innerHTML = `
+        <button type="button" class="ns-pagecard__thumb" data-idx="${i}" style="background:${thumbBg}">
+          ${p.thumb ? `<img src="${p.thumb}" alt="Page ${i + 1}" />` : ""}
+        </button>
+        <div class="ns-pagecard__row">
+          <span>${i + 1}</span>
+          <button type="button" class="ns-pagecard__icon" data-dup="${i}" title="Duplicate page">⧉</button>
+          <button type="button" class="ns-pagecard__icon" data-del="${i}" title="Delete page" ${NS.pages.length <= 1 ? "disabled" : ""}>✕</button>
+        </div>`;
+      wrap.appendChild(item);
+    });
+  }
+
+  function duplicatePage(i) {
+    if (i === NS.activeIndex) saveCurrentPageState();
+    const src = NS.pages[i];
+    const copy = newPage({
+      theme: src.theme,
+      ruled: src.ruled,
+      json: src.json ? JSON.parse(JSON.stringify(src.json)) : null,
+      thumb: src.thumb,
+    });
+    NS.pages.splice(i + 1, 0, copy);
+    loadPage(i + 1);
+    scheduleSave();
+  }
+
+  function deletePage(i) {
+    if (NS.pages.length <= 1) return;
+    if (!confirm("Delete this page? This can't be undone.")) return;
+    NS.pages.splice(i, 1);
+    if (NS.activeIndex === i) {
+      loadPage(Math.min(i, NS.pages.length - 1));
+    } else {
+      if (NS.activeIndex > i) NS.activeIndex--;
+      renderPagesList();
+      scheduleSave();
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Controls & Tooling
+  // ---------------------------------------------------------------------
+  function buildThemeToggle() {
+    const wrap = document.getElementById("nsThemeToggle");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    [["dark", "Dark"], ["light", "Light"]].forEach(([key, label]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pt-legend__chip ns-modechip";
+      b.dataset.theme = key;
+      b.textContent = label;
+      wrap.appendChild(b);
+    });
+    wrap.addEventListener("click", (e) => {
+      const b = e.target.closest(".ns-modechip");
+      if (!b) return;
+      NS.pages[NS.activeIndex].theme = b.dataset.theme;
+      refreshActiveBackground();
+      updateThemeRuledUI();
+      scheduleSave();
+    });
+  }
+
+  function buildRuledToggle() {
+    const wrap = document.getElementById("nsRuledToggle");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    [[true, "Lined"], [false, "Plain"]].forEach(([key, label]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pt-legend__chip ns-modechip";
+      b.dataset.ruled = String(key);
+      b.textContent = label;
+      wrap.appendChild(b);
+    });
+    wrap.addEventListener("click", (e) => {
+      const b = e.target.closest(".ns-modechip");
+      if (!b) return;
+      NS.pages[NS.activeIndex].ruled = b.dataset.ruled === "true";
+      refreshActiveBackground();
+      updateThemeRuledUI();
+      scheduleSave();
+    });
+  }
+
+  function updateThemeRuledUI() {
+    const page = NS.pages[NS.activeIndex];
+    if (!page) return;
+    document.querySelectorAll("#nsThemeToggle .ns-modechip").forEach((b) =>
+      b.classList.toggle("is-active", b.dataset.theme === page.theme));
+    document.querySelectorAll("#nsRuledToggle .ns-modechip").forEach((b) =>
+      b.classList.toggle("is-active", (b.dataset.ruled === "true") === page.ruled));
+    const shell = document.getElementById("nsPageShell");
+    if (shell) shell.classList.toggle("ns-page-shell--light", page.theme === "light");
+  }
+
+  function buildColorSwatches() {
+    const wrap = document.getElementById("nsColors");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    NS_PALETTE.forEach((hex) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "ns-swatch" + (hex === NS.color ? " is-active" : "");
+      b.style.setProperty("--sw", hex);
+      b.dataset.color = hex;
+      b.title = hex;
+      wrap.appendChild(b);
+    });
+    const custom = document.createElement("input");
+    custom.type = "color";
+    custom.className = "ns-swatch ns-swatch--custom";
+    custom.title = "Custom colour";
+    custom.value = NS.color;
+    wrap.appendChild(custom);
+
+    wrap.addEventListener("click", (e) => {
+      const sw = e.target.closest(".ns-swatch:not(.ns-swatch--custom)");
+      if (sw) setColor(sw.dataset.color);
+    });
+    custom.addEventListener("input", (e) => setColor(e.target.value));
+  }
+
+  function setColor(hex) {
+    NS.color = hex;
+    document.querySelectorAll(".ns-swatch").forEach((s) => s.classList.toggle("is-active", s.dataset.color === hex));
+    if (NS.canvas.isDrawingMode && NS.canvas.freeDrawingBrush) {
+      NS.canvas.freeDrawingBrush.color = NS.tool === "highlighter" ? hexToRgba(hex, 0.35) : hex;
+    }
+    applyColorToActive();
+  }
+
+  function applyColorToActive() {
+    const obj = NS.canvas.getActiveObject();
+    if (!obj) return;
+    const targets = obj.type === "activeSelection" ? obj.getObjects() : [obj];
+    targets.forEach((o) => {
+      if (o.type === "i-text" || o.type === "text" || o.type === "textbox") o.set("fill", NS.color);
+      else if (o.type === "group") o.getObjects().forEach((c) => c.set(c.type === "triangle" ? "fill" : "stroke", NS.color));
+      else o.set({ stroke: NS.color });
+    });
+    NS.canvas.requestRenderAll();
+    pushHistory();
+  }
+
+  function wireStrokeSlider() {
+    const input = document.getElementById("nsStroke");
+    if (!input) return;
+    input.value = NS.strokeWidth;
+    input.addEventListener("input", (e) => {
+      NS.strokeWidth = Number(e.target.value);
+      if (NS.canvas.freeDrawingBrush) {
+        NS.canvas.freeDrawingBrush.width = NS.tool === "highlighter" ? Math.max(NS.strokeWidth * 3, 14) : NS.strokeWidth;
+      }
+      const obj = NS.canvas.getActiveObject();
+      if (obj) {
+        const targets = obj.type === "activeSelection" ? obj.getObjects() : [obj];
+        targets.forEach((o) => { if ("strokeWidth" in o) o.set("strokeWidth", NS.strokeWidth); });
+        NS.canvas.requestRenderAll();
+        pushHistory();
+      }
+    });
+  }
+
+  function setTool(tool) {
+    NS.tool = tool;
+    document.querySelectorAll("#nsTools .ns-tbtn").forEach((b) => b.classList.toggle("is-active", b.dataset.tool === tool));
+
+    NS.canvas.isDrawingMode = false;
+    NS.canvas.selection = true;
+    NS.canvas.defaultCursor = "default";
+    NS.canvas.hoverCursor = "move";
+    NS.canvas.forEachObject((o) => (o.selectable = !o.locked));
+    NS.pendingPlace = null;
+
+    if (tool === "pen" || tool === "highlighter") {
+      NS.canvas.isDrawingMode = true;
+      const brush = new fabric.PencilBrush(NS.canvas);
+      if (tool === "highlighter") {
+        brush.color = hexToRgba(NS.color, 0.35);
+        brush.width = Math.max(NS.strokeWidth * 3, 14);
+      } else {
+        brush.color = NS.color;
+        brush.width = NS.strokeWidth;
+      }
+      NS.canvas.freeDrawingBrush = brush;
+    } else if (tool === "eraser") {
+      NS.canvas.selection = false;
+      NS.canvas.defaultCursor = "not-allowed";
+      NS.canvas.hoverCursor = "not-allowed";
+      NS.canvas.forEachObject((o) => (o.selectable = false));
+    } else if (["text", "sticky", "rect", "ellipse", "line", "arrow"].includes(tool)) {
+      NS.pendingPlace = tool;
+      NS.canvas.defaultCursor = "crosshair";
+    }
+  }
+
+  function placeObject(kind, point) {
+    const stroke = NS.color, sw = NS.strokeWidth;
+    let obj = null;
+    switch (kind) {
+      case "text":
+        obj = new fabric.IText("Type here", { left: point.x, top: point.y, fontFamily: "Inter, sans-serif", fontSize: 20 + sw, fill: stroke });
+        break;
+      case "sticky":
+        obj = new fabric.Textbox("New note", {
+          left: point.x, top: point.y, width: 220, fontFamily: "Inter, sans-serif",
+          fontSize: 18, fill: "#1a1a2e", backgroundColor: stroke, padding: 10,
+        });
+        break;
+      case "rect":
+        obj = new fabric.Rect({ left: point.x - 60, top: point.y - 40, width: 120, height: 80, rx: 8, ry: 8, fill: "transparent", stroke, strokeWidth: sw });
+        break;
+      case "ellipse":
+        obj = new fabric.Ellipse({ left: point.x - 60, top: point.y - 40, rx: 60, ry: 40, fill: "transparent", stroke, strokeWidth: sw });
+        break;
+      case "line":
+        obj = new fabric.Line([point.x - 70, point.y, point.x + 70, point.y], { stroke, strokeWidth: sw });
+        break;
+      case "arrow": {
+        const len = 140;
+        const shaft = new fabric.Line([0, 0, len, 0], { stroke, strokeWidth: sw, originX: "center", originY: "center" });
+        const head = new fabric.Triangle({ left: len / 2, top: 0, originX: "center", originY: "center", angle: 90, width: sw * 4 + 8, height: sw * 4 + 8, fill: stroke });
+        obj = new fabric.Group([shaft, head], { left: point.x - len / 2, top: point.y });
+        break;
+      }
+      default:
+        return;
+    }
+    NS.canvas.add(obj);
+    NS.canvas.setActiveObject(obj);
+    NS.canvas.requestRenderAll();
+  }
+
+  function handleCanvasMouseDown(opt) {
+    if (NS.tool === "eraser") {
+      if (opt.target) NS.canvas.remove(opt.target);
+      return;
+    }
+    if (NS.pendingPlace) {
+      const p = NS.canvas.getPointer(opt.e);
+      placeObject(NS.pendingPlace, p);
+      NS.pendingPlace = null;
+      setTool("select");
+    }
+  }
+
+  function wireFormattingControls() {
+    const boldBtn = document.getElementById("nsFormatBold");
+    const italicBtn = document.getElementById("nsFormatItalic");
+    const lockBtn = document.getElementById("nsLockObj");
+    const snapBtn = document.getElementById("nsSnapGrid");
+    const helpBtn = document.getElementById("nsHelpBtn");
+    const helpModal = document.getElementById("nsHelpModal");
+    const helpClose = document.getElementById("nsHelpClose");
+    const helpScrim = document.getElementById("nsHelpScrim");
+
+    if (boldBtn) {
+      boldBtn.addEventListener("click", () => {
+        const obj = NS.canvas.getActiveObject();
+        if (!obj) return;
+        const cur = obj.get("fontWeight");
+        obj.set("fontWeight", cur === "bold" ? "normal" : "bold");
+        NS.canvas.requestRenderAll();
+        pushHistory();
+      });
+    }
+
+    if (italicBtn) {
+      italicBtn.addEventListener("click", () => {
+        const obj = NS.canvas.getActiveObject();
+        if (!obj) return;
+        const cur = obj.get("fontStyle");
+        obj.set("fontStyle", cur === "italic" ? "normal" : "italic");
+        NS.canvas.requestRenderAll();
+        pushHistory();
+      });
+    }
+
+    if (lockBtn) {
+      lockBtn.addEventListener("click", () => {
+        const obj = NS.canvas.getActiveObject();
+        if (!obj) return;
+        const isLocked = !obj.locked;
+        obj.set({
+          locked: isLocked,
+          lockMovementX: isLocked,
+          lockMovementY: isLocked,
+          lockRotation: isLocked,
+          lockScalingX: isLocked,
+          lockScalingY: isLocked,
+        });
+        lockBtn.classList.toggle("is-active", isLocked);
+        NS.canvas.requestRenderAll();
+        pushHistory();
+      });
+    }
+
+    if (snapBtn) {
+      snapBtn.addEventListener("click", () => {
+        NS.snapToGrid = !NS.snapToGrid;
+        snapBtn.classList.toggle("is-active", NS.snapToGrid);
+      });
+    }
+
+    if (helpBtn && helpModal) {
+      helpBtn.addEventListener("click", () => helpModal.hidden = false);
+      if (helpClose) helpClose.addEventListener("click", () => helpModal.hidden = true);
+      if (helpScrim) helpScrim.addEventListener("click", () => helpModal.hidden = true);
+    }
+
+    NS.canvas.on("object:moving", (options) => {
+      if (!NS.snapToGrid || !options.target) return;
+      options.target.set({
+        left: Math.round(options.target.left / GRID_SIZE) * GRID_SIZE,
+        top: Math.round(options.target.top / GRID_SIZE) * GRID_SIZE,
+      });
+    });
+  }
+
+  function setupTouchAndStylus() {
+    const el = NS.canvas.upperCanvasEl;
+    if (!el) return;
+    el.style.touchAction = "none";
+
+    el.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "pen" && NS.tool === "pen" && NS.canvas.freeDrawingBrush) {
+        const pressure = e.pressure > 0 ? e.pressure : 0.5;
+        NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
+      }
+    }, { passive: true });
+
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "pen" && NS.tool === "pen" && NS.canvas.isDrawingMode && NS.canvas.freeDrawingBrush) {
+        const pressure = e.pressure > 0 ? e.pressure : 0.5;
+        NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
+      }
+    }, { passive: true });
+  }
+
+  function setZoom(z) {
+    z = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
+    NS.zoom = z;
+    NS.canvas.setZoom(z);
+    NS.canvas.setWidth(PAGE_W * z);
+    NS.canvas.setHeight(PAGE_H * z);
+    const label = document.getElementById("nsZoomLabel");
+    if (label) label.textContent = Math.round(z * 100) + "%";
+  }
+
+  function wireImageImport() {
+    const btn = document.getElementById("nsImportImageBtn");
+    const input = document.getElementById("nsImageInput");
+    if (!btn || !input) return;
+    btn.addEventListener("click", () => input.click());
+    input.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      files.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          fabric.Image.fromURL(reader.result, (img) => {
+            if (!img) return;
+            const scale = Math.min(1, (PAGE_W * 0.5) / img.width);
+            img.set({ left: 110 + idx * 24, top: 110 + idx * 24, scaleX: scale, scaleY: scale });
+            NS.canvas.add(img);
+            NS.canvas.setActiveObject(img);
+            NS.canvas.requestRenderAll();
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+      input.value = "";
+    });
+  }
+
+  function wirePdfImport() {
+    const btn = document.getElementById("nsImportPdfBtn");
+    const input = document.getElementById("nsPdfInput");
+    if (!btn || !input) return;
+    btn.addEventListener("click", () => input.click());
+    input.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      input.value = "";
+      if (!file) return;
+      if (!window.pdfjsLib) {
+        alert("PDF import couldn't load. Check network connections.");
+        return;
+      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
+      showBusy("Reading PDF…");
+      try {
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        saveCurrentPageState();
+
+        const insertAt = NS.activeIndex + 1;
+        const pageTheme = NS.pages[NS.activeIndex].theme;
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          showBusy(`Rendering PDF page ${i} of ${pdf.numPages}…`);
+          const pdfPage = await pdf.getPage(i);
+          const baseViewport = pdfPage.getViewport({ scale: 1 });
+          const scale = (PAGE_W - 40) / baseViewport.width;
+          const viewport = pdfPage.getViewport({ scale });
+
+          const off = document.createElement("canvas");
+          off.width = viewport.width;
+          off.height = viewport.height;
+          const offCtx = off.getContext("2d");
+          await pdfPage.render({ canvasContext: offCtx, viewport }).promise;
+
+          const dataUrl = off.toDataURL("image/jpeg", 0.85);
+          off.width = off.height = 0;
+          if (pdfPage.cleanup) pdfPage.cleanup();
+
+          const idx = insertAt + (i - 1);
+          NS.pages.splice(idx, 0, newPage({ theme: pageTheme, ruled: false }));
+          await loadPage(idx);
+          await new Promise((resolve) => {
+            fabric.Image.fromURL(dataUrl, (img) => {
+              if (img) {
+                img.set({ left: (PAGE_W - viewport.width) / 2, top: 30, selectable: false, evented: false, hasControls: false });
+                NS.canvas.add(img);
+                NS.canvas.sendToBack(img);
+                NS.canvas.requestRenderAll();
+              }
+              resolve();
+            });
+          });
+          saveCurrentPageState();
+        }
+
+        await loadPage(insertAt);
+        setStatus(`Imported ${pdf.numPages} pages from PDF`);
+      } catch (err) {
+        console.error(err);
+        alert("Error loading PDF document.");
+      } finally {
+        hideBusy(); // Guarantees spinner is removed
+      }
+    });
+  }
+
+  function exportCurrentPagePng() {
+    saveCurrentPageState();
+    const url = NS.canvas.toDataURL({ format: "png", multiplier: 2 / NS.zoom });
+    downloadDataUrl(url, `ayuverse-notes-page-${NS.activeIndex + 1}.png`);
+  }
+
   async function exportNotebookPdf() {
     if (!window.jspdf) {
-      alert("PDF library failed to load.");
+      alert("PDF export couldn't load. Check network connection.");
       return;
     }
     showBusy("Preparing PDF export…");
@@ -280,74 +866,171 @@
       doc.save("ayuverse-notes.pdf");
       setStatus("Export complete");
     } catch (err) {
-      console.error("Export failed:", err);
-      alert("Export failed. Check console for details.");
+      console.error("Export error:", err);
+      alert("Export encountered an issue.");
     } finally {
-      hideBusy(); // Guarantees spinner disappears
+      hideBusy(); // Guarantees busy modal closes
     }
   }
 
-  function setTool(tool) {
-    NS.tool = tool;
-    document.querySelectorAll("#nsTools .ns-tbtn").forEach((b) => b.classList.toggle("is-active", b.dataset.tool === tool));
-    NS.canvas.isDrawingMode = false;
-    NS.canvas.selection = true;
-    NS.canvas.defaultCursor = "default";
-    NS.canvas.hoverCursor = "move";
-    NS.canvas.forEachObject((o) => (o.selectable = !o.locked));
-
-    if (tool === "pen" || tool === "highlighter") {
-      NS.canvas.isDrawingMode = true;
-      const brush = new fabric.PencilBrush(NS.canvas);
-      brush.color = tool === "highlighter" ? "rgba(255, 212, 59, 0.35)" : NS.color;
-      brush.width = tool === "highlighter" ? Math.max(NS.strokeWidth * 3, 14) : NS.strokeWidth;
-      NS.canvas.freeDrawingBrush = brush;
-    }
-  }
-
-  function renderPagesList() {
-    const wrap = document.getElementById("nsPagesList");
-    if (!wrap) return;
-    wrap.innerHTML = "";
-    NS.pages.forEach((p, i) => {
-      const item = document.createElement("div");
-      item.className = "ns-pagecard" + (i === NS.activeIndex ? " is-active" : "");
-      const thumbBg = p.theme === "dark" ? "#0d0f20" : "#ffffff";
-      item.innerHTML = `
-        <button type="button" class="ns-pagecard__thumb" data-idx="${i}" style="background:${thumbBg}">
-          ${p.thumb ? `<img src="${p.thumb}" alt="Page ${i + 1}" />` : ""}
-        </button>
-        <div class="ns-pagecard__row">
-          <span>${i + 1}</span>
-        </div>`;
-      wrap.appendChild(item);
+  function wireExportMenu() {
+    const btn = document.getElementById("nsExportBtn");
+    const menu = document.getElementById("nsExportMenu");
+    if (!btn || !menu) return;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+    });
+    document.addEventListener("click", () => { menu.hidden = true; });
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest("[data-export]");
+      if (!item) return;
+      menu.hidden = true;
+      if (item.dataset.export === "png") exportCurrentPagePng();
+      else exportNotebookPdf();
     });
   }
 
-  function setZoom(z) {
-    z = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
-    NS.zoom = z;
-    NS.canvas.setZoom(z);
-    NS.canvas.setWidth(PAGE_W * z);
-    NS.canvas.setHeight(PAGE_H * z);
-    const label = document.getElementById("nsZoomLabel");
-    if (label) label.textContent = Math.round(z * 100) + "%";
+  function wireToolbar() {
+    const tools = document.getElementById("nsTools");
+    if (tools) {
+      tools.addEventListener("click", (e) => {
+        const btn = e.target.closest(".ns-tbtn[data-tool]");
+        if (btn) setTool(btn.dataset.tool);
+      });
+    }
+    const undoBtn = document.getElementById("nsUndo");
+    const redoBtn = document.getElementById("nsRedo");
+    const clearBtn = document.getElementById("nsClearPage");
+    const zoomIn = document.getElementById("nsZoomIn");
+    const zoomOut = document.getElementById("nsZoomOut");
+    const applyAll = document.getElementById("nsApplyAll");
+
+    if (undoBtn) undoBtn.addEventListener("click", undo);
+    if (redoBtn) redoBtn.addEventListener("click", redo);
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        if (!confirm("Clear all drawings on this page?")) return;
+        NS.canvas.getObjects().slice().forEach((o) => NS.canvas.remove(o));
+        pushHistory();
+      });
+    }
+    if (zoomIn) zoomIn.addEventListener("click", () => setZoom(NS.zoom + 0.1));
+    if (zoomOut) zoomOut.addEventListener("click", () => setZoom(NS.zoom - 0.1));
+    if (applyAll) {
+      applyAll.addEventListener("click", () => {
+        const page = NS.pages[NS.activeIndex];
+        NS.pages.forEach((p) => { p.theme = page.theme; p.ruled = page.ruled; });
+        scheduleSave();
+        renderPagesList();
+      });
+    }
   }
 
-  function updateThemeRuledUI() {
-    const page = NS.pages[NS.activeIndex];
-    if (!page) return;
-    document.querySelectorAll("#nsThemeToggle .ns-modechip").forEach((b) =>
-      b.classList.toggle("is-active", b.dataset.theme === page.theme));
-    document.querySelectorAll("#nsRuledToggle .ns-modechip").forEach((b) =>
-      b.classList.toggle("is-active", (b.dataset.ruled === "true") === page.ruled));
+  function wirePages() {
+    const addBtn = document.getElementById("nsAddPage");
+    const pagesList = document.getElementById("nsPagesList");
+
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        saveCurrentPageState();
+        const cur = NS.pages[NS.activeIndex];
+        NS.pages.splice(NS.activeIndex + 1, 0, newPage({ theme: cur ? cur.theme : "dark", ruled: cur ? cur.ruled : true }));
+        loadPage(NS.activeIndex + 1);
+        scheduleSave();
+      });
+    }
+
+    if (pagesList) {
+      pagesList.addEventListener("click", (e) => {
+        const dup = e.target.closest("[data-dup]");
+        const del = e.target.closest("[data-del]");
+        const thumb = e.target.closest("[data-idx]");
+        if (dup) return duplicatePage(Number(dup.dataset.dup));
+        if (del) return deletePage(Number(del.dataset.del));
+        if (thumb) {
+          const idx = Number(thumb.dataset.idx);
+          if (idx !== NS.activeIndex) loadPage(idx);
+        }
+      });
+    }
   }
 
+  function wireCanvasEvents() {
+    NS.canvas.on("object:added", pushHistory);
+    NS.canvas.on("object:modified", pushHistory);
+    NS.canvas.on("object:removed", pushHistory);
+    NS.canvas.on("path:created", pushHistory);
+    NS.canvas.on("mouse:down", handleCanvasMouseDown);
+    NS.canvas.on("selection:created", updateSelectionUI);
+    NS.canvas.on("selection:updated", updateSelectionUI);
+    NS.canvas.on("selection:cleared", updateSelectionUI);
+  }
+
+  function updateSelectionUI() {
+    const active = NS.canvas.getActiveObject();
+    const lockBtn = document.getElementById("nsLockObj");
+    const boldBtn = document.getElementById("nsFormatBold");
+    const italicBtn = document.getElementById("nsFormatItalic");
+    if (lockBtn) lockBtn.classList.toggle("is-active", !!(active && active.locked));
+    if (boldBtn) boldBtn.classList.toggle("is-active", !!(active && active.get("fontWeight") === "bold"));
+    if (italicBtn) italicBtn.classList.toggle("is-active", !!(active && active.get("fontStyle") === "italic"));
+  }
+
+  function wireKeyboard() {
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      const active = NS.canvas.getActiveObject();
+      const isEditingText = tag === "input" || tag === "textarea" || (active && active.isEditing);
+
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) { e.preventDefault(); redo(); return; }
+      if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); scheduleSave(); return; }
+
+      if (mod && e.key.toLowerCase() === "c" && !isEditingText && active) {
+        e.preventDefault();
+        active.clone((cloned) => { NS.clipboard = cloned; });
+        return;
+      }
+      if (mod && e.key.toLowerCase() === "v" && !isEditingText && NS.clipboard) {
+        e.preventDefault();
+        NS.clipboard.clone((cloned) => {
+          NS.canvas.discardActiveObject();
+          cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20, evented: true });
+          if (cloned.type === "activeSelection") {
+            cloned.canvas = NS.canvas;
+            cloned.forEachObject((obj) => NS.canvas.add(obj));
+            cloned.setCoords();
+          } else {
+            NS.canvas.add(cloned);
+          }
+          NS.canvas.setActiveObject(cloned);
+          NS.canvas.requestRenderAll();
+          pushHistory();
+        });
+        return;
+      }
+
+      if ((e.key === "Delete" || e.key === "Backspace") && !isEditingText && active) {
+        e.preventDefault();
+        const objs = active.type === "activeSelection" ? active.getObjects() : [active];
+        objs.forEach((o) => { if (!o.locked) NS.canvas.remove(o); });
+        NS.canvas.discardActiveObject();
+        NS.canvas.requestRenderAll();
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Application Entry Point
+  // ---------------------------------------------------------------------
   async function init() {
     if (typeof fabric === "undefined") {
       setStatus("Fabric engine unavailable.");
       return;
     }
+
     NS.canvas = new fabric.Canvas("nsCanvas", { selection: true, preserveObjectStacking: true });
     NS.canvas.setWidth(PAGE_W);
     NS.canvas.setHeight(PAGE_H);
@@ -357,20 +1040,34 @@
       if (saved && Array.isArray(saved.pages) && saved.pages.length) {
         NS.pages = saved.pages;
         NS.activeIndex = Math.min(saved.activeIndex || 0, NS.pages.length - 1);
+        NS.color = saved.color || NS.color;
+        NS.strokeWidth = saved.strokeWidth || NS.strokeWidth;
       } else {
         NS.pages = [newPage()];
+        NS.activeIndex = 0;
       }
     } catch (e) {
       NS.pages = [newPage()];
+      NS.activeIndex = 0;
     }
 
-    const exportBtn = document.getElementById("nsSaveWarnExport");
-    if (exportBtn) exportBtn.addEventListener("click", exportNotebookPdf);
-
-    const exportPdfOpt = document.querySelector('[data-export="pdf"]');
-    if (exportPdfOpt) exportPdfOpt.addEventListener("click", exportNotebookPdf);
+    buildColorSwatches();
+    buildThemeToggle();
+    buildRuledToggle();
+    wireStrokeSlider();
+    wireToolbar();
+    wirePages();
+    wireCanvasEvents();
+    wireImageImport();
+    wirePdfImport();
+    wireExportMenu();
+    wireKeyboard();
+    wireSaveWarning();
+    wireFormattingControls();
+    setupTouchAndStylus();
 
     await loadPage(NS.activeIndex, true);
+    hideBusy();
   }
 
   document.addEventListener("DOMContentLoaded", init);
