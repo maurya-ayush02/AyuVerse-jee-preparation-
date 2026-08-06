@@ -193,6 +193,10 @@
                 <canvas id="nsCanvas"></canvas>
               </div>
               <div class="ns-status" id="nsStatus">All changes saved</div>
+              <div class="ns-savewarn" id="nsSaveWarn" hidden role="alert">
+                <span>Your changes aren't saving — storage is full or unavailable.</span>
+                <button type="button" class="btn btn--sm" id="nsSaveWarnExport">Export a backup now</button>
+              </div>
               <div class="ns-busy" id="nsBusy" hidden>
                 <div class="ns-busy__spinner"></div>
                 <p id="nsBusyText">Working…</p>
