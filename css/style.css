@@ -1402,3 +1402,38 @@ p { margin: 0; }
   #nsCanvas { touch-action: none; }
   .ns-canvas-wrap { touch-action: pan-y; }
 }
+/* Custom Help Modal Extensions */
+.ns-help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.ns-help-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+kbd {
+  background: var(--bg-surface-3);
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+/* Canvas Touch Optimizations */
+#nsCanvas {
+  touch-action: none !important;
+}
+
+/* Formatting Control Active State */
+#nsTextControls .ns-tbtn.is-active {
+  background: var(--c-violet);
+  color: #fff;
+}
+
