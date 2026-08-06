@@ -1212,6 +1212,7 @@ p { margin: 0; }
 }
 .ns-menu__panel button:hover { background: var(--bg-surface-3); color: var(--text-primary); }
 .ns-menu__panel button + button { border-top: 1px solid var(--border-soft); }
+.ns-menu__panel[hidden] { display: none; }
 
 /* ---- Body: canvas + page rail ---- */
 .ns-body { display: flex; gap: 1.1rem; align-items: flex-start; }
@@ -1275,6 +1276,7 @@ p { margin: 0; }
   border: none;
   font-weight: 600;
 }
+.ns-savewarn[hidden] { display: none; }
 
 .ns-busy {
   position: absolute;
@@ -1297,6 +1299,7 @@ p { margin: 0; }
   animation: ns-spin .8s linear infinite;
 }
 .ns-busy p { font-size: .85rem; color: var(--text-secondary); }
+.ns-busy[hidden] { display: none; }
 @keyframes ns-spin { to { transform: rotate(360deg); } }
 
 /* ---- Page rail ---- */
@@ -1402,38 +1405,3 @@ p { margin: 0; }
   #nsCanvas { touch-action: none; }
   .ns-canvas-wrap { touch-action: pan-y; }
 }
-/* Custom Help Modal Extensions */
-.ns-help-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-top: 1rem;
-}
-.ns-help-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-kbd {
-  background: var(--bg-surface-3);
-  border: 1px solid var(--border-soft);
-  border-radius: 4px;
-  padding: 0.15rem 0.4rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-primary);
-}
-
-/* Canvas Touch Optimizations */
-#nsCanvas {
-  touch-action: none !important;
-}
-
-/* Formatting Control Active State */
-#nsTextControls .ns-tbtn.is-active {
-  background: var(--c-violet);
-  color: #fff;
-}
-
