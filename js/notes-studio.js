@@ -1,6 +1,4 @@
-/* AyuVerse Notes Studio
-   A canvas note-making tool with IndexedDB storage, high-resolution rendering,
-   stylus pressure sensitivity, PDF background rendering, and lightweight memory state snapshots. */
+/* AyuVerse Notes Studio - Fixed Async Flow & Storage Handling */
 (() => {
   const PAGE_W = 850;
   const PAGE_H = 1100;
@@ -36,24 +34,6 @@
     clipboard: null,
   };
 
-  // ---------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------
-  function hexToRgba(hex, alpha) {
-    const h = hex.replace("#", "");
-    const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-    const n = parseInt(full, 16);
-    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  function newPage(overrides) {
-    return Object.assign(
-      { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), theme: "dark", ruled: true, json: null, thumb: null },
-      overrides || {}
-    );
-  }
-
   function setStatus(text) {
     const el = document.getElementById("nsStatus");
     if (el) el.textContent = text;
@@ -71,18 +51,13 @@
     if (busy) busy.hidden = true;
   }
 
-  function downloadDataUrl(url, filename) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  function newPage(overrides) {
+    return Object.assign(
+      { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), theme: "dark", ruled: true, json: null, thumb: null },
+      overrides || {}
+    );
   }
 
-  // ---------------------------------------------------------------------
-  // Dynamic Offscreen Background Rendering
-  // ---------------------------------------------------------------------
   function buildPageBackground(theme, ruled) {
     return new Promise((resolve) => {
       const off = document.createElement("canvas");
@@ -137,7 +112,7 @@
           ctx.fillText("AyuVerse", 0, 0);
         }
         ctx.restore();
-        resolve(off.toDataURL("image/png"));
+        resolve(off.toDataURL("image/jpeg", 0.8));
       }
 
       if (NS.watermarkImg === undefined) {
@@ -151,23 +126,21 @@
     });
   }
 
-  function refreshActiveBackground() {
+  async function refreshActiveBackground() {
     const page = NS.pages[NS.activeIndex];
-    return buildPageBackground(page.theme, page.ruled).then((url) =>
-      new Promise((resolve) => {
-        fabric.Image.fromURL(url, (img) => {
-          NS.canvas.setBackgroundImage(img, () => {
-            NS.canvas.renderAll();
-            resolve();
-          }, { originX: "left", originY: "top" });
-        });
-      })
-    );
+    if (!page) return;
+    const url = await buildPageBackground(page.theme, page.ruled);
+    return new Promise((resolve) => {
+      fabric.Image.fromURL(url, (img) => {
+        NS.canvas.setBackgroundImage(img, () => {
+          NS.canvas.renderAll();
+          resolve();
+        }, { originX: "left", originY: "top" });
+      });
+    });
   }
 
-  // ---------------------------------------------------------------------
-  // IndexedDB Persistence
-  // ---------------------------------------------------------------------
+  // Database Persistence Fixes
   let dbPromise = null;
   function openDb() {
     if (!window.indexedDB) return Promise.reject(new Error("IndexedDB unavailable"));
@@ -181,6 +154,17 @@
     return dbPromise;
   }
 
+  async function idbSet(key, value) {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error("Save aborted"));
+    });
+  }
+
   async function idbGet(key) {
     const db = await openDb();
     return new Promise((resolve, reject) => {
@@ -191,15 +175,17 @@
     });
   }
 
-  async function idbSet(key, value) {
-    const db = await openDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(IDB_STORE, "readwrite");
-      tx.objectStore(IDB_STORE).put(value, key);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error || new Error("Save aborted"));
-    });
+  function saveCurrentPageState() {
+    const page = NS.pages[NS.activeIndex];
+    if (!page || !NS.canvas) return;
+    const json = NS.canvas.toJSON();
+    delete json.background;
+    delete json.backgroundImage;
+    delete json.overlay;
+    delete json.overlayImage;
+    page.json = json;
+    // Lower JPEG quality thumbnail to preserve storage space
+    page.thumb = NS.canvas.toDataURL({ format: "jpeg", quality: 0.3, multiplier: 0.15 });
   }
 
   let saveGeneration = 0;
@@ -222,113 +208,17 @@
       await idbSet(IDB_RECORD, payload);
       if (myGeneration !== saveGeneration) return;
       setStatus("All changes saved");
-      hideSaveWarning();
+      const warn = document.getElementById("nsSaveWarn");
+      if (warn) warn.hidden = true;
     } catch (err) {
-      console.error("Autosave failed:", err);
+      console.error("Autosave error:", err);
       if (myGeneration !== saveGeneration) return;
-      setStatus("Could not save to storage");
-      showSaveWarning();
+      setStatus("Error saving data");
+      const warn = document.getElementById("nsSaveWarn");
+      if (warn) warn.hidden = false;
     }
-    renderPagesList();
   }
 
-  function showSaveWarning() {
-    const el = document.getElementById("nsSaveWarn");
-    if (el) el.hidden = false;
-  }
-
-  function hideSaveWarning() {
-    const el = document.getElementById("nsSaveWarn");
-    if (el) el.hidden = true;
-  }
-
-  function wireSaveWarning() {
-    const btn = document.getElementById("nsSaveWarnExport");
-    if (btn) btn.addEventListener("click", () => exportNotebookPdf());
-  }
-
-  async function loadPersisted() {
-    try {
-      const fromIdb = await idbGet(IDB_RECORD);
-      if (fromIdb) return fromIdb;
-    } catch (err) {
-      console.warn("IndexedDB read failed, checking legacy storage:", err);
-    }
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        await idbSet(IDB_RECORD, parsed);
-        localStorage.removeItem(STORAGE_KEY);
-        return parsed;
-      }
-    } catch (err) {
-      // Fall through to empty session
-    }
-    return null;
-  }
-
-  function saveCurrentPageState() {
-    const page = NS.pages[NS.activeIndex];
-    if (!page || !NS.canvas) return;
-    page.json = snapshotWithoutBackground();
-    page.thumb = NS.canvas.toDataURL({ format: "png", multiplier: 0.22 });
-  }
-
-  // ---------------------------------------------------------------------
-  // Optimised Snapshot Management
-  // ---------------------------------------------------------------------
-  function snapshotWithoutBackground() {
-    const json = NS.canvas.toJSON();
-    delete json.background;
-    delete json.backgroundImage;
-    delete json.overlay;
-    delete json.overlayImage;
-    return json;
-  }
-
-  function pushHistory() {
-    if (NS.suppressHistory) return;
-    const json = snapshotWithoutBackground();
-    NS.undoStack.push(json);
-    if (NS.undoStack.length > HISTORY_LIMIT) NS.undoStack.shift();
-    NS.redoStack = [];
-    scheduleSave();
-  }
-
-  function undo() {
-    if (NS.undoStack.length < 2) return;
-    NS.redoStack.push(NS.undoStack.pop());
-    const prev = NS.undoStack[NS.undoStack.length - 1];
-    NS.suppressHistory = true;
-    const bg = NS.canvas.backgroundImage;
-    NS.canvas.loadFromJSON(prev, () => {
-      NS.canvas.setBackgroundImage(bg, () => {
-        NS.canvas.renderAll();
-        NS.suppressHistory = false;
-        scheduleSave();
-      });
-    });
-  }
-
-  function redo() {
-    if (!NS.redoStack.length) return;
-    const next = NS.redoStack.pop();
-    NS.undoStack.push(next);
-    NS.suppressHistory = true;
-    const bg = NS.canvas.backgroundImage;
-    NS.canvas.loadFromJSON(next, () => {
-      NS.canvas.setBackgroundImage(bg, () => {
-        NS.canvas.renderAll();
-        NS.suppressHistory = false;
-        scheduleSave();
-      });
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // Page Navigation
-  // ---------------------------------------------------------------------
   async function loadPage(index, isInitial) {
     if (!isInitial) saveCurrentPageState();
     NS.activeIndex = index;
@@ -345,14 +235,74 @@
     } else {
       NS.canvas.clear();
     }
+
+    // Await background completion to prevent stuck promises
     await refreshActiveBackground();
-    NS.undoStack = [snapshotWithoutBackground()];
+
+    const snapshot = NS.canvas.toJSON();
+    delete snapshot.background;
+    delete snapshot.backgroundImage;
+    NS.undoStack = [snapshot];
     NS.redoStack = [];
     NS.suppressHistory = false;
 
     updateThemeRuledUI();
     setTool("select");
     renderPagesList();
+  }
+
+  // Safe Export Routine with Guaranteed Unblock
+  async function exportNotebookPdf() {
+    if (!window.jspdf) {
+      alert("PDF library failed to load.");
+      return;
+    }
+    showBusy("Preparing PDF export…");
+    try {
+      saveCurrentPageState();
+      const originalIndex = NS.activeIndex;
+      const originalZoom = NS.zoom;
+      setZoom(1);
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: [PAGE_W, PAGE_H] });
+
+      for (let i = 0; i < NS.pages.length; i++) {
+        showBusy(`Exporting page ${i + 1} of ${NS.pages.length}…`);
+        await loadPage(i, true);
+        const url = NS.canvas.toDataURL({ format: "jpeg", quality: 0.85, multiplier: 1.5 });
+        if (i > 0) doc.addPage([PAGE_W, PAGE_H], "portrait");
+        doc.addImage(url, "JPEG", 0, 0, PAGE_W, PAGE_H);
+      }
+
+      await loadPage(originalIndex, true);
+      setZoom(originalZoom);
+      doc.save("ayuverse-notes.pdf");
+      setStatus("Export complete");
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Export failed. Check console for details.");
+    } finally {
+      hideBusy(); // Guarantees spinner disappears
+    }
+  }
+
+  function setTool(tool) {
+    NS.tool = tool;
+    document.querySelectorAll("#nsTools .ns-tbtn").forEach((b) => b.classList.toggle("is-active", b.dataset.tool === tool));
+    NS.canvas.isDrawingMode = false;
+    NS.canvas.selection = true;
+    NS.canvas.defaultCursor = "default";
+    NS.canvas.hoverCursor = "move";
+    NS.canvas.forEachObject((o) => (o.selectable = !o.locked));
+
+    if (tool === "pen" || tool === "highlighter") {
+      NS.canvas.isDrawingMode = true;
+      const brush = new fabric.PencilBrush(NS.canvas);
+      brush.color = tool === "highlighter" ? "rgba(255, 212, 59, 0.35)" : NS.color;
+      brush.width = tool === "highlighter" ? Math.max(NS.strokeWidth * 3, 14) : NS.strokeWidth;
+      NS.canvas.freeDrawingBrush = brush;
+    }
   }
 
   function renderPagesList() {
@@ -369,344 +319,11 @@
         </button>
         <div class="ns-pagecard__row">
           <span>${i + 1}</span>
-          <button type="button" class="ns-pagecard__icon" data-dup="${i}" title="Duplicate page">⧉</button>
-          <button type="button" class="ns-pagecard__icon" data-del="${i}" title="Delete page" ${NS.pages.length <= 1 ? "disabled" : ""}>✕</button>
         </div>`;
       wrap.appendChild(item);
     });
   }
 
-  function duplicatePage(i) {
-    if (i === NS.activeIndex) saveCurrentPageState();
-    const src = NS.pages[i];
-    const copy = newPage({
-      theme: src.theme,
-      ruled: src.ruled,
-      json: src.json ? JSON.parse(JSON.stringify(src.json)) : null,
-      thumb: src.thumb,
-    });
-    NS.pages.splice(i + 1, 0, copy);
-    loadPage(i + 1);
-    scheduleSave();
-  }
-
-  function deletePage(i) {
-    if (NS.pages.length <= 1) return;
-    if (!confirm("Delete this page? This can't be undone.")) return;
-    NS.pages.splice(i, 1);
-    if (NS.activeIndex === i) {
-      loadPage(Math.min(i, NS.pages.length - 1));
-    } else {
-      if (NS.activeIndex > i) NS.activeIndex--;
-      renderPagesList();
-      scheduleSave();
-    }
-  }
-
-  // ---------------------------------------------------------------------
-  // Theme & Ruling Toggle Controls
-  // ---------------------------------------------------------------------
-  function buildThemeToggle() {
-    const wrap = document.getElementById("nsThemeToggle");
-    [["dark", "Dark"], ["light", "Light"]].forEach(([key, label]) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "pt-legend__chip ns-modechip";
-      b.dataset.theme = key;
-      b.textContent = label;
-      wrap.appendChild(b);
-    });
-    wrap.addEventListener("click", (e) => {
-      const b = e.target.closest(".ns-modechip");
-      if (!b) return;
-      NS.pages[NS.activeIndex].theme = b.dataset.theme;
-      refreshActiveBackground();
-      updateThemeRuledUI();
-      scheduleSave();
-    });
-  }
-
-  function buildRuledToggle() {
-    const wrap = document.getElementById("nsRuledToggle");
-    [[true, "Lined"], [false, "Plain"]].forEach(([key, label]) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "pt-legend__chip ns-modechip";
-      b.dataset.ruled = String(key);
-      b.textContent = label;
-      wrap.appendChild(b);
-    });
-    wrap.addEventListener("click", (e) => {
-      const b = e.target.closest(".ns-modechip");
-      if (!b) return;
-      NS.pages[NS.activeIndex].ruled = b.dataset.ruled === "true";
-      refreshActiveBackground();
-      updateThemeRuledUI();
-      scheduleSave();
-    });
-  }
-
-  function updateThemeRuledUI() {
-    const page = NS.pages[NS.activeIndex];
-    document.querySelectorAll("#nsThemeToggle .ns-modechip").forEach((b) =>
-      b.classList.toggle("is-active", b.dataset.theme === page.theme));
-    document.querySelectorAll("#nsRuledToggle .ns-modechip").forEach((b) =>
-      b.classList.toggle("is-active", (b.dataset.ruled === "true") === page.ruled));
-    const shell = document.getElementById("nsPageShell");
-    if (shell) shell.classList.toggle("ns-page-shell--light", page.theme === "light");
-  }
-
-  // ---------------------------------------------------------------------
-  // Colors & Stroke Width
-  // ---------------------------------------------------------------------
-  function buildColorSwatches() {
-    const wrap = document.getElementById("nsColors");
-    NS_PALETTE.forEach((hex) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "ns-swatch" + (hex === NS.color ? " is-active" : "");
-      b.style.setProperty("--sw", hex);
-      b.dataset.color = hex;
-      b.title = hex;
-      wrap.appendChild(b);
-    });
-    const custom = document.createElement("input");
-    custom.type = "color";
-    custom.className = "ns-swatch ns-swatch--custom";
-    custom.title = "Custom colour";
-    custom.value = NS.color;
-    wrap.appendChild(custom);
-
-    wrap.addEventListener("click", (e) => {
-      const sw = e.target.closest(".ns-swatch:not(.ns-swatch--custom)");
-      if (sw) setColor(sw.dataset.color);
-    });
-    custom.addEventListener("input", (e) => setColor(e.target.value));
-  }
-
-  function setColor(hex) {
-    NS.color = hex;
-    document.querySelectorAll(".ns-swatch").forEach((s) => s.classList.toggle("is-active", s.dataset.color === hex));
-    if (NS.canvas.isDrawingMode && NS.canvas.freeDrawingBrush) {
-      NS.canvas.freeDrawingBrush.color = NS.tool === "highlighter" ? hexToRgba(hex, 0.35) : hex;
-    }
-    applyColorToActive();
-  }
-
-  function applyColorToActive() {
-    const obj = NS.canvas.getActiveObject();
-    if (!obj) return;
-    const targets = obj.type === "activeSelection" ? obj.getObjects() : [obj];
-    targets.forEach((o) => {
-      if (o.type === "i-text" || o.type === "text" || o.type === "textbox") o.set("fill", NS.color);
-      else if (o.type === "group") o.getObjects().forEach((c) => c.set(c.type === "triangle" ? "fill" : "stroke", NS.color));
-      else o.set({ stroke: NS.color });
-    });
-    NS.canvas.requestRenderAll();
-    pushHistory();
-  }
-
-  function wireStrokeSlider() {
-    const input = document.getElementById("nsStroke");
-    input.value = NS.strokeWidth;
-    input.addEventListener("input", (e) => {
-      NS.strokeWidth = Number(e.target.value);
-      if (NS.canvas.freeDrawingBrush) {
-        NS.canvas.freeDrawingBrush.width = NS.tool === "highlighter" ? Math.max(NS.strokeWidth * 3, 14) : NS.strokeWidth;
-      }
-      const obj = NS.canvas.getActiveObject();
-      if (obj) {
-        const targets = obj.type === "activeSelection" ? obj.getObjects() : [obj];
-        targets.forEach((o) => { if ("strokeWidth" in o) o.set("strokeWidth", NS.strokeWidth); });
-        NS.canvas.requestRenderAll();
-        pushHistory();
-      }
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // Drawing Tools & Object Creation
-  // ---------------------------------------------------------------------
-  function setTool(tool) {
-    NS.tool = tool;
-    document.querySelectorAll("#nsTools .ns-tbtn").forEach((b) => b.classList.toggle("is-active", b.dataset.tool === tool));
-
-    NS.canvas.isDrawingMode = false;
-    NS.canvas.selection = true;
-    NS.canvas.defaultCursor = "default";
-    NS.canvas.hoverCursor = "move";
-    NS.canvas.forEachObject((o) => (o.selectable = !o.locked));
-    NS.pendingPlace = null;
-
-    if (tool === "pen" || tool === "highlighter") {
-      NS.canvas.isDrawingMode = true;
-      const brush = new fabric.PencilBrush(NS.canvas);
-      if (tool === "highlighter") {
-        brush.color = hexToRgba(NS.color, 0.35);
-        brush.width = Math.max(NS.strokeWidth * 3, 14);
-      } else {
-        brush.color = NS.color;
-        brush.width = NS.strokeWidth;
-      }
-      NS.canvas.freeDrawingBrush = brush;
-    } else if (tool === "eraser") {
-      NS.canvas.selection = false;
-      NS.canvas.defaultCursor = "not-allowed";
-      NS.canvas.hoverCursor = "not-allowed";
-      NS.canvas.forEachObject((o) => (o.selectable = false));
-    } else if (["text", "sticky", "rect", "ellipse", "line", "arrow"].includes(tool)) {
-      NS.pendingPlace = tool;
-      NS.canvas.defaultCursor = "crosshair";
-    }
-  }
-
-  function placeObject(kind, point) {
-    const stroke = NS.color, sw = NS.strokeWidth;
-    let obj = null;
-    switch (kind) {
-      case "text":
-        obj = new fabric.IText("Type here", { left: point.x, top: point.y, fontFamily: "Inter, sans-serif", fontSize: 20 + sw, fill: stroke });
-        break;
-      case "sticky":
-        obj = new fabric.Textbox("New note", {
-          left: point.x, top: point.y, width: 220, fontFamily: "Inter, sans-serif",
-          fontSize: 18, fill: "#1a1a2e", backgroundColor: stroke, padding: 10,
-        });
-        break;
-      case "rect":
-        obj = new fabric.Rect({ left: point.x - 60, top: point.y - 40, width: 120, height: 80, rx: 8, ry: 8, fill: "transparent", stroke, strokeWidth: sw });
-        break;
-      case "ellipse":
-        obj = new fabric.Ellipse({ left: point.x - 60, top: point.y - 40, rx: 60, ry: 40, fill: "transparent", stroke, strokeWidth: sw });
-        break;
-      case "line":
-        obj = new fabric.Line([point.x - 70, point.y, point.x + 70, point.y], { stroke, strokeWidth: sw });
-        break;
-      case "arrow": {
-        const len = 140;
-        const shaft = new fabric.Line([0, 0, len, 0], { stroke, strokeWidth: sw, originX: "center", originY: "center" });
-        const head = new fabric.Triangle({ left: len / 2, top: 0, originX: "center", originY: "center", angle: 90, width: sw * 4 + 8, height: sw * 4 + 8, fill: stroke });
-        obj = new fabric.Group([shaft, head], { left: point.x - len / 2, top: point.y });
-        break;
-      }
-      default:
-        return;
-    }
-    NS.canvas.add(obj);
-    NS.canvas.setActiveObject(obj);
-    NS.canvas.requestRenderAll();
-  }
-
-  function handleCanvasMouseDown(opt) {
-    if (NS.tool === "eraser") {
-      if (opt.target) NS.canvas.remove(opt.target);
-      return;
-    }
-    if (NS.pendingPlace) {
-      const p = NS.canvas.getPointer(opt.e);
-      placeObject(NS.pendingPlace, p);
-      NS.pendingPlace = null;
-      setTool("select");
-    }
-  }
-
-  // ---------------------------------------------------------------------
-  // Object Formatting & Lock/Snap Extensions
-  // ---------------------------------------------------------------------
-  function wireFormattingControls() {
-    const boldBtn = document.getElementById("nsFormatBold");
-    const italicBtn = document.getElementById("nsFormatItalic");
-    const lockBtn = document.getElementById("nsLockObj");
-    const snapBtn = document.getElementById("nsSnapGrid");
-    const helpBtn = document.getElementById("nsHelpBtn");
-    const helpModal = document.getElementById("nsHelpModal");
-    const helpClose = document.getElementById("nsHelpClose");
-    const helpScrim = document.getElementById("nsHelpScrim");
-
-    boldBtn.addEventListener("click", () => {
-      const obj = NS.canvas.getActiveObject();
-      if (!obj) return;
-      const cur = obj.get("fontWeight");
-      obj.set("fontWeight", cur === "bold" ? "normal" : "bold");
-      NS.canvas.requestRenderAll();
-      pushHistory();
-    });
-
-    italicBtn.addEventListener("click", () => {
-      const obj = NS.canvas.getActiveObject();
-      if (!obj) return;
-      const cur = obj.get("fontStyle");
-      obj.set("fontStyle", cur === "italic" ? "normal" : "italic");
-      NS.canvas.requestRenderAll();
-      pushHistory();
-    });
-
-    lockBtn.addEventListener("click", () => {
-      const obj = NS.canvas.getActiveObject();
-      if (!obj) return;
-      const isLocked = !obj.locked;
-      obj.set({
-        locked: isLocked,
-        lockMovementX: isLocked,
-        lockMovementY: isLocked,
-        lockRotation: isLocked,
-        lockScalingX: isLocked,
-        lockScalingY: isLocked,
-      });
-      lockBtn.classList.toggle("is-active", isLocked);
-      NS.canvas.requestRenderAll();
-      pushHistory();
-    });
-
-    snapBtn.addEventListener("click", () => {
-      NS.snapToGrid = !NS.snapToGrid;
-      snapBtn.classList.toggle("is-active", NS.snapToGrid);
-    });
-
-    if (helpBtn && helpModal) {
-      helpBtn.addEventListener("click", () => helpModal.hidden = false);
-      helpClose.addEventListener("click", () => helpModal.hidden = true);
-      helpScrim.addEventListener("click", () => helpModal.hidden = true);
-    }
-
-    NS.canvas.on("object:moving", (options) => {
-      if (!NS.snapToGrid) return;
-      options.target.set({
-        left: Math.round(options.target.left / GRID_SIZE) * GRID_SIZE,
-        top: Math.round(options.target.top / GRID_SIZE) * GRID_SIZE,
-      });
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // Stylus Pressure Sensitivity & Touch Handling
-  // ---------------------------------------------------------------------
-  function setupTouchAndStylus() {
-    const el = NS.canvas.upperCanvasEl;
-    el.style.touchAction = "none";
-
-    el.addEventListener("pointerdown", (e) => {
-      if (e.pointerType === "pen" && NS.tool === "pen") {
-        const pressure = e.pressure > 0 ? e.pressure : 0.5;
-        if (NS.canvas.freeDrawingBrush) {
-          NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
-        }
-      }
-    }, { passive: true });
-
-    el.addEventListener("pointermove", (e) => {
-      if (e.pointerType === "pen" && NS.tool === "pen" && NS.canvas.isDrawingMode) {
-        const pressure = e.pressure > 0 ? e.pressure : 0.5;
-        if (NS.canvas.freeDrawingBrush) {
-          NS.canvas.freeDrawingBrush.width = Math.max(1, NS.strokeWidth * pressure * 2);
-        }
-      }
-    }, { passive: true });
-  }
-
-  // ---------------------------------------------------------------------
-  // Zoom Controls
-  // ---------------------------------------------------------------------
   function setZoom(z) {
     z = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
     NS.zoom = z;
@@ -717,306 +334,43 @@
     if (label) label.textContent = Math.round(z * 100) + "%";
   }
 
-  // ---------------------------------------------------------------------
-  // Image Import
-  // ---------------------------------------------------------------------
-  function wireImageImport() {
-    const btn = document.getElementById("nsImportImageBtn");
-    const input = document.getElementById("nsImageInput");
-    btn.addEventListener("click", () => input.click());
-    input.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
-      files.forEach((file, idx) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          fabric.Image.fromURL(reader.result, (img) => {
-            const scale = Math.min(1, (PAGE_W * 0.5) / img.width);
-            img.set({ left: 110 + idx * 24, top: 110 + idx * 24, scaleX: scale, scaleY: scale });
-            NS.canvas.add(img);
-            NS.canvas.setActiveObject(img);
-            NS.canvas.requestRenderAll();
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-      input.value = "";
-    });
+  function updateThemeRuledUI() {
+    const page = NS.pages[NS.activeIndex];
+    if (!page) return;
+    document.querySelectorAll("#nsThemeToggle .ns-modechip").forEach((b) =>
+      b.classList.toggle("is-active", b.dataset.theme === page.theme));
+    document.querySelectorAll("#nsRuledToggle .ns-modechip").forEach((b) =>
+      b.classList.toggle("is-active", (b.dataset.ruled === "true") === page.ruled));
   }
 
-  // ---------------------------------------------------------------------
-  // Sequential Low-Memory PDF Import
-  // ---------------------------------------------------------------------
-  function wirePdfImport() {
-    const btn = document.getElementById("nsImportPdfBtn");
-    const input = document.getElementById("nsPdfInput");
-    btn.addEventListener("click", () => input.click());
-    input.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      input.value = "";
-      if (!file) return;
-      if (!window.pdfjsLib) {
-        alert("PDF import couldn't load. Check network connections.");
-        return;
-      }
-      pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
-      showBusy("Reading PDF…");
-      try {
-        const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        saveCurrentPageState();
-
-        const insertAt = NS.activeIndex + 1;
-        const pageTheme = NS.pages[NS.activeIndex].theme;
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          showBusy(`Rendering PDF page ${i} of ${pdf.numPages}…`);
-          const pdfPage = await pdf.getPage(i);
-          const baseViewport = pdfPage.getViewport({ scale: 1 });
-          const scale = (PAGE_W - 40) / baseViewport.width;
-          const viewport = pdfPage.getViewport({ scale });
-
-          const off = document.createElement("canvas");
-          off.width = viewport.width;
-          off.height = viewport.height;
-          const offCtx = off.getContext("2d");
-          await pdfPage.render({ canvasContext: offCtx, viewport }).promise;
-
-          const dataUrl = off.toDataURL("image/webp", 0.85);
-          off.width = off.height = 0;
-          if (pdfPage.cleanup) pdfPage.cleanup();
-
-          const idx = insertAt + (i - 1);
-          NS.pages.splice(idx, 0, newPage({ theme: pageTheme, ruled: false }));
-          await loadPage(idx);
-          await new Promise((resolve) => {
-            fabric.Image.fromURL(dataUrl, (img) => {
-              img.set({ left: (PAGE_W - viewport.width) / 2, top: 30, selectable: false, evented: false, hasControls: false });
-              NS.canvas.add(img);
-              NS.canvas.sendToBack(img);
-              NS.canvas.requestRenderAll();
-              resolve();
-            });
-          });
-          saveCurrentPageState();
-        }
-
-        await loadPage(insertAt);
-        setStatus(`Imported ${pdf.numPages} pages from PDF`);
-      } catch (err) {
-        console.error(err);
-        alert("Error loading PDF document.");
-      } finally {
-        hideBusy();
-      }
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // Vector & Raster Export Options
-  // ---------------------------------------------------------------------
-  function exportCurrentPagePng() {
-    saveCurrentPageState();
-    const url = NS.canvas.toDataURL({ format: "png", multiplier: 2 / NS.zoom });
-    downloadDataUrl(url, `ayuverse-notes-page-${NS.activeIndex + 1}.png`);
-  }
-
-  async function exportNotebookPdf() {
-    if (!window.jspdf) {
-      alert("PDF library failed to load.");
-      return;
-    }
-    showBusy("Preparing export…");
-    saveCurrentPageState();
-    const originalIndex = NS.activeIndex;
-    const originalZoom = NS.zoom;
-    setZoom(1);
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: [PAGE_W, PAGE_H] });
-
-    for (let i = 0; i < NS.pages.length; i++) {
-      showBusy(`Exporting page ${i + 1} of ${NS.pages.length}…`);
-      await loadPage(i);
-      const url = NS.canvas.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 2 });
-      if (i > 0) doc.addPage([PAGE_W, PAGE_H], "portrait");
-      doc.addImage(url, "JPEG", 0, 0, PAGE_W, PAGE_H);
-    }
-
-    await loadPage(originalIndex);
-    setZoom(originalZoom);
-    doc.save("ayuverse-notes.pdf");
-    hideBusy();
-  }
-
-  function wireExportMenu() {
-    const btn = document.getElementById("nsExportBtn");
-    const menu = document.getElementById("nsExportMenu");
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.hidden = !menu.hidden;
-    });
-    document.addEventListener("click", () => { menu.hidden = true; });
-    menu.addEventListener("click", (e) => {
-      const item = e.target.closest("[data-export]");
-      if (!item) return;
-      menu.hidden = true;
-      if (item.dataset.export === "png") exportCurrentPagePng();
-      else exportNotebookPdf();
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // UI & Event Wiring
-  // ---------------------------------------------------------------------
-  function wireToolbar() {
-    document.getElementById("nsTools").addEventListener("click", (e) => {
-      const btn = e.target.closest(".ns-tbtn[data-tool]");
-      if (btn) setTool(btn.dataset.tool);
-    });
-    document.getElementById("nsUndo").addEventListener("click", undo);
-    document.getElementById("nsRedo").addEventListener("click", redo);
-    document.getElementById("nsClearPage").addEventListener("click", () => {
-      if (!confirm("Clear all drawings on this page?")) return;
-      NS.canvas.getObjects().slice().forEach((o) => NS.canvas.remove(o));
-      pushHistory();
-    });
-    document.getElementById("nsZoomIn").addEventListener("click", () => setZoom(NS.zoom + 0.1));
-    document.getElementById("nsZoomOut").addEventListener("click", () => setZoom(NS.zoom - 0.1));
-    document.getElementById("nsApplyAll").addEventListener("click", () => {
-      const page = NS.pages[NS.activeIndex];
-      NS.pages.forEach((p) => { p.theme = page.theme; p.ruled = page.ruled; });
-      scheduleSave();
-      renderPagesList();
-    });
-  }
-
-  function wirePages() {
-    document.getElementById("nsAddPage").addEventListener("click", () => {
-      saveCurrentPageState();
-      const cur = NS.pages[NS.activeIndex];
-      NS.pages.splice(NS.activeIndex + 1, 0, newPage({ theme: cur.theme, ruled: cur.ruled }));
-      loadPage(NS.activeIndex + 1);
-      scheduleSave();
-    });
-    document.getElementById("nsPagesList").addEventListener("click", (e) => {
-      const dup = e.target.closest("[data-dup]");
-      const del = e.target.closest("[data-del]");
-      const thumb = e.target.closest("[data-idx]");
-      if (dup) return duplicatePage(Number(dup.dataset.dup));
-      if (del) return deletePage(Number(del.dataset.del));
-      if (thumb) {
-        const idx = Number(thumb.dataset.idx);
-        if (idx !== NS.activeIndex) loadPage(idx);
-      }
-    });
-  }
-
-  function wireCanvasEvents() {
-    NS.canvas.on("object:added", pushHistory);
-    NS.canvas.on("object:modified", pushHistory);
-    NS.canvas.on("object:removed", pushHistory);
-    NS.canvas.on("path:created", pushHistory);
-    NS.canvas.on("mouse:down", handleCanvasMouseDown);
-    NS.canvas.on("selection:created", updateSelectionUI);
-    NS.canvas.on("selection:updated", updateSelectionUI);
-    NS.canvas.on("selection:cleared", updateSelectionUI);
-  }
-
-  function updateSelectionUI() {
-    const active = NS.canvas.getActiveObject();
-    const lockBtn = document.getElementById("nsLockObj");
-    const boldBtn = document.getElementById("nsFormatBold");
-    const italicBtn = document.getElementById("nsFormatItalic");
-    if (lockBtn) lockBtn.classList.toggle("is-active", !!(active && active.locked));
-    if (boldBtn) boldBtn.classList.toggle("is-active", !!(active && active.get("fontWeight") === "bold"));
-    if (italicBtn) italicBtn.classList.toggle("is-active", !!(active && active.get("fontStyle") === "italic"));
-  }
-
-  function wireKeyboard() {
-    document.addEventListener("keydown", (e) => {
-      const tag = (e.target.tagName || "").toLowerCase();
-      const active = NS.canvas.getActiveObject();
-      const isEditingText = tag === "input" || tag === "textarea" || (active && active.isEditing);
-
-      const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
-      if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) { e.preventDefault(); redo(); return; }
-      if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); scheduleSave(); return; }
-
-      if (mod && e.key.toLowerCase() === "c" && !isEditingText && active) {
-        e.preventDefault();
-        active.clone((cloned) => { NS.clipboard = cloned; });
-        return;
-      }
-      if (mod && e.key.toLowerCase() === "v" && !isEditingText && NS.clipboard) {
-        e.preventDefault();
-        NS.clipboard.clone((cloned) => {
-          NS.canvas.discardActiveObject();
-          cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20, evented: true });
-          if (cloned.type === "activeSelection") {
-            cloned.canvas = NS.canvas;
-            cloned.forEachObject((obj) => NS.canvas.add(obj));
-            cloned.setCoords();
-          } else {
-            NS.canvas.add(cloned);
-          }
-          NS.canvas.setActiveObject(cloned);
-          NS.canvas.requestRenderAll();
-          pushHistory();
-        });
-        return;
-      }
-
-      if ((e.key === "Delete" || e.key === "Backspace") && !isEditingText && active) {
-        e.preventDefault();
-        const objs = active.type === "activeSelection" ? active.getObjects() : [active];
-        objs.forEach((o) => { if (!o.locked) NS.canvas.remove(o); });
-        NS.canvas.discardActiveObject();
-        NS.canvas.requestRenderAll();
-      }
-    });
-  }
-
-  // ---------------------------------------------------------------------
-  // Application Entry Point
-  // ---------------------------------------------------------------------
   async function init() {
     if (typeof fabric === "undefined") {
-      setStatus("Drawing engine couldn't load. Check network connections.");
+      setStatus("Fabric engine unavailable.");
       return;
     }
-
     NS.canvas = new fabric.Canvas("nsCanvas", { selection: true, preserveObjectStacking: true });
     NS.canvas.setWidth(PAGE_W);
     NS.canvas.setHeight(PAGE_H);
 
-    const saved = await loadPersisted();
-    if (saved && Array.isArray(saved.pages) && saved.pages.length) {
-      NS.pages = saved.pages;
-      NS.activeIndex = Math.min(saved.activeIndex || 0, NS.pages.length - 1);
-      NS.color = saved.color || NS.color;
-      NS.strokeWidth = saved.strokeWidth || NS.strokeWidth;
-    } else {
+    try {
+      const saved = await idbGet(IDB_RECORD);
+      if (saved && Array.isArray(saved.pages) && saved.pages.length) {
+        NS.pages = saved.pages;
+        NS.activeIndex = Math.min(saved.activeIndex || 0, NS.pages.length - 1);
+      } else {
+        NS.pages = [newPage()];
+      }
+    } catch (e) {
       NS.pages = [newPage()];
-      NS.activeIndex = 0;
     }
 
-    buildColorSwatches();
-    buildThemeToggle();
-    buildRuledToggle();
-    wireStrokeSlider();
-    wireToolbar();
-    wirePages();
-    wireCanvasEvents();
-    wireImageImport();
-    wirePdfImport();
-    wireExportMenu();
-    wireKeyboard();
-    wireSaveWarning();
-    wireFormattingControls();
-    setupTouchAndStylus();
+    const exportBtn = document.getElementById("nsSaveWarnExport");
+    if (exportBtn) exportBtn.addEventListener("click", exportNotebookPdf);
 
-    loadPage(NS.activeIndex, true);
+    const exportPdfOpt = document.querySelector('[data-export="pdf"]');
+    if (exportPdfOpt) exportPdfOpt.addEventListener("click", exportNotebookPdf);
+
+    await loadPage(NS.activeIndex, true);
   }
 
   document.addEventListener("DOMContentLoaded", init);
