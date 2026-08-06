@@ -1251,6 +1251,31 @@ p { margin: 0; }
   pointer-events: none;
 }
 
+.ns-savewarn {
+  position: absolute;
+  left: 50%;
+  top: 1rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: .78rem;
+  color: #fff;
+  background: #c92a2a;
+  padding: .55rem .75rem .55rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+  z-index: 5;
+  max-width: calc(100% - 2rem);
+}
+.ns-savewarn button {
+  flex-shrink: 0;
+  background: #fff;
+  color: #c92a2a;
+  border: none;
+  font-weight: 600;
+}
+
 .ns-busy {
   position: absolute;
   inset: 0;
@@ -1352,6 +1377,28 @@ p { margin: 0; }
   .ns-canvas-wrap { max-height: 62vh; width: 100%; }
 }
 @media (max-width: 640px) {
-  .ns-toolbar { justify-content: flex-start; }
+  /* Toolbar previously wrapped into many cramped rows on small screens.
+     Scroll it horizontally instead, and bump touch targets to Apple/Google's
+     44px minimum so tools are easy to hit with a finger. */
+  .ns-toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding-bottom: .6rem;
+    justify-content: flex-start;
+  }
+  .ns-toolbar::-webkit-scrollbar { height: 4px; }
+  .ns-tbgroup { flex: 0 0 auto; scroll-snap-align: start; }
   .ns-tbgroup--right { margin-left: 0; }
+  .ns-tbtn { min-width: 44px; min-height: 44px; padding: .45rem .6rem; }
+  .ns-tbtn--icon { min-width: 44px; min-height: 44px; }
+  .ns-swatch { min-width: 32px; min-height: 32px; }
+
+  /* Drawing on mobile was triggering the browser's native pinch-zoom /
+     page-scroll on top of the app's own zoom controls. Let the canvas
+     capture all touch gestures itself; the surrounding page can still
+     scroll normally since the wrap only restricts what's inside it. */
+  #nsCanvas { touch-action: none; }
+  .ns-canvas-wrap { touch-action: pan-y; }
 }
