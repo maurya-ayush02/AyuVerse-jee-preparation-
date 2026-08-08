@@ -1380,23 +1380,132 @@ p { margin: 0; }
   .ns-canvas-wrap { max-height: 62vh; width: 100%; }
 }
 @media (max-width: 640px) {
-  /* Toolbar previously wrapped into many cramped rows on small screens.
-     Scroll it horizontally instead, and bump touch targets to Apple/Google's
-     44px minimum so tools are easy to hit with a finger. */
+  /* Reclaim the site chrome's padding so the page can span edge-to-edge —
+     "pages should occupy all screen space" — and let the toolbar collapse
+     into floating controls instead of pushing the notebook down. */
+  .ns-hub { padding-top: .75rem; }
+  .hub__head { margin-bottom: .75rem; }
+  .hub__head p, .ns-hint { display: none; }
+  .ns-app {
+    margin-inline: -1rem;
+    width: calc(100% + 2rem);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 0;
+    gap: 0;
+  }
+
+  /* ---- Floating toolbar ---- */
+  /* Collapsed by default: only .ns-essential buttons/groups show, as a
+     small pill hovering over the page. Tap the "More" FAB to expand the
+     rest as a scrollable sheet above it — "essential tools always show,
+     all tools show when clicked". */
   .ns-toolbar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    padding-bottom: .6rem;
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + .75rem);
+    transform: translateX(-50%);
+    z-index: 40;
+    width: auto;
+    max-width: calc(100vw - 4.5rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .3rem;
+    padding: .5rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
+    max-height: none;
+    overflow: visible;
+  }
+  .ns-toolbar .ns-tbgroup { border-right: none; padding-inline: 0; gap: .25rem; }
+  .ns-toolbar .ns-tbgroup--right { margin-left: 0; }
+  .ns-toolbar:not(.is-expanded) .ns-tbgroup--extra { display: none; }
+  .ns-toolbar:not(.is-expanded) .ns-tbtn:not(.ns-essential) { display: none; }
+  .ns-toolbar.is-expanded {
+    max-width: calc(100vw - 1.5rem);
+    max-height: 55vh;
+    overflow-y: auto;
     justify-content: flex-start;
   }
-  .ns-toolbar::-webkit-scrollbar { height: 4px; }
-  .ns-tbgroup { flex: 0 0 auto; scroll-snap-align: start; }
-  .ns-tbgroup--right { margin-left: 0; }
-  .ns-tbtn { min-width: 44px; min-height: 44px; padding: .45rem .6rem; }
-  .ns-tbtn--icon { min-width: 44px; min-height: 44px; }
-  .ns-swatch { min-width: 32px; min-height: 32px; }
+  .ns-toolbar .ns-tbtn span { display: none; } /* icon-only to keep the pill small */
+  .ns-toolbar.is-expanded .ns-tbtn span { display: block; font-size: .62rem; }
+  .ns-tbtn { min-width: 46px; min-height: 46px; padding: .4rem; }
+  .ns-tbtn--icon { min-width: 46px; min-height: 46px; }
+  .ns-swatch { min-width: 34px; min-height: 34px; }
+
+  /* ---- Floating action buttons ---- */
+  .ns-morefab, .ns-pagesfab {
+    position: fixed;
+    z-index: 41;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    background: var(--gradient-brand, var(--c-violet));
+    color: #04030a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .4);
+  }
+  .ns-morefab {
+    right: calc(env(safe-area-inset-right, 0px) + .75rem);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + .75rem);
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ns-morefab span { font-size: .55rem; }
+  .ns-morefab svg { width: 20px; height: 20px; }
+  .ns-pagesfab {
+    right: calc(env(safe-area-inset-right, 0px) + .75rem);
+    top: .75rem;
+  }
+  .ns-pagesfab svg { width: 22px; height: 22px; }
+
+  .ns-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 35;
+  }
+  .ns-scrim[hidden] { display: none; }
+
+  /* ---- Full-bleed page ---- */
+  .ns-body { display: block; }
+  .ns-canvas-wrap {
+    padding: .5rem;
+    border-radius: 0;
+    max-height: none;
+    height: calc(100dvh - 3rem);
+    width: 100%;
+  }
+  .ns-page-shell { max-width: 100%; }
+
+  /* ---- Page rail as an off-canvas drawer instead of eating page width ---- */
+  .ns-pages {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(78vw, 300px);
+    max-height: none;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    z-index: 40;
+    background: var(--bg-surface-2);
+    border-left: 1px solid var(--border-soft);
+    padding: 1rem;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+    overflow-y: auto;
+  }
+  .ns-pages.is-open { transform: translateX(0); }
+  .ns-pages__list { flex-direction: column; }
+  .ns-pagecard, .ns-addpage { flex: 0 0 auto; width: 100%; }
 
   /* Drawing on mobile was triggering the browser's native pinch-zoom /
      page-scroll on top of the app's own zoom controls. Let the canvas
