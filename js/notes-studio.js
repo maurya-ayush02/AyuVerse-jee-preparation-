@@ -596,7 +596,17 @@
       NS.canvas.defaultCursor = "not-allowed";
       NS.canvas.hoverCursor = "not-allowed";
       NS.canvas.forEachObject((o) => (o.selectable = false));
-    } else if (["text", "sticky", "rect", "ellipse", "line", "arrow"].includes(tool)) {
+    } else if (tool === "area-eraser") {
+      NS.canvas.selection = false;
+      NS.canvas.defaultCursor = "crosshair";
+      NS.canvas.hoverCursor = "not-allowed";
+      NS.canvas.forEachObject((o) => (o.selectable = false));
+    } else if (tool === "lasso" || tool === "ruler" || tool === "compass") {
+      NS.canvas.selection = false;
+      NS.canvas.defaultCursor = "crosshair";
+      NS.canvas.hoverCursor = "crosshair";
+      NS.canvas.forEachObject((o) => (o.selectable = false));
+    } else if (["text", "sticky", "rect", "ellipse", "triangle", "diamond", "line", "arrow"].includes(tool)) {
       NS.pendingPlace = tool;
       NS.canvas.defaultCursor = "crosshair";
     }
@@ -621,6 +631,12 @@
       case "ellipse":
         obj = new fabric.Ellipse({ left: point.x - 60, top: point.y - 40, rx: 60, ry: 40, fill: "transparent", stroke, strokeWidth: sw });
         break;
+      case "triangle":
+        obj = new fabric.Triangle({ left: point.x - 60, top: point.y - 40, width: 120, height: 80, fill: "transparent", stroke, strokeWidth: sw });
+        break;
+      case "diamond":
+        obj = new fabric.Rect({ left: point.x - 45, top: point.y - 45, width: 90, height: 90, angle: 45, fill: "transparent", stroke, strokeWidth: sw });
+        break;
       case "line":
         obj = new fabric.Line([point.x - 70, point.y, point.x + 70, point.y], { stroke, strokeWidth: sw });
         break;
@@ -644,12 +660,211 @@
       if (opt.target) NS.canvas.remove(opt.target);
       return;
     }
+    if (NS.tool === "lasso") { startLasso(opt); return; }
+    if (NS.tool === "area-eraser") { startAreaErase(opt); return; }
+    if (NS.tool === "ruler") { startRulerDraw(opt); return; }
+    if (NS.tool === "compass") { startCompassDraw(opt); return; }
     if (NS.pendingPlace) {
       const p = NS.canvas.getPointer(opt.e);
       placeObject(NS.pendingPlace, p);
       NS.pendingPlace = null;
       setTool("select");
     }
+  }
+
+  function handleCanvasMouseMove(opt) {
+    if (NS.dragTool === "lasso") return updateLasso(opt);
+    if (NS.dragTool === "area-eraser") return updateAreaErase(opt);
+    if (NS.dragTool === "ruler") return updateRulerDraw(opt);
+    if (NS.dragTool === "compass") return updateCompassDraw(opt);
+  }
+
+  function handleCanvasMouseUp() {
+    if (NS.dragTool === "lasso") return finishLasso();
+    if (NS.dragTool === "area-eraser") return finishAreaErase();
+    if (NS.dragTool === "ruler") return finishRulerDraw();
+    if (NS.dragTool === "compass") return finishCompassDraw();
+  }
+
+  // ---------------------------------------------------------------------
+  // Lasso select — freehand loop; anything whose centre falls inside the
+  // loop when released gets selected as a group, same as a marquee select.
+  // ---------------------------------------------------------------------
+  function pointInPolygon(pt, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+      const hit = (yi > pt.y) !== (yj > pt.y) && pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi) + xi;
+      if (hit) inside = !inside;
+    }
+    return inside;
+  }
+  function startLasso(opt) {
+    NS.dragTool = "lasso";
+    NS.suppressHistory = true;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.lassoPoints = [p];
+    NS.lassoShape = new fabric.Polyline(NS.lassoPoints, {
+      fill: "rgba(107,40,240,0.12)", stroke: "#6b28f0", strokeWidth: 1.5,
+      strokeDashArray: [5, 4], selectable: false, evented: false,
+    });
+    NS.canvas.add(NS.lassoShape);
+  }
+  function updateLasso(opt) {
+    if (!NS.lassoShape) return;
+    NS.lassoPoints.push(NS.canvas.getPointer(opt.e));
+    NS.lassoShape.set({ points: NS.lassoPoints.slice() });
+    NS.canvas.requestRenderAll();
+  }
+  function finishLasso() {
+    if (!NS.lassoShape) return;
+    const points = NS.lassoPoints;
+    NS.canvas.remove(NS.lassoShape);
+    NS.lassoShape = null;
+    NS.dragTool = null;
+    NS.suppressHistory = false;
+    if (points.length > 2) {
+      const hit = NS.canvas.getObjects().filter((o) => pointInPolygon(o.getCenterPoint(), points));
+      if (hit.length) {
+        NS.canvas.discardActiveObject();
+        const sel = hit.length === 1 ? hit[0] : new fabric.ActiveSelection(hit, { canvas: NS.canvas });
+        NS.canvas.setActiveObject(sel);
+      }
+    }
+    NS.canvas.requestRenderAll();
+    setTool("select");
+  }
+
+  // ---------------------------------------------------------------------
+  // Area eraser — drag a box, everything overlapping it on release is
+  // deleted (a real removal, so it's undoable like any other edit).
+  // ---------------------------------------------------------------------
+  function startAreaErase(opt) {
+    NS.dragTool = "area-eraser";
+    NS.suppressHistory = true;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.eraseStart = p;
+    NS.eraseRect = new fabric.Rect({
+      left: p.x, top: p.y, width: 0, height: 0,
+      fill: "rgba(255,60,60,0.14)", stroke: "#ff5c5c", strokeDashArray: [5, 4],
+      selectable: false, evented: false,
+    });
+    NS.canvas.add(NS.eraseRect);
+  }
+  function updateAreaErase(opt) {
+    if (!NS.eraseRect) return;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.eraseRect.set({
+      left: Math.min(p.x, NS.eraseStart.x), top: Math.min(p.y, NS.eraseStart.y),
+      width: Math.abs(p.x - NS.eraseStart.x), height: Math.abs(p.y - NS.eraseStart.y),
+    });
+    NS.canvas.requestRenderAll();
+  }
+  function finishAreaErase() {
+    if (!NS.eraseRect) return;
+    const box = NS.eraseRect.getBoundingRect();
+    NS.canvas.remove(NS.eraseRect);
+    NS.eraseRect = null;
+    NS.dragTool = null;
+    NS.suppressHistory = false;
+    if (box.width > 2 && box.height > 2) {
+      const tl = { x: box.left, y: box.top };
+      const br = { x: box.left + box.width, y: box.top + box.height };
+      NS.canvas.getObjects()
+        .filter((o) => o.intersectsWithRect(tl, br))
+        .forEach((o) => NS.canvas.remove(o));
+    }
+    NS.canvas.requestRenderAll();
+  }
+
+  // ---------------------------------------------------------------------
+  // Ruler — drag to draw a straight line, snapped to 15° steps (hold Alt
+  // for a free angle), the way a straightedge constrains a pen stroke.
+  // ---------------------------------------------------------------------
+  function snapToAngle(start, p, snapDeg) {
+    if (!snapDeg) return p;
+    const dx = p.x - start.x, dy = p.y - start.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1) return p;
+    const snapRad = (snapDeg * Math.PI) / 180;
+    const angle = Math.round(Math.atan2(dy, dx) / snapRad) * snapRad;
+    return { x: start.x + Math.cos(angle) * dist, y: start.y + Math.sin(angle) * dist };
+  }
+  function startRulerDraw(opt) {
+    NS.dragTool = "ruler";
+    NS.suppressHistory = true;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.rulerStart = p;
+    NS.rulerLine = new fabric.Line([p.x, p.y, p.x, p.y], {
+      stroke: NS.color, strokeWidth: NS.strokeWidth, selectable: false, evented: false,
+    });
+    NS.canvas.add(NS.rulerLine);
+  }
+  function updateRulerDraw(opt) {
+    if (!NS.rulerLine) return;
+    const p = snapToAngle(NS.rulerStart, NS.canvas.getPointer(opt.e), opt.e.altKey ? null : 15);
+    NS.rulerLine.set({ x2: p.x, y2: p.y });
+    NS.canvas.requestRenderAll();
+  }
+  function finishRulerDraw() {
+    if (!NS.rulerLine) return;
+    const line = NS.rulerLine;
+    NS.rulerLine = null;
+    NS.dragTool = null;
+    const isPoint = Math.hypot(line.x2 - line.x1, line.y2 - line.y1) < 2;
+    if (isPoint) {
+      NS.canvas.remove(line);
+      NS.suppressHistory = false;
+    } else {
+      line.set({ selectable: true, evented: true });
+      line.setCoords();
+      NS.canvas.setActiveObject(line);
+      NS.suppressHistory = false;
+      pushHistory();
+    }
+    NS.canvas.requestRenderAll();
+    setTool("select");
+  }
+
+  // ---------------------------------------------------------------------
+  // Compass — drag from a centre point to draw a perfect circle at that
+  // radius, the way a physical compass works.
+  // ---------------------------------------------------------------------
+  function startCompassDraw(opt) {
+    NS.dragTool = "compass";
+    NS.suppressHistory = true;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.compassCenter = p;
+    NS.compassCircle = new fabric.Circle({
+      left: p.x, top: p.y, radius: 0, originX: "center", originY: "center",
+      fill: "transparent", stroke: NS.color, strokeWidth: NS.strokeWidth,
+      selectable: false, evented: false,
+    });
+    NS.canvas.add(NS.compassCircle);
+  }
+  function updateCompassDraw(opt) {
+    if (!NS.compassCircle) return;
+    const p = NS.canvas.getPointer(opt.e);
+    NS.compassCircle.set({ radius: Math.hypot(p.x - NS.compassCenter.x, p.y - NS.compassCenter.y) });
+    NS.canvas.requestRenderAll();
+  }
+  function finishCompassDraw() {
+    if (!NS.compassCircle) return;
+    const circle = NS.compassCircle;
+    NS.compassCircle = null;
+    NS.dragTool = null;
+    if (circle.radius < 2) {
+      NS.canvas.remove(circle);
+      NS.suppressHistory = false;
+    } else {
+      circle.set({ selectable: true, evented: true });
+      circle.setCoords();
+      NS.canvas.setActiveObject(circle);
+      NS.suppressHistory = false;
+      pushHistory();
+    }
+    NS.canvas.requestRenderAll();
+    setTool("select");
   }
 
   // ---------------------------------------------------------------------
@@ -826,6 +1041,15 @@
     });
   }
 
+  function deleteSelection() {
+    const active = NS.canvas.getActiveObject();
+    if (!active) return;
+    const objs = active.type === "activeSelection" ? active.getObjects() : [active];
+    objs.forEach((o) => NS.canvas.remove(o));
+    NS.canvas.discardActiveObject();
+    NS.canvas.requestRenderAll();
+  }
+
   // ---------------------------------------------------------------------
   // Wiring
   // ---------------------------------------------------------------------
@@ -836,6 +1060,7 @@
     });
     document.getElementById("nsUndo").addEventListener("click", undo);
     document.getElementById("nsRedo").addEventListener("click", redo);
+    document.getElementById("nsDeleteSelected").addEventListener("click", deleteSelection);
     document.getElementById("nsClearPage").addEventListener("click", () => {
       if (!confirm("Clear all drawings on this page?")) return;
       NS.canvas.getObjects().slice().forEach((o) => NS.canvas.remove(o));
@@ -878,6 +1103,55 @@
     NS.canvas.on("object:removed", pushHistory);
     NS.canvas.on("path:created", pushHistory);
     NS.canvas.on("mouse:down", handleCanvasMouseDown);
+    NS.canvas.on("mouse:move", handleCanvasMouseMove);
+    NS.canvas.on("mouse:up", handleCanvasMouseUp);
+  }
+
+  // Mobile floating toolbar: the full tool set collapses into a sheet behind
+  // the "More" FAB, and the page list becomes an off-canvas drawer behind
+  // the "Pages" FAB, so the page itself can fill the screen (see the
+  // max-width:640px rules in the stylesheet for the collapsed/expanded look).
+  function wireMobileToolbar() {
+    const toolbar = document.getElementById("nsToolbar");
+    const moreBtn = document.getElementById("nsMoreToggle");
+    const pagesBtn = document.getElementById("nsPagesToggle");
+    const pagesRail = document.getElementById("nsPagesRail");
+    const scrim = document.getElementById("nsToolbarScrim");
+    if (!toolbar || !moreBtn || !pagesBtn || !pagesRail || !scrim) return;
+
+    function closeAll() {
+      toolbar.classList.remove("is-expanded");
+      moreBtn.setAttribute("aria-expanded", "false");
+      pagesRail.classList.remove("is-open");
+      pagesBtn.setAttribute("aria-expanded", "false");
+      scrim.hidden = true;
+    }
+    moreBtn.addEventListener("click", () => {
+      const willOpen = !toolbar.classList.contains("is-expanded");
+      closeAll();
+      if (willOpen) {
+        toolbar.classList.add("is-expanded");
+        moreBtn.setAttribute("aria-expanded", "true");
+        scrim.hidden = false;
+      }
+    });
+    pagesBtn.addEventListener("click", () => {
+      const willOpen = !pagesRail.classList.contains("is-open");
+      closeAll();
+      if (willOpen) {
+        pagesRail.classList.add("is-open");
+        pagesBtn.setAttribute("aria-expanded", "true");
+        scrim.hidden = false;
+      }
+    });
+    scrim.addEventListener("click", closeAll);
+    // Picking a tool or jumping to a page collapses the sheet back down.
+    document.getElementById("nsTools").addEventListener("click", (e) => {
+      if (e.target.closest("[data-tool]")) closeAll();
+    });
+    document.getElementById("nsPagesList").addEventListener("click", (e) => {
+      if (e.target.closest("[data-idx]")) closeAll();
+    });
   }
 
   function wireKeyboard() {
@@ -918,10 +1192,7 @@
 
       if ((e.key === "Delete" || e.key === "Backspace") && !isEditingText && active) {
         e.preventDefault();
-        const objs = active.type === "activeSelection" ? active.getObjects() : [active];
-        objs.forEach((o) => NS.canvas.remove(o));
-        NS.canvas.discardActiveObject();
-        NS.canvas.requestRenderAll();
+        deleteSelection();
       }
     });
   }
@@ -971,6 +1242,7 @@
     wireExportMenu();
     wireKeyboard();
     wireSaveWarning();
+    wireMobileToolbar();
 
     loadPage(NS.activeIndex, true);
   }
