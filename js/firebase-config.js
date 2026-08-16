@@ -31,10 +31,11 @@
    ========================================================== */
 
 window.AYU_FIREBASE_CONFIG = {
-  apiKey: "PASTE_YOUR_API_KEY_HERE",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID",
+    apiKey: "AIzaSyBRojUfpYvOa4XjIRQXfwnHX-cM9jwsj_c",
+  authDomain: "ayuverse-e50af.firebaseapp.com",
+  projectId: "ayuverse-e50af",
+  storageBucket: "ayuverse-e50af.firebasestorage.app",
+  messagingSenderId: "969478078786",
+  appId: "1:969478078786:web:c3e01f760240c0ff6208db",
+  measurementId: "G-8SB0Y24KDY"
 };
