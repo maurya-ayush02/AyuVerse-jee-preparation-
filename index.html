@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#060814" />
 
   <!-- Security headers (GitHub Pages doesn't allow server headers; meta is the fallback) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com; frame-ancestors 'none';" />
   <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
@@ -52,6 +52,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css?v=pt4" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
 
 <body>
@@ -411,5 +412,7 @@
   </div>
 
   <script src="js/script.js?v=tools1"></script>
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
 </body>
 </html>

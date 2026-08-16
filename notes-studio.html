@@ -19,7 +19,7 @@
 
   <!-- Security headers -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob: https://cdnjs.cloudflare.com; frame-ancestors 'none';" />
+    content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com; frame-ancestors 'none';" />
   <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
@@ -37,6 +37,7 @@
     rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css?v=ns1" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
 
 <body>
@@ -310,6 +311,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
   <script src="js/notes-studio.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
 </body>
 
 </html>

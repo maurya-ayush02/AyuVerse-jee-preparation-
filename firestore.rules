@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Username -> email lookup, used so people can sign in with a
+    // username instead of typing their email.
+    //  - Anyone can READ a username doc (needed to resolve
+    //    "username" -> email before signing in, and to check if a
+    //    username is already taken while someone is signing up).
+    //  - Only a signed-in user can CREATE the doc for their OWN uid
+    //    (this is what runs right after account creation).
+    //  - Nobody can update or delete a username once it's set, so
+    //    people can't hijack someone else's username.
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.auth.uid == request.resource.data.uid
+                    && request.resource.data.email is string;
+      allow update, delete: if false;
+    }
+  }
+}
