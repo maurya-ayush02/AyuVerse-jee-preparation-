@@ -1,0 +1,132 @@
+/* ==========================================================
+   AyuVerse — Auth UI (login modal + nav account button)
+   Self-contained: falls back to its own tokens if a page
+   doesn't load css/style.css.
+   ========================================================== */
+:root {
+  --ayu-void: #060814;
+  --ayu-surface: #0d0f20;
+  --ayu-surface-2: #161933;
+  --ayu-cyan: #00c3fa;
+  --ayu-blue: #0d7cf5;
+  --ayu-violet: #6b28f0;
+  --ayu-text: #f3f4fb;
+  --ayu-text-2: #9a9dc2;
+  --ayu-border: rgba(124, 100, 255, 0.24);
+  --ayu-gradient: linear-gradient(90deg, var(--ayu-cyan) 0%, var(--ayu-blue) 45%, var(--ayu-violet) 100%);
+  --ayu-radius: 16px;
+}
+
+/* ---------- nav account button ---------- */
+.ayu-auth-slot { display: flex; align-items: center; gap: .6rem; margin-left: .4rem; }
+.ayu-auth-slot--fixed {
+  position: fixed; top: 14px; right: 16px; z-index: 950; margin-left: 0;
+  background: var(--ayu-surface); padding: 6px; border-radius: 999px; border: 1px solid var(--ayu-border);
+}
+.ayu-auth-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .55rem 1.1rem; border-radius: 999px; border: 1px solid var(--ayu-border);
+  background: transparent; color: var(--ayu-text); font: 600 .85rem/1 "Inter", sans-serif;
+  cursor: pointer; white-space: nowrap;
+}
+.ayu-auth-btn:hover { border-color: var(--ayu-cyan); color: var(--ayu-cyan); }
+.ayu-auth-btn--primary { background: var(--ayu-gradient); color: #050611; border: none; }
+.ayu-auth-user { display: inline-flex; align-items: center; gap: .55rem; cursor: pointer; background: none; border: none; padding: 0; }
+.ayu-auth-avatar {
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+  background: var(--ayu-gradient); display: flex; align-items: center; justify-content: center;
+  font: 700 .8rem "Inter", sans-serif; color: #050611; flex: none;
+}
+.ayu-auth-name { color: var(--ayu-text); font: 600 .85rem "Inter", sans-serif; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ayu-auth-menu {
+  position: absolute; top: calc(100% + 10px); right: 0; min-width: 190px;
+  background: var(--ayu-surface-2); border: 1px solid var(--ayu-border); border-radius: 14px;
+  padding: .5rem; box-shadow: 0 20px 50px rgba(0,0,0,.5); z-index: 500; display: none;
+}
+.ayu-auth-menu.is-open { display: block; }
+.ayu-auth-menu button {
+  width: 100%; text-align: left; padding: .6rem .7rem; border-radius: 8px; border: none;
+  background: none; color: var(--ayu-text-2); font: 500 .85rem "Inter", sans-serif; cursor: pointer;
+}
+.ayu-auth-menu button:hover { background: rgba(124,100,255,.14); color: var(--ayu-text); }
+
+/* ---------- modal ---------- */
+.ayu-auth-overlay {
+  position: fixed; inset: 0; background: rgba(3, 4, 12, .72); backdrop-filter: blur(6px);
+  z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.ayu-auth-overlay.is-open { display: flex; }
+.ayu-auth-modal {
+  width: 100%; max-width: 380px; background: var(--ayu-surface); border: 1px solid var(--ayu-border);
+  border-radius: var(--ayu-radius); padding: 1.6rem 1.5rem; position: relative;
+  max-height: 90vh; overflow-y: auto; font-family: "Inter", sans-serif;
+}
+.ayu-auth-close {
+  position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--ayu-border); background: none; color: var(--ayu-text-2); cursor: pointer; font-size: 1rem;
+}
+.ayu-auth-close:hover { color: var(--ayu-text); border-color: var(--ayu-cyan); }
+.ayu-auth-title { font: 700 1.25rem "Space Grotesk", sans-serif; color: var(--ayu-text); margin: 0 0 .3rem; }
+.ayu-auth-sub { color: var(--ayu-text-2); font-size: .85rem; margin: 0 0 1.2rem; line-height: 1.5; }
+.ayu-auth-reason {
+  background: rgba(0, 195, 250, .1); border: 1px solid rgba(0, 195, 250, .3); color: var(--ayu-cyan);
+  font-size: .8rem; padding: .6rem .8rem; border-radius: 10px; margin: 0 0 1.1rem; display: none;
+}
+.ayu-auth-reason.is-visible { display: block; }
+
+.ayu-auth-tabs { display: flex; gap: .4rem; margin-bottom: 1.1rem; background: var(--ayu-surface-2); padding: 4px; border-radius: 10px; }
+.ayu-auth-tab {
+  flex: 1; padding: .5rem .4rem; border: none; background: none; color: var(--ayu-text-2);
+  font: 600 .78rem "Inter", sans-serif; border-radius: 7px; cursor: pointer;
+}
+.ayu-auth-tab.is-active { background: var(--ayu-surface); color: var(--ayu-text); }
+
+.ayu-auth-panel { display: none; flex-direction: column; gap: .7rem; }
+.ayu-auth-panel.is-active { display: flex; }
+
+.ayu-auth-google {
+  display: flex; align-items: center; justify-content: center; gap: .6rem;
+  padding: .7rem 1rem; border-radius: 10px; border: 1px solid var(--ayu-border);
+  background: #fff; color: #1f1f1f; font: 600 .88rem "Inter", sans-serif; cursor: pointer; width: 100%;
+}
+.ayu-auth-google:hover { background: #f2f2f2; }
+.ayu-auth-google svg { width: 18px; height: 18px; flex: none; }
+
+.ayu-auth-or { display: flex; align-items: center; gap: .7rem; color: var(--ayu-text-2); font-size: .72rem; margin: .2rem 0; }
+.ayu-auth-or::before, .ayu-auth-or::after { content: ""; flex: 1; height: 1px; background: var(--ayu-border); }
+
+.ayu-auth-field { display: flex; flex-direction: column; gap: .35rem; }
+.ayu-auth-field label { font-size: .78rem; color: var(--ayu-text-2); font-weight: 600; }
+.ayu-auth-field input {
+  padding: .65rem .8rem; border-radius: 9px; border: 1px solid var(--ayu-border);
+  background: var(--ayu-surface-2); color: var(--ayu-text); font: 500 .9rem "Inter", sans-serif; width: 100%;
+}
+.ayu-auth-field input:focus { outline: none; border-color: var(--ayu-cyan); }
+
+.ayu-auth-submit {
+  padding: .75rem 1rem; border-radius: 10px; border: none; background: var(--ayu-gradient);
+  color: #050611; font: 700 .88rem "Inter", sans-serif; cursor: pointer; margin-top: .2rem;
+}
+.ayu-auth-submit:disabled { opacity: .55; cursor: not-allowed; }
+
+.ayu-auth-switch { text-align: center; font-size: .8rem; color: var(--ayu-text-2); margin-top: .2rem; }
+.ayu-auth-switch button { background: none; border: none; color: var(--ayu-cyan); font-weight: 700; cursor: pointer; padding: 0; }
+
+.ayu-auth-error {
+  color: #ff6b81; font-size: .78rem; background: rgba(255,107,129,.1); border: 1px solid rgba(255,107,129,.3);
+  padding: .5rem .7rem; border-radius: 8px; display: none;
+}
+.ayu-auth-error.is-visible { display: block; }
+
+.ayu-auth-guest {
+  text-align: center; font-size: .8rem; color: var(--ayu-text-2); margin-top: 1rem;
+  padding-top: 1rem; border-top: 1px solid var(--ayu-border);
+}
+.ayu-auth-guest button { background: none; border: none; color: var(--ayu-text); font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0; }
+
+#ayuRecaptchaContainer { display: flex; justify-content: center; margin: .2rem 0; }
+
+@media (max-width: 480px) {
+  .ayu-auth-name { display: none; }
+}
