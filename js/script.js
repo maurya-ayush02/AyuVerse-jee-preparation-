@@ -294,3 +294,4 @@ function setupPickerModal(launchId, modalId, scrimId, closeId) {
 
 setupPickerModal('notesLaunchBtn', 'notesSubjectModal', 'notesModalScrim', 'notesModalClose');
 setupPickerModal('toolsLaunchBtn', 'toolsPickerModal', 'toolsModalScrim', 'toolsModalClose');
+setupPickerModal('quickToolsBtn', 'toolsPickerModal', 'toolsModalScrim', 'toolsModalClose');

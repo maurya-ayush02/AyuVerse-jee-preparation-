@@ -26,6 +26,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 (function () {
@@ -35,6 +36,7 @@ import {
   let auth = null;
   let db = null;
   let currentUser = null;
+  let currentProfileName = null;
   let pendingConfirmation = null; // phone OTP confirmation result
   let downloadReasonPending = false;
 
@@ -79,6 +81,10 @@ import {
         <div class="ayu-auth-error" id="ayuAuthError"></div>
 
         <form class="ayu-auth-panel is-active" id="ayuEmailPanel" data-panel="email">
+          <div class="ayu-auth-field" id="ayuNameField" hidden>
+            <label for="ayuFullName">Full name</label>
+            <input type="text" id="ayuFullName" autocomplete="name" placeholder="e.g. Ayush Maurya" minlength="2" maxlength="60" />
+          </div>
           <div class="ayu-auth-field" id="ayuUsernameField" hidden>
             <label for="ayuUsername">Choose a username</label>
             <input type="text" id="ayuUsername" autocomplete="username" placeholder="e.g. ayush_10" minlength="3" maxlength="20" />
@@ -122,6 +128,100 @@ import {
     return overlay;
   }
 
+  /* ---------------------------------------------------------
+     Name-completion prompt
+     Shown to any signed-in user whose stored profile doesn't
+     have a real name yet (new phone/Google sign-ins with no
+     name, or older accounts from before the "Full name" field
+     existed, whose name is still just their username handle).
+     Keeps nudging until it's actually filled in — that's how
+     it gets fixed for every user, not just new signups.
+     --------------------------------------------------------- */
+  function buildNamePrompt() {
+    const overlay = document.createElement("div");
+    overlay.className = "ayu-auth-overlay";
+    overlay.id = "ayuNamePromptOverlay";
+    overlay.innerHTML = `
+      <div class="ayu-auth-modal ayu-name-modal" role="dialog" aria-modal="true" aria-labelledby="ayuNamePromptTitle">
+        <h2 class="ayu-auth-title" id="ayuNamePromptTitle">What's your name?</h2>
+        <p class="ayu-auth-sub">This is shown across AyuVerse instead of your username — takes two seconds.</p>
+        <form id="ayuNamePromptForm">
+          <div class="ayu-auth-field">
+            <label for="ayuNamePromptInput">Full name</label>
+            <input type="text" id="ayuNamePromptInput" autocomplete="name" placeholder="e.g. Ayush Maurya" minlength="2" maxlength="60" required />
+          </div>
+          <div class="ayu-auth-error" id="ayuNamePromptError"></div>
+          <button type="submit" class="ayu-auth-submit" id="ayuNamePromptSubmit">Save name</button>
+        </form>
+        <div class="ayu-auth-guest">
+          <button type="button" id="ayuNamePromptSkip">Not now</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function needsName(profile) {
+    if (!profile) return false;
+    const name = (profile.name || "").trim();
+    if (!name) return true;
+    const username = (profile.username || "").trim();
+    if (username && name.toLowerCase() === username.toLowerCase()) return true;
+    return false;
+  }
+
+  let namePromptDismissed = false;
+
+  function openNamePrompt() {
+    if (namePromptDismissed) return;
+    const overlay = document.getElementById("ayuNamePromptOverlay");
+    if (!overlay) return;
+    document.getElementById("ayuNamePromptError").textContent = "";
+    overlay.classList.add("is-open");
+    setTimeout(() => document.getElementById("ayuNamePromptInput").focus(), 50);
+  }
+
+  function closeNamePrompt() {
+    const overlay = document.getElementById("ayuNamePromptOverlay");
+    if (overlay) overlay.classList.remove("is-open");
+  }
+
+  function wireNamePrompt() {
+    const form = document.getElementById("ayuNamePromptForm");
+    const skipBtn = document.getElementById("ayuNamePromptSkip");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("ayuNamePromptInput");
+      const errEl = document.getElementById("ayuNamePromptError");
+      const name = input.value.trim();
+      if (name.length < 2) {
+        errEl.textContent = "Please enter your full name.";
+        errEl.classList.add("is-visible");
+        return;
+      }
+      const submitBtn = document.getElementById("ayuNamePromptSubmit");
+      submitBtn.disabled = true;
+      try {
+        await updateProfile(currentUser, { displayName: name });
+        await setDoc(doc(db, "users", currentUser.uid), { name }, { merge: true });
+        currentProfileName = name;
+        renderNav();
+        closeNamePrompt();
+      } catch (err) {
+        console.error(err);
+        errEl.textContent = "Couldn't save — please try again.";
+        errEl.classList.add("is-visible");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+    skipBtn.addEventListener("click", () => {
+      namePromptDismissed = true;
+      closeNamePrompt();
+    });
+  }
+
   function mountNavSlot() {
     let host = document.querySelector(".nav__menu");
     let floating = false;
@@ -162,6 +262,7 @@ import {
       "auth/popup-closed-by-user": "Sign-in was closed before finishing.",
       "auth/network-request-failed": "Network error — check your connection and try again.",
       "custom/bad-username": "Username should be 3–20 characters: letters, numbers, or underscore only.",
+      "custom/need-name": "Please enter your full name.",
       "custom/need-email": "Please enter a valid email address to create your account.",
       "custom/username-taken": "That username is already taken — try another.",
       "custom/username-not-found": "No account with that username. Check the spelling, or sign in with your email instead.",
@@ -212,8 +313,8 @@ import {
     const slot = document.getElementById("ayuAuthSlot");
     if (!slot) return;
     if (currentUser) {
-      const initial = (currentUser.displayName || currentUser.email || currentUser.phoneNumber || "?").trim().charAt(0).toUpperCase();
-      const name = currentUser.displayName || currentUser.email || currentUser.phoneNumber || "Account";
+      const initial = (currentProfileName || currentUser.displayName || currentUser.email || currentUser.phoneNumber || "?").trim().charAt(0).toUpperCase();
+      const name = currentProfileName || currentUser.displayName || currentUser.email || currentUser.phoneNumber || "Account";
       slot.innerHTML = `
         <div style="position:relative;">
           <button type="button" class="ayu-auth-user" id="ayuUserBtn">
@@ -223,6 +324,7 @@ import {
             <span class="ayu-auth-name">${name}</span>
           </button>
           <div class="ayu-auth-menu" id="ayuUserMenu">
+            <a href="dashboard.html" id="ayuDashboardLink">Dashboard</a>
             <button type="button" id="ayuLogoutBtn">Log out</button>
           </div>
         </div>
@@ -282,6 +384,7 @@ import {
 
     // Email panel: sign in / sign up toggle
     let emailMode = "signin";
+    const nameField = document.getElementById("ayuNameField");
     const usernameField = document.getElementById("ayuUsernameField");
     const emailLabel = document.getElementById("ayuEmailLabel");
     const emailInput = document.getElementById("ayuEmail");
@@ -291,6 +394,7 @@ import {
     switchBtn.addEventListener("click", () => {
       emailMode = emailMode === "signin" ? "signup" : "signin";
       const isSignup = emailMode === "signup";
+      nameField.hidden = !isSignup;
       usernameField.hidden = !isSignup;
       emailLabel.textContent = isSignup ? "Email" : "Email or username";
       emailInput.placeholder = isSignup ? "you@example.com" : "you@example.com or username";
@@ -306,21 +410,33 @@ import {
       showError("");
       const identifier = document.getElementById("ayuEmail").value.trim();
       const password = document.getElementById("ayuPassword").value;
+      const fullName = document.getElementById("ayuFullName").value.trim();
       const username = document.getElementById("ayuUsername").value.trim();
       submitBtn.disabled = true;
       try {
         if (emailMode === "signup") {
+          if (fullName.length < 2) throw { code: "custom/need-name" };
           if (!USERNAME_RE.test(username)) throw { code: "custom/bad-username" };
           if (!identifier.includes("@")) throw { code: "custom/need-email" };
           const usernameKey = username.toLowerCase();
           const existing = await getDoc(doc(db, "usernames", usernameKey));
           if (existing.exists()) throw { code: "custom/username-taken" };
 
+          // Store the person's real name as their display name — the
+          // username stays a separate handle, used only for username
+          // sign-in lookups.
           const cred = await createUserWithEmailAndPassword(auth, identifier, password);
-          await updateProfile(cred.user, { displayName: username });
+          await updateProfile(cred.user, { displayName: fullName });
           await setDoc(doc(db, "usernames", usernameKey), {
             uid: cred.user.uid,
             email: identifier,
+          });
+          await setDoc(doc(db, "users", cred.user.uid), {
+            name: fullName,
+            username: username,
+            email: identifier,
+            provider: "password",
+            createdAt: serverTimestamp(),
           });
         } else {
           let email = identifier;
@@ -386,6 +502,35 @@ import {
     });
   }
 
+  /* ---------------------------------------------------------
+     Ensure every signed-in user has a users/{uid} profile doc,
+     regardless of which sign-in method they used (Google and
+     phone sign-ins skip the email/password form, so this is
+     where their profile first gets created).
+     --------------------------------------------------------- */
+  async function ensureUserProfile(user) {
+    if (!db || !user) return null;
+    try {
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) return snap.data();
+      const provider = (user.providerData[0] && user.providerData[0].providerId) || "unknown";
+      const profile = {
+        name: user.displayName || "",
+        username: null,
+        email: user.email || null,
+        phone: user.phoneNumber || null,
+        provider,
+        createdAt: serverTimestamp(),
+      };
+      await setDoc(ref, profile);
+      return profile;
+    } catch (err) {
+      console.error("AyuVerse auth: couldn't create user profile.", err);
+      return null;
+    }
+  }
+
   function requireConfigured() {
     if (!isConfigured || !auth || !db) {
       showError("Login isn't finished setting up on this site yet — please check back soon.");
@@ -420,18 +565,32 @@ import {
      --------------------------------------------------------- */
   function init() {
     buildModal();
+    buildNamePrompt();
     mountNavSlot();
     wireModal();
+    wireNamePrompt();
     wireDownloadGate();
     renderNav();
 
     if (auth) {
       onAuthStateChanged(auth, (user) => {
         currentUser = user;
+        currentProfileName = null;
         renderNav();
-        if (user && downloadReasonPending) {
-          downloadReasonPending = false;
-          closeModal();
+        if (user) {
+          ensureUserProfile(user).then((profile) => {
+            if (profile && profile.name) {
+              currentProfileName = profile.name;
+              renderNav();
+            }
+            if (needsName(profile)) {
+              openNamePrompt();
+            }
+          });
+          if (downloadReasonPending) {
+            downloadReasonPending = false;
+            closeModal();
+          }
         }
       });
     }
