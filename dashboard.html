@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard — AyuVerse</title>
+  <link rel="canonical" href="https://maurya-ayush02.github.io/AyuVerse-jee-preparation-/dashboard.html" />
+  <meta name="description" content="Your AyuVerse account dashboard — profile, study details, and quick links to Physics, Chemistry and Mathematics resources." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#060814" />
+  <script src="js/theme-init.js"></script>
+
+  <!-- Security headers -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com; frame-ancestors 'none';" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css?v=pt4" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+
+<body>
+  <script src="js/pwa-splash.js"></script>
+  <script src="js/pwa-update.js"></script>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="ticker">
+    <div class="ticker__track">
+      <div class="ticker__group">
+        <span>🚀 100% Free — No Sign-up Fees, No Hidden Costs</span>
+        <span>🚀 Physics · Chemistry · Mathematics, All in One Place</span>
+        <span>🚀 Built for JEE Advanced Aspirants</span>
+        <span>🚀 Quality Prep Shouldn't Cost a Fortune</span>
+        <span>🚀 Study at Your Own Pace, Anytime</span>
+      </div>
+      <div class="ticker__group" aria-hidden="true">
+        <span>🚀 100% Free — No Sign-up Fees, No Hidden Costs</span>
+        <span>🚀 Physics · Chemistry · Mathematics, All in One Place</span>
+        <span>🚀 Built for JEE Advanced Aspirants</span>
+        <span>🚀 Quality Prep Shouldn't Cost a Fortune</span>
+        <span>🚀 Study at Your Own Pace, Anytime</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="header" id="top">
+    <nav class="nav container">
+      <a href="index.html#home" class="nav__brand">
+        <img src="assets/images/icon-mark.webp" alt="AyuVerse" class="nav__icon" width="36" height="36" />
+        <span class="nav__wordmark">Ayu<span>Verse</span></span>
+      </a>
+
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navMenu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="nav__menu" id="navMenu">
+        <ul class="nav__links">
+          <li><a href="index.html#home">Home</a></li>
+          <li class="nav__dropdown">
+            <button class="nav__dropdown-toggle" id="subjectsToggle" aria-expanded="false" aria-controls="subjectsPanel">
+              Subjects
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
+            <div class="nav__dropdown-panel" id="subjectsPanel">
+              <a href="physics.html"><img src="assets/images/physics.webp" alt="" /><span>Physics</span></a>
+              <a href="maths.html"><img src="assets/images/maths.webp" alt="" /><span>Mathematics</span></a>
+              <a href="chemistry.html"><img src="assets/images/chemistry.webp" alt="" /><span>Chemistry</span></a>
+            </div>
+          </li>
+          <li><a href="index.html#resources">Resources</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+        <a href="index.html#subjects" class="btn btn--primary btn--sm nav__cta">Start Learning</a>
+      </div>
+      <div class="nav__scrim" id="navScrim"></div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="dash container">
+
+      <div class="dash-loading" id="dashLoading">Loading your dashboard…</div>
+
+      <!-- Signed-out state -->
+      <div class="dash-guest" id="dashGuest" hidden>
+        <h1>Sign in to see your dashboard</h1>
+        <p>Your dashboard holds your profile, study details, and quick links to every subject — free, always. Sign in to set it up.</p>
+        <button type="button" class="btn btn--primary" id="dashGuestLoginBtn">Sign in to AyuVerse</button>
+      </div>
+
+      <!-- Signed-in state -->
+      <div id="dashContent" hidden>
+
+        <div class="dash-hero">
+          <div class="dash-avatar" id="dashAvatar"></div>
+          <div class="dash-hero-info">
+            <h1 class="dash-hero-name" id="dashName">—</h1>
+            <p class="dash-hero-handle" id="dashHandle"></p>
+            <div class="dash-hero-meta">
+              <span class="dash-badge">✓ Downloads unlocked</span>
+              <span class="dash-badge dash-badge--admin" id="dashAdminBadge" hidden>★ Admin</span>
+              <span id="dashEmail"></span>
+              <span id="dashJoined"></span>
+              <span id="dashProvider"></span>
+            </div>
+          </div>
+          <div class="dash-hero-actions">
+            <button type="button" class="btn btn--ghost btn--sm" id="dashSignOutBtn">Log out</button>
+          </div>
+        </div>
+
+        <div class="dash-stats">
+          <div class="dash-stat">
+            <div class="dash-stat-label">Member since</div>
+            <div class="dash-stat-value" id="dashStatSince">—</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-label">Sign-in method</div>
+            <div class="dash-stat-value" id="dashStatType">—</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-label">Downloads</div>
+            <div class="dash-stat-value" id="dashStatDownloads">—</div>
+            <div class="dash-stat-sub">PDFs, quiz sheets &amp; Notes Studio exports</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-label">Profile completeness</div>
+            <div class="dash-stat-value" id="dashStatCompleteness">—</div>
+            <div class="dash-progress"><div class="dash-progress-bar" id="dashCompletenessBar"></div></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Left column -->
+          <div>
+            <div class="dash-panel">
+              <h2>Profile details</h2>
+              <p class="dash-panel-sub">Your real name is shown across AyuVerse instead of your username.</p>
+
+              <div id="dashFieldsView">
+                <div class="dash-field-row">
+                  <span class="dash-field-label">Full name</span>
+                  <span class="dash-field-value" id="viewName">—</span>
+                </div>
+                <div class="dash-field-row">
+                  <span class="dash-field-label">Username</span>
+                  <span class="dash-field-value" id="viewUsername">—</span>
+                </div>
+                <div class="dash-field-row">
+                  <span class="dash-field-label">Class / stage</span>
+                  <span class="dash-field-value" id="viewClass">—</span>
+                </div>
+                <div class="dash-field-row">
+                  <span class="dash-field-label">Target JEE year</span>
+                  <span class="dash-field-value" id="viewTarget">—</span>
+                </div>
+                <div class="dash-field-row">
+                  <span class="dash-field-label">Mobile number</span>
+                  <span class="dash-field-value" id="viewPhone">—</span>
+                </div>
+                <div class="dash-form-actions" style="margin-top:1rem;">
+                  <button type="button" class="btn btn--primary btn--sm" id="dashEditBtn">Edit profile</button>
+                </div>
+              </div>
+
+              <form id="dashFieldsForm" class="dash-form" hidden>
+                <div class="dash-field">
+                  <label for="formName">Full name</label>
+                  <input type="text" id="formName" minlength="2" maxlength="60" required />
+                </div>
+                <div class="dash-field">
+                  <label for="formClass">Class / stage</label>
+                  <select id="formClass">
+                    <option value="">Select…</option>
+                    <option value="Class 11">Class 11</option>
+                    <option value="Class 12">Class 12</option>
+                    <option value="Dropper">Dropper / Repeater</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="dash-field">
+                  <label for="formTarget">Target JEE year</label>
+                  <select id="formTarget">
+                    <option value="">Select…</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                  </select>
+                </div>
+                <div class="dash-field">
+                  <label for="formPhone">Mobile number <span class="dash-field-static">(optional)</span></label>
+                  <input type="tel" id="formPhone" placeholder="+91 98765 43210" />
+                </div>
+                <div class="dash-form-actions">
+                  <button type="submit" class="btn btn--primary btn--sm">Save changes</button>
+                  <button type="button" class="btn btn--ghost btn--sm" id="dashCancelBtn">Cancel</button>
+                </div>
+                <p class="dash-save-msg" id="dashSaveMsg"></p>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div>
+            <div class="dash-panel">
+              <h2>Quick links</h2>
+              <p class="dash-panel-sub">Jump back into your prep.</p>
+              <div class="dash-links">
+                <a class="dash-link" href="physics.html"><span class="dash-link-icon">⚛️</span>Physics</a>
+                <a class="dash-link" href="chemistry.html"><span class="dash-link-icon">🧪</span>Chemistry</a>
+                <a class="dash-link" href="maths.html"><span class="dash-link-icon">📐</span>Mathematics</a>
+                <a class="dash-link" href="notes-studio.html"><span class="dash-link-icon">📝</span>Notes Studio</a>
+                <a class="dash-link" href="physics-quiz.html"><span class="dash-link-icon">🧠</span>Physics Quiz</a>
+                <a class="dash-link" href="jee-advanced-pyq-archive.html"><span class="dash-link-icon">📚</span>PYQ Archive</a>
+              </div>
+            </div>
+
+            <div class="dash-panel">
+              <h2>Account</h2>
+              <p class="dash-panel-sub">Signed in with <span id="dashProviderInline"></span>. Downloads across the site stay unlocked while you're signed in.</p>
+              <button type="button" class="btn btn--ghost btn--sm" id="dashSignOutBtn2">Log out of AyuVerse</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="index.html#home" class="nav__brand">
+          <img src="assets/images/icon-mark.webp" alt="AyuVerse" class="nav__icon" width="32" height="32" />
+          <span class="nav__wordmark">Ayu<span>Verse</span></span>
+        </a>
+        <p>Where future engineers are built.</p>
+      </div>
+
+      <div class="footer__links">
+        <h4>Site</h4>
+        <ul>
+          <li><a href="index.html#home">Home</a></li>
+          <li><a href="index.html#resources">Resources</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links">
+        <h4>Subjects</h4>
+        <ul>
+          <li><a href="physics.html">Physics</a></li>
+          <li><a href="maths.html">Mathematics</a></li>
+          <li><a href="chemistry.html">Chemistry</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__links">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="mailto:maurya.kd75@gmail.com">maurya.kd75@gmail.com</a></li>
+          <li><a href="https://github.com/maurya-ayush02" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <p>© 2026 AyuVerse. Free forever for JEE Advanced aspirants. · <a href="terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a></p>
+    </div>
+  </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie consent" aria-live="polite" hidden>
+    <div class="cookie-banner__inner">
+      <div class="cookie-banner__text">
+        <p class="cookie-banner__title">🍪 We use cookies</p>
+        <p>We use cookies to improve your experience. By clicking "Allow All", you also agree to receive browser notifications when new content is added.</p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button class="btn btn--ghost btn--sm" id="cookieDeny">Decline</button>
+        <button class="btn btn--primary btn--sm" id="cookieAllow">Allow All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" /></svg>
+    <span>Notifications Enabled! You will now be notified when new content is added to the website.</span>
+  </div>
+
+  <script src="js/script.js?v=tools1"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/practice-schema.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+
+</html>

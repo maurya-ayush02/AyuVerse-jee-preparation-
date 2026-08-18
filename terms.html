@@ -10,6 +10,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
 <link rel="manifest" href="site.webmanifest" />
+<script src="js/theme-init.js"></script>
 <!-- Security headers -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://www.google.com https://recaptcha.google.com; frame-ancestors 'none';" />
 <meta http-equiv="X-Frame-Options" content="DENY" />
@@ -28,6 +29,30 @@
     --accent-b: #9b5cff;
     --accent-c: #33c7ff;
   }
+  :root[data-theme="light"]{
+    --bg: #f4f5fb;
+    --bg-panel: #ffffff;
+    --bg-panel-2: #f2f3fa;
+    --border: rgba(75,59,220,0.13);
+    --text: #12131f;
+    --text-dim: #4c4f70;
+    --text-faint: #7d80a0;
+  }
+  :root[data-theme="light"] body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(79,125,255,0.08), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(155,92,255,0.07), transparent 55%),
+      var(--bg);
+  }
+  .theme-toggle{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-panel-2);border:1px solid var(--border);
+    color:var(--text-dim);cursor:pointer;transition:border-color .25s,color .25s;
+  }
+  .theme-toggle:hover{color:var(--accent-c);border-color:var(--accent-c);}
+  .theme-toggle svg{width:18px;height:18px;}
+  .theme-toggle--floating{position:fixed;top:16px;right:16px;z-index:400;box-shadow:0 10px 30px rgba(0,0,0,.35);}
   *{ box-sizing: border-box; }
   html{ scroll-behavior: smooth; }
   body{
@@ -489,6 +514,7 @@
 </footer>
 
 <script src="js/sw-register.js"></script>
+  <script src="js/theme.js"></script>
   <script src="js/firebase-config.js"></script>
   <script type="module" src="js/auth.js"></script>
 </body>

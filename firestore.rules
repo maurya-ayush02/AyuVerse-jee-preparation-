@@ -18,5 +18,40 @@ service cloud.firestore {
                     && request.resource.data.email is string;
       allow update, delete: if false;
     }
+
+    // User profile docs: name, username, class/grade, target year,
+    // etc. Powers the account dashboard.
+    //  - Only the owner can read or write their own profile.
+    //  - Nobody can read someone else's profile — it's private,
+    //    not a public directory.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if false;
+
+      // Per-question practice history for this user: one doc per
+      // question, tracking their latest answer, correct/wrong/
+      // skipped status, and how many points it earned them.
+      // Powers the "Earn Points" and "Revise" dashboard sections.
+      //  - Only the owner can read or write their own attempts —
+      //    nobody else can see what a person got wrong.
+      match /attempts/{questionId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // Practice question bank.
+    //  - Any signed-in user can read questions (practicing is a
+    //    signed-in feature, same as downloads).
+    //  - Only the site owner can add/edit/remove questions.
+    //    Replace ADMIN_UID below with your own Firebase Auth UID:
+    //    Firebase console -> Authentication -> Users -> copy the
+    //    "User UID" value for your account.
+    match /questions/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.uid == "XVOuUxVyNvMcqaYyDyYChPPiQLx1";
+    }
   }
 }
